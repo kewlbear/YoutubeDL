@@ -1,0 +1,4 @@
+module Python {
+  header "Module.h"
+  export *
+}

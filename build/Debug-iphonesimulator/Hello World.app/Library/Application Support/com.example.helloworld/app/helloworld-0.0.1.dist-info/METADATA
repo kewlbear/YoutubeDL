@@ -1,0 +1,9 @@
+Metadata-Version: 2.1
+Name: helloworld
+Formal-Name: Hello World
+App-ID: com.example.helloworld
+Version: 0.0.1
+Home-page: https://example.com/helloworld
+Author: Jane Developer
+Author-email: jane@example.com
+Summary: My first application

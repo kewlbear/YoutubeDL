@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16095" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="isX-he-tzB">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16084.1"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Download View Controller-->
+        <scene sceneID="uUX-2y-2HR">
+            <objects>
+                <viewController id="Sum-gd-pex" customClass="DownloadViewController" customModule="Y" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="azB-Ti-YY7">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="hgJ-EL-1mB">
+                                <rect key="frame" x="20" y="447" width="374" height="2"/>
+                            </progressView>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <constraints>
+                            <constraint firstItem="hgJ-EL-1mB" firstAttribute="leading" secondItem="azB-Ti-YY7" secondAttribute="leadingMargin" id="IlW-y7-isP"/>
+                            <constraint firstItem="hgJ-EL-1mB" firstAttribute="centerY" secondItem="azB-Ti-YY7" secondAttribute="centerY" id="eO1-rt-RRA"/>
+                            <constraint firstItem="hgJ-EL-1mB" firstAttribute="centerX" secondItem="azB-Ti-YY7" secondAttribute="centerX" id="rF0-hy-SnW"/>
+                            <constraint firstItem="hgJ-EL-1mB" firstAttribute="trailing" secondItem="azB-Ti-YY7" secondAttribute="trailingMargin" id="trf-25-S3Z"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="Sem-Ds-zFN"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="Y8W-PF-Ghw">
+                        <barButtonItem key="rightBarButtonItem" title="Item" id="hYE-0Y-aDt">
+                            <connections>
+                                <action selector="crop:" destination="Sum-gd-pex" id="lls-N9-w8W"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="progressView" destination="hgJ-EL-1mB" id="2no-GM-0aI"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="HKO-O0-CQx" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="688.40579710144937" y="99.776785714285708"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="Vc4-7J-eP2">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="isX-he-tzB" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="N2n-eK-Vuc">
+                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="Sum-gd-pex" kind="relationship" relationship="rootViewController" id="BFx-DB-jxx"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="W6A-xT-9gx" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-220.28985507246378" y="99.776785714285708"/>
+        </scene>
+    </scenes>
+</document>
