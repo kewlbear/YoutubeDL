@@ -9,6 +9,7 @@
 import UIKit
 import Python
 import Intents
+import Photos
 
 struct Info {
     let info: PythonObject
@@ -84,6 +85,31 @@ extension Downloader: URLSessionTaskDelegate {
 extension Downloader: URLSessionDownloadDelegate {
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         print(#function, session, downloadTask, location)
+        
+        do {
+            let url = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+                .appendingPathComponent("video")
+                .appendingPathExtension("mp4")
+
+            try? FileManager.default.removeItem(at: url)
+            
+            try FileManager.default.moveItem(at: location, to: url)
+            
+            PHPhotoLibrary.shared().performChanges({
+                let changeRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
+                //                            changeRequest.contentEditingOutput = output
+            }) { (success, error) in
+                print(success, error)
+            
+                let content = UNMutableNotificationContent()
+                content.body = "Download complete!"
+                let request = UNNotificationRequest(identifier: "Download", content: content, trigger: nil)
+                UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+            }
+        }
+        catch {
+            print(error)
+        }
     }
     
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
@@ -181,12 +207,25 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 fatalError()
             }
             extractInfo(url: url) { info in
-                guard let request = info?.format?.urlRequest else { return }
+                guard let request = info?.format?.urlRequest, let title = info?.title else { return }
                 let task = Downloader.shared.download(request: request)
                 DispatchQueue.main.async {
                     let navigationController = self.window?.rootViewController as? UINavigationController
                     let downloadViewController = navigationController?.topViewController as? DownloadViewController
                     downloadViewController?.progressView.observedProgress = task.progress
+
+                    if #available(iOS 13.0, *) {
+                        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound, .announcement, .providesAppNotificationSettings]) { (granted, error) in
+                            print(granted, error)
+                        }
+                    } else {
+                        // Fallback on earlier versions
+                    }
+                    
+                    let content = UNMutableNotificationContent()
+                    content.body = #""\#(title)" 다운로드 시작!"#
+                    let notificationRequest = UNNotificationRequest(identifier: "Download", content: content, trigger: nil)
+                    UNUserNotificationCenter.current().add(notificationRequest, withCompletionHandler: nil)
                 }
             }
         } else {
