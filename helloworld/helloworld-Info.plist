@@ -59,7 +59,9 @@
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Fetch video</string>
 	<key>NSUserActivityTypes</key>
-	<array/>
+	<array>
+		<string>DownloadIntent</string>
+	</array>
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

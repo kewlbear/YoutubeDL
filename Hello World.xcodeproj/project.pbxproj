@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4C0A8EF124D7D0F40071AE7D /* YTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A8EF024D7D0F40071AE7D /* YTests.swift */; };
 		600000000000000000000100 /* libbzip2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000100 /* libbzip2.a */; };
 		600000000000000000000200 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000200 /* libsqlite3.tbd */; };
 		600000000000000000000300 /* libxz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000300 /* libxz.a */; };
@@ -38,6 +39,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		4C0A8EF324D7D0F40071AE7D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 60796EDA19190F4100A9926B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 60796EE119190F4100A9926B;
+			remoteInfo = "Hello World";
+		};
 		C76812AA241B73E200EA5FD8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 60796EDA19190F4100A9926B /* Project object */;
@@ -70,6 +78,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4C0A8EEE24D7D0F40071AE7D /* YTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4C0A8EF024D7D0F40071AE7D /* YTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YTests.swift; sourceTree = "<group>"; };
+		4C0A8EF224D7D0F40071AE7D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		610000000000000000000100 /* libbzip2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libbzip2.a; path = Support/BZip2/libbzip2.a; sourceTree = "<group>"; };
 		610000000000000000000200 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 		610000000000000000000300 /* libxz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libxz.a; path = Support/XZ/libxz.a; sourceTree = "<group>"; };
@@ -113,6 +124,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		4C0A8EEB24D7D0F40071AE7D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		60796EDF19190F4100A9926B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -150,6 +168,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4C0A8EEF24D7D0F40071AE7D /* YTests */ = {
+			isa = PBXGroup;
+			children = (
+				4C0A8EF024D7D0F40071AE7D /* YTests.swift */,
+				4C0A8EF224D7D0F40071AE7D /* Info.plist */,
+			);
+			path = YTests;
+			sourceTree = "<group>";
+		};
 		60796ED919190F4100A9926B = {
 			isa = PBXGroup;
 			children = (
@@ -158,6 +185,7 @@
 				60796EEB19190F4100A9926B /* helloworld */,
 				C7681298241B73E200EA5FD8 /* Intents */,
 				C76812A3241B73E200EA5FD8 /* IntentsUI */,
+				4C0A8EEF24D7D0F40071AE7D /* YTests */,
 				60796EE419190F4100A9926B /* Frameworks */,
 				60796EE319190F4100A9926B /* Products */,
 			);
@@ -169,6 +197,7 @@
 				610000000000000000100400 /* Y.app */,
 				C7681297241B73E200EA5FD8 /* IntentsExtension.appex */,
 				C76812A0241B73E200EA5FD8 /* IntentsUIExtension.appex */,
+				4C0A8EEE24D7D0F40071AE7D /* YTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -263,6 +292,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		4C0A8EED24D7D0F40071AE7D /* YTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4C0A8EF524D7D0F40071AE7D /* Build configuration list for PBXNativeTarget "YTests" */;
+			buildPhases = (
+				4C0A8EEA24D7D0F40071AE7D /* Sources */,
+				4C0A8EEB24D7D0F40071AE7D /* Frameworks */,
+				4C0A8EEC24D7D0F40071AE7D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4C0A8EF424D7D0F40071AE7D /* PBXTargetDependency */,
+			);
+			name = YTests;
+			productName = YTests;
+			productReference = 4C0A8EEE24D7D0F40071AE7D /* YTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		60796EE119190F4100A9926B /* Hello World */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 60796F0E19190F4100A9926B /* Build configuration list for PBXNativeTarget "Hello World" */;
@@ -326,10 +373,14 @@
 		60796EDA19190F4100A9926B /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1140;
+				LastSwiftUpdateCheck = 1200;
 				LastUpgradeCheck = 1140;
 				ORGANIZATIONNAME = "Jane Developer";
 				TargetAttributes = {
+					4C0A8EED24D7D0F40071AE7D = {
+						CreatedOnToolsVersion = 12.0;
+						TestTargetID = 60796EE119190F4100A9926B;
+					};
 					60796EE119190F4100A9926B = {
 						LastSwiftMigration = 1140;
 					};
@@ -359,11 +410,19 @@
 				60796EE119190F4100A9926B /* Hello World */,
 				C7681296241B73E200EA5FD8 /* IntentsExtension */,
 				C768129F241B73E200EA5FD8 /* IntentsUIExtension */,
+				4C0A8EED24D7D0F40071AE7D /* YTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		4C0A8EEC24D7D0F40071AE7D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		60796EE019190F4100A9926B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -410,6 +469,14 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		4C0A8EEA24D7D0F40071AE7D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4C0A8EF124D7D0F40071AE7D /* YTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		60796EDE19190F4100A9926B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -442,6 +509,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		4C0A8EF424D7D0F40071AE7D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 60796EE119190F4100A9926B /* Hello World */;
+			targetProxy = 4C0A8EF324D7D0F40071AE7D /* PBXContainerItemProxy */;
+		};
 		C76812AB241B73E200EA5FD8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = C768129F241B73E200EA5FD8 /* IntentsUIExtension */;
@@ -474,6 +546,74 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		4C0A8EF624D7D0F40071AE7D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 265782UUTC;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = YTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Y.app/Y";
+			};
+			name = Debug;
+		};
+		4C0A8EF724D7D0F40071AE7D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 265782UUTC;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = YTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Y.app/Y";
+			};
+			name = Release;
+		};
 		60796F0C19190F4100A9926B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -583,7 +723,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Y.entitlements;
-				DEVELOPMENT_TEAM = SR74ZBT9RP;
+				DEVELOPMENT_TEAM = 265782UUTC;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -610,7 +750,7 @@
 					"$(PROJECT_DIR)/Support/XZ",
 					"$(PROJECT_DIR)/Support/BZip2",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.Y;
+				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YD;
 				PRODUCT_NAME = Y;
 				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/helloworld/Module";
 				SWIFT_OBJC_BRIDGING_HEADER = "helloworld/Hello World-Bridging-Header.h";
@@ -629,7 +769,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Y.entitlements;
-				DEVELOPMENT_TEAM = SR74ZBT9RP;
+				DEVELOPMENT_TEAM = 265782UUTC;
 				ENABLE_TESTABILITY = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -657,7 +797,7 @@
 					"$(PROJECT_DIR)/Support/XZ",
 					"$(PROJECT_DIR)/Support/Python",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.Y;
+				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YD;
 				PRODUCT_NAME = Y;
 				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/helloworld/Module";
 				SWIFT_OBJC_BRIDGING_HEADER = "helloworld/Hello World-Bridging-Header.h";
@@ -678,7 +818,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = SR74ZBT9RP;
+				DEVELOPMENT_TEAM = 265782UUTC;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = IntentsUI/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
@@ -689,7 +829,7 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.Y.IntentsUI;
+				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YD.IntentsUI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -711,7 +851,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = SR74ZBT9RP;
+				DEVELOPMENT_TEAM = 265782UUTC;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = IntentsUI/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
@@ -722,7 +862,7 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.Y.IntentsUI;
+				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YD.IntentsUI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -743,7 +883,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = SR74ZBT9RP;
+				DEVELOPMENT_TEAM = 265782UUTC;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = Intents/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
@@ -754,7 +894,7 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.Y.Intents;
+				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YD.Intents;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -776,7 +916,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = SR74ZBT9RP;
+				DEVELOPMENT_TEAM = 265782UUTC;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = Intents/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
@@ -787,7 +927,7 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.Y.Intents;
+				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YD.Intents;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -800,6 +940,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		4C0A8EF524D7D0F40071AE7D /* Build configuration list for PBXNativeTarget "YTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4C0A8EF624D7D0F40071AE7D /* Debug */,
+				4C0A8EF724D7D0F40071AE7D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		60796EDD19190F4100A9926B /* Build configuration list for PBXProject "Hello World" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

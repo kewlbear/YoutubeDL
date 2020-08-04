@@ -5,20 +5,22 @@
 	<key>INEnums</key>
 	<array/>
 	<key>INIntentDefinitionModelVersion</key>
-	<string>1.1</string>
+	<string>1.2</string>
 	<key>INIntentDefinitionNamespace</key>
 	<string>NpwgKE</string>
 	<key>INIntentDefinitionSystemVersion</key>
-	<string>19D76</string>
+	<string>20A5323l</string>
 	<key>INIntentDefinitionToolsBuildVersion</key>
-	<string>11N132i</string>
+	<string>12A8169g</string>
 	<key>INIntentDefinitionToolsVersion</key>
-	<string>11.4</string>
+	<string>12.0</string>
 	<key>INIntents</key>
 	<array>
 		<dict>
 			<key>INIntentCategory</key>
 			<string>download</string>
+			<key>INIntentClassName</key>
+			<string>DownloadIntent</string>
 			<key>INIntentConfigurable</key>
 			<true/>
 			<key>INIntentDescription</key>
@@ -66,6 +68,8 @@
 			<key>INIntentParameters</key>
 			<array>
 				<dict>
+					<key>INIntentParameterConfigurable</key>
+					<true/>
 					<key>INIntentParameterDisplayName</key>
 					<string>URL</string>
 					<key>INIntentParameterDisplayNameID</key>
