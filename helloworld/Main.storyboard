@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16095" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="isX-he-tzB">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="isX-he-tzB">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16084.1"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17124"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -17,22 +18,22 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="hgJ-EL-1mB">
-                                <rect key="frame" x="20" y="447" width="374" height="2"/>
+                                <rect key="frame" x="20" y="446" width="374" height="4"/>
                             </progressView>
                         </subviews>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <viewLayoutGuide key="safeArea" id="Sem-Ds-zFN"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="hgJ-EL-1mB" firstAttribute="leading" secondItem="azB-Ti-YY7" secondAttribute="leadingMargin" id="IlW-y7-isP"/>
                             <constraint firstItem="hgJ-EL-1mB" firstAttribute="centerY" secondItem="azB-Ti-YY7" secondAttribute="centerY" id="eO1-rt-RRA"/>
                             <constraint firstItem="hgJ-EL-1mB" firstAttribute="centerX" secondItem="azB-Ti-YY7" secondAttribute="centerX" id="rF0-hy-SnW"/>
                             <constraint firstItem="hgJ-EL-1mB" firstAttribute="trailing" secondItem="azB-Ti-YY7" secondAttribute="trailingMargin" id="trf-25-S3Z"/>
                         </constraints>
-                        <viewLayoutGuide key="safeArea" id="Sem-Ds-zFN"/>
                     </view>
                     <navigationItem key="navigationItem" id="Y8W-PF-Ghw">
                         <barButtonItem key="rightBarButtonItem" title="Item" id="hYE-0Y-aDt">
                             <connections>
-                                <action selector="crop:" destination="Sum-gd-pex" id="lls-N9-w8W"/>
+                                <segue destination="pd4-kL-g8F" kind="show" identifier="formats" id="DMO-Bv-dj3"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -43,6 +44,47 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="HKO-O0-CQx" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="688.40579710144937" y="99.776785714285708"/>
+        </scene>
+        <!--Format Table View Controller-->
+        <scene sceneID="Mba-QO-T5j">
+            <objects>
+                <tableViewController id="pd4-kL-g8F" customClass="FormatTableViewController" customModule="Y" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="q6e-Th-YJL">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="cell" textLabel="b78-sH-hfC" imageView="VYp-yF-4ky" style="IBUITableViewCellStyleDefault" id="CMg-kH-Ua8">
+                                <rect key="frame" x="0.0" y="28" width="414" height="43.5"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="CMg-kH-Ua8" id="egh-gT-gQB">
+                                    <rect key="frame" x="0.0" y="0.0" width="414" height="43.5"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="b78-sH-hfC">
+                                            <rect key="frame" x="20" y="0.0" width="374" height="43.5"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="VYp-yF-4ky">
+                                            <autoresizingMask key="autoresizingMask"/>
+                                        </imageView>
+                                    </subviews>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="pd4-kL-g8F" id="bY7-IM-O2F"/>
+                            <outlet property="delegate" destination="pd4-kL-g8F" id="lZg-KS-LRh"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" id="xJf-wE-qaM"/>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="zDL-2N-sTZ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1519" y="100"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="Vc4-7J-eP2">
@@ -63,4 +105,9 @@
             <point key="canvasLocation" x="-220.28985507246378" y="99.776785714285708"/>
         </scene>
     </scenes>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
 </document>

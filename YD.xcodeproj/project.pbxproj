@@ -8,6 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		4C0A8EF124D7D0F40071AE7D /* YTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A8EF024D7D0F40071AE7D /* YTests.swift */; };
+		4CD1DB3724FC9737000091B5 /* FormatTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD1DB3624FC9737000091B5 /* FormatTableViewController.swift */; };
+		4CD1DB3A24FCBF50000091B5 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB3824FCBF50000091B5 /* libavcodec.a */; };
+		4CD1DB3B24FCBF50000091B5 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB3924FCBF50000091B5 /* libavformat.a */; };
+		4CD1DB3D24FCC061000091B5 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB3C24FCC061000091B5 /* libavutil.a */; };
+		4CD1DB3F24FCC09E000091B5 /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB3E24FCC09E000091B5 /* libswresample.a */; };
+		4CD1DB4124FCC0A7000091B5 /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB4024FCC0A7000091B5 /* VideoToolbox.framework */; };
+		4CD1DB4324FCC0B7000091B5 /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB4224FCC0B7000091B5 /* libiconv.tbd */; };
+		4CFF393A24DA71A900131F73 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFF393924DA71A900131F73 /* DetailView.swift */; };
 		600000000000000000000100 /* libbzip2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000100 /* libbzip2.a */; };
 		600000000000000000000200 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000200 /* libsqlite3.tbd */; };
 		600000000000000000000300 /* libxz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000300 /* libxz.a */; };
@@ -81,6 +89,14 @@
 		4C0A8EEE24D7D0F40071AE7D /* YTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C0A8EF024D7D0F40071AE7D /* YTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YTests.swift; sourceTree = "<group>"; };
 		4C0A8EF224D7D0F40071AE7D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4CD1DB3624FC9737000091B5 /* FormatTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatTableViewController.swift; sourceTree = "<group>"; };
+		4CD1DB3824FCBF50000091B5 /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = "../../../../Volumes/SSD - 데이터/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib/libavcodec.a"; sourceTree = "<group>"; };
+		4CD1DB3924FCBF50000091B5 /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavformat.a; path = "../../../../Volumes/SSD - 데이터/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib/libavformat.a"; sourceTree = "<group>"; };
+		4CD1DB3C24FCC061000091B5 /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavutil.a; path = "../../../../Volumes/SSD - 데이터/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib/libavutil.a"; sourceTree = "<group>"; };
+		4CD1DB3E24FCC09E000091B5 /* libswresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswresample.a; path = "../../../../Volumes/SSD - 데이터/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib/libswresample.a"; sourceTree = "<group>"; };
+		4CD1DB4024FCC0A7000091B5 /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
+		4CD1DB4224FCC0B7000091B5 /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
+		4CFF393924DA71A900131F73 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
 		610000000000000000000100 /* libbzip2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libbzip2.a; path = Support/BZip2/libbzip2.a; sourceTree = "<group>"; };
 		610000000000000000000200 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 		610000000000000000000300 /* libxz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libxz.a; path = Support/XZ/libxz.a; sourceTree = "<group>"; };
@@ -135,6 +151,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4CD1DB4324FCC0B7000091B5 /* libiconv.tbd in Frameworks */,
+				4CD1DB4124FCC0A7000091B5 /* VideoToolbox.framework in Frameworks */,
+				4CD1DB3F24FCC09E000091B5 /* libswresample.a in Frameworks */,
+				4CD1DB3D24FCC061000091B5 /* libavutil.a in Frameworks */,
+				4CD1DB3A24FCBF50000091B5 /* libavcodec.a in Frameworks */,
+				4CD1DB3B24FCBF50000091B5 /* libavformat.a in Frameworks */,
 				600000000000000000000100 /* libbzip2.a in Frameworks */,
 				600000000000000000000200 /* libsqlite3.tbd in Frameworks */,
 				600000000000000000000300 /* libxz.a in Frameworks */,
@@ -205,6 +227,12 @@
 		60796EE419190F4100A9926B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4CD1DB4224FCC0B7000091B5 /* libiconv.tbd */,
+				4CD1DB4024FCC0A7000091B5 /* VideoToolbox.framework */,
+				4CD1DB3E24FCC09E000091B5 /* libswresample.a */,
+				4CD1DB3C24FCC061000091B5 /* libavutil.a */,
+				4CD1DB3824FCBF50000091B5 /* libavcodec.a */,
+				4CD1DB3924FCBF50000091B5 /* libavformat.a */,
 				C768128F241B690700EA5FD8 /* Intents.framework */,
 				610000000000000000000100 /* libbzip2.a */,
 				610000000000000000000200 /* libsqlite3.tbd */,
@@ -237,6 +265,8 @@
 				C7681275241B4E7800EA5FD8 /* Main.storyboard */,
 				C7681277241B4F2F00EA5FD8 /* LaunchScreen.storyboard */,
 				C775AF442419EA7C0044C43E /* Hello World-Bridging-Header.h */,
+				4CFF393924DA71A900131F73 /* DetailView.swift */,
+				4CD1DB3624FC9737000091B5 /* FormatTableViewController.swift */,
 			);
 			path = helloworld;
 			sourceTree = "<group>";
@@ -310,9 +340,9 @@
 			productReference = 4C0A8EEE24D7D0F40071AE7D /* YTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		60796EE119190F4100A9926B /* Hello World */ = {
+		60796EE119190F4100A9926B /* YD */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 60796F0E19190F4100A9926B /* Build configuration list for PBXNativeTarget "Hello World" */;
+			buildConfigurationList = 60796F0E19190F4100A9926B /* Build configuration list for PBXNativeTarget "YD" */;
 			buildPhases = (
 				60796F2F1919C7E700A9926B /* Refresh Python source */,
 				60796EDE19190F4100A9926B /* Sources */,
@@ -326,7 +356,7 @@
 				C76812AB241B73E200EA5FD8 /* PBXTargetDependency */,
 				C76812AE241B73E200EA5FD8 /* PBXTargetDependency */,
 			);
-			name = "Hello World";
+			name = YD;
 			packageProductDependencies = (
 			);
 			productName = helloworld;
@@ -375,7 +405,7 @@
 			attributes = {
 				LastSwiftUpdateCheck = 1200;
 				LastUpgradeCheck = 1140;
-				ORGANIZATIONNAME = "Jane Developer";
+				ORGANIZATIONNAME = Kewlbear;
 				TargetAttributes = {
 					4C0A8EED24D7D0F40071AE7D = {
 						CreatedOnToolsVersion = 12.0;
@@ -392,7 +422,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 60796EDD19190F4100A9926B /* Build configuration list for PBXProject "Hello World" */;
+			buildConfigurationList = 60796EDD19190F4100A9926B /* Build configuration list for PBXProject "YD" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -407,7 +437,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				60796EE119190F4100A9926B /* Hello World */,
+				60796EE119190F4100A9926B /* YD */,
 				C7681296241B73E200EA5FD8 /* IntentsExtension */,
 				C768129F241B73E200EA5FD8 /* IntentsUIExtension */,
 				4C0A8EED24D7D0F40071AE7D /* YTests */,
@@ -483,7 +513,9 @@
 			files = (
 				C784637A244D57EA007CFD0E /* AppDelegate.swift in Sources */,
 				C7846378244D5705007CFD0E /* PythonLibrary+Symbols.swift in Sources */,
+				4CD1DB3724FC9737000091B5 /* FormatTableViewController.swift in Sources */,
 				C7681292241B6C9400EA5FD8 /* Intents.intentdefinition in Sources */,
+				4CFF393A24DA71A900131F73 /* DetailView.swift in Sources */,
 				600000000000000000100100 /* main.m in Sources */,
 				E19B09AC241C84440016CB29 /* DownloadViewController.swift in Sources */,
 				C775AF462419EA7D0044C43E /* Python.swift in Sources */,
@@ -511,7 +543,7 @@
 /* Begin PBXTargetDependency section */
 		4C0A8EF424D7D0F40071AE7D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 60796EE119190F4100A9926B /* Hello World */;
+			target = 60796EE119190F4100A9926B /* YD */;
 			targetProxy = 4C0A8EF324D7D0F40071AE7D /* PBXContainerItemProxy */;
 		};
 		C76812AB241B73E200EA5FD8 /* PBXTargetDependency */ = {
@@ -562,7 +594,6 @@
 				DEVELOPMENT_TEAM = 265782UUTC;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = YTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -597,7 +628,6 @@
 				DEVELOPMENT_TEAM = 265782UUTC;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = YTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -661,7 +691,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -708,7 +738,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -737,6 +767,7 @@
 					"\"$(PROJECT_DIR)/Support/OpenSSL/Headers\"",
 					"\"$(PROJECT_DIR)/Support/XZ/Headers\"",
 					"\"$(PROJECT_DIR)/Support/Python/Headers\"",
+					"\"/Volumes/Dark SSD/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/include\"",
 				);
 				INFOPLIST_FILE = "helloworld/helloworld-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -749,6 +780,7 @@
 					"$(PROJECT_DIR)/Support/OpenSSL",
 					"$(PROJECT_DIR)/Support/XZ",
 					"$(PROJECT_DIR)/Support/BZip2",
+					"\"/Volumes/Dark SSD/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YD;
 				PRODUCT_NAME = Y;
@@ -784,6 +816,7 @@
 					"\"$(PROJECT_DIR)/Support/OpenSSL/Headers\"",
 					"\"$(PROJECT_DIR)/Support/XZ/Headers\"",
 					"\"$(PROJECT_DIR)/Support/Python/Headers\"",
+					"\"/Volumes/Dark SSD/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/include\"",
 				);
 				INFOPLIST_FILE = "helloworld/helloworld-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -821,7 +854,6 @@
 				DEVELOPMENT_TEAM = 265782UUTC;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = IntentsUI/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -854,7 +886,6 @@
 				DEVELOPMENT_TEAM = 265782UUTC;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = IntentsUI/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -886,7 +917,6 @@
 				DEVELOPMENT_TEAM = 265782UUTC;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = Intents/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -919,7 +949,6 @@
 				DEVELOPMENT_TEAM = 265782UUTC;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = Intents/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -949,7 +978,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		60796EDD19190F4100A9926B /* Build configuration list for PBXProject "Hello World" */ = {
+		60796EDD19190F4100A9926B /* Build configuration list for PBXProject "YD" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				60796F0C19190F4100A9926B /* Debug */,
@@ -958,7 +987,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		60796F0E19190F4100A9926B /* Build configuration list for PBXNativeTarget "Hello World" */ = {
+		60796F0E19190F4100A9926B /* Build configuration list for PBXNativeTarget "YD" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				60796F0F19190F4100A9926B /* Debug */,

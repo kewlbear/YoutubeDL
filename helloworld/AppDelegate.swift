@@ -10,10 +10,11 @@ import UIKit
 import Python
 import Intents
 import Photos
+import SwiftUI
 
 let trace = "trace"
 
-struct Info {
+struct Info: CustomStringConvertible {
     let info: PythonObject
 
     var dict: [String: PythonObject]? {
@@ -33,9 +34,13 @@ struct Info {
         let dicts: [[String: PythonObject]?]? = array?.map { Dictionary($0) }
         return dicts?.compactMap { $0.flatMap { Format(format: $0) } } ?? []
     }
+    
+    var description: String {
+        "\(dict?["title"] ?? "no title?")"
+    }
 }
 
-struct Format {
+struct Format: CustomStringConvertible {
     let format: [String: PythonObject]
     
     var url: URL? { format["url"].flatMap { String($0) }.flatMap { URL(string: $0) } }
@@ -53,6 +58,10 @@ struct Format {
             request.addValue(value, forHTTPHeaderField: field)
         }
         return request
+    }
+    
+    var description: String {
+        "\(format["format"] ?? "no format?") \(format["ext"] ?? "no ext?") \(format["filesize"] ?? "no size?")"
     }
 }
 
@@ -74,7 +83,27 @@ class Downloader: NSObject {
         }
     }
     
-    static let shared = Downloader()
+    static let shared = Downloader(backgroundURLSessionIdentifier:
+//                                    "YD"
+        nil
+    )
+    
+    var session: URLSession = URLSession.shared
+    
+    init(backgroundURLSessionIdentifier: String?) {
+        super.init()
+        
+        var configuration: URLSessionConfiguration
+        if let identifier = backgroundURLSessionIdentifier {
+            configuration = URLSessionConfiguration.background(withIdentifier: identifier)
+        } else {
+            configuration = .default
+        }
+
+        configuration.networkServiceType = .responsiveAV
+        
+        session = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
+    }
     
     func download(request: URLRequest, kind: Kind) -> URLSessionDownloadTask {
         do {
@@ -85,13 +114,159 @@ class Downloader: NSObject {
             print(#function, error)
         }
 
-        let configuration = URLSessionConfiguration.background(withIdentifier: "y")
-        let session = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
         let task = session.downloadTask(with: request)
         task.taskDescription = kind.rawValue
         print(#function, request, trace)
         task.resume()
         return task
+    }
+    
+    struct StreamContext {
+        var dec_ctx: UnsafeMutablePointer<AVCodecContext>?
+        var enc_ctx: UnsafeMutablePointer<AVCodecContext>?
+    }
+    
+    func open_input_file(filename: String, ifmt_ctx: inout UnsafeMutablePointer<AVFormatContext>?, stream_ctx: inout [StreamContext]) -> Int32 {
+        var ret = avformat_open_input(&ifmt_ctx, filename, nil, nil)
+        if ret < 0 {
+            print("Cannot open input file")
+            return ret
+        }
+        
+        ret = avformat_find_stream_info(ifmt_ctx, nil)
+        if ret < 0 {
+            print("Cannot find stream info")
+            return ret
+        }
+        
+        guard let ic = ifmt_ctx?.pointee else {
+            return -19730225
+        }
+        
+        stream_ctx = Array(repeating: StreamContext(), count: Int(ic.nb_streams))
+        
+        for index in 0..<Int(ic.nb_streams) {
+            guard let stream = ic.streams[index] else { return -19730225 }
+            guard let dec = avcodec_find_decoder(stream.pointee.codecpar.pointee.codec_id) else {
+                print("Failed to find decoder for stream #\(index)")
+                return -19730225
+            }
+            guard let codec_ctx = avcodec_alloc_context3(dec) else {
+                print("Failed to allocate the decoder context for stream #\(index)")
+                return -19730225
+            }
+            ret = avcodec_parameters_to_context(codec_ctx, stream.pointee.codecpar)
+            if ret < 0 {
+                print("Failed to copy decoder parameters to input decoder context for stream #\(index)")
+                return ret
+            }
+            if codec_ctx.pointee.codec_type == AVMEDIA_TYPE_VIDEO || codec_ctx.pointee.codec_type == AVMEDIA_TYPE_AUDIO {
+                if codec_ctx.pointee.codec_type == AVMEDIA_TYPE_VIDEO {
+                    codec_ctx.pointee.framerate = av_guess_frame_rate(ifmt_ctx, stream, nil)
+                }
+                ret = avcodec_open2(codec_ctx, dec, nil)
+                if ret < 0 {
+                    print("Failed to open decoder for stream #\(index)")
+                    return ret
+                }
+            }
+            stream_ctx[index].dec_ctx = codec_ctx
+        }
+        
+        av_dump_format(ifmt_ctx, 0, filename, 0)
+        
+        return 0
+    }
+    
+    func open_output_file(filename: String, ifmt_ctx: UnsafePointer<AVFormatContext>, stream_ctx: inout [StreamContext], ofmt_ctx: inout UnsafeMutablePointer<AVFormatContext>?) -> Int32 {
+        avformat_alloc_output_context2(&ofmt_ctx, nil, nil, filename)
+        guard ofmt_ctx != nil else {
+            print("Could not create output context")
+            return -19730225
+        }
+        
+        for index in 0..<Int(ifmt_ctx.pointee.nb_streams) {
+            guard let out_stream = avformat_new_stream(ofmt_ctx, nil) else {
+                print("Failed allocating output stream")
+                return -19730225
+            }
+            
+            guard let in_stream = ifmt_ctx.pointee.streams[index],
+                  let dec_ctx = stream_ctx[index].dec_ctx else
+            {
+                return -19730225
+            }
+            
+            if dec_ctx.pointee.codec_type == AVMEDIA_TYPE_VIDEO || dec_ctx.pointee.codec_type == AVMEDIA_TYPE_AUDIO {
+                guard let encoder = avcodec_find_encoder(AV_CODEC_ID_H264) else { // FIXME: ...
+                    print("Necessary encoder not found")
+                    return -19730225
+                }
+                guard let enc_ctx = avcodec_alloc_context3(encoder) else {
+                    print("Failed to allocate the encoder context")
+                    return -19730225
+                }
+                
+                if dec_ctx.pointee.codec_type == AVMEDIA_TYPE_VIDEO {
+                    enc_ctx.pointee.height = dec_ctx.pointee.height
+                    enc_ctx.pointee.width = dec_ctx.pointee.width
+                    enc_ctx.pointee.sample_aspect_ratio = dec_ctx.pointee.sample_aspect_ratio
+                    enc_ctx.pointee.pix_fmt = encoder.pointee.pix_fmts?.pointee ?? dec_ctx.pointee.pix_fmt
+                    enc_ctx.pointee.time_base = av_inv_q(dec_ctx.pointee.framerate)
+                } else {
+                    enc_ctx.pointee.sample_rate = dec_ctx.pointee.sample_rate
+                    enc_ctx.pointee.channel_layout = dec_ctx.pointee.channel_layout
+                    enc_ctx.pointee.channels = av_get_channel_layout_nb_channels(enc_ctx.pointee.channel_layout)
+                    enc_ctx.pointee.sample_fmt = encoder.pointee.sample_fmts.pointee
+                    enc_ctx.pointee.time_base = AVRational(num: 1, den: enc_ctx.pointee.sample_rate)
+                }
+                
+                if (((ofmt_ctx?.pointee.oformat.pointee.flags ?? 0) & AVFMT_GLOBALHEADER) != 0) {
+                    enc_ctx.pointee.flags |= AVFMT_GLOBALHEADER
+                }
+                
+                var ret = avcodec_open2(enc_ctx, encoder, nil)
+                if ret < 0 {
+                    print("Cannot open video encoder for stream #\(index)")
+                    return ret
+                }
+                ret = avcodec_parameters_from_context(out_stream.pointee.codecpar, enc_ctx)
+                if ret < 0 {
+                    print("Failed to copy encoder parameters to output stream #\(index)")
+                    return ret
+                }
+                
+                out_stream.pointee.time_base = enc_ctx.pointee.time_base
+                stream_ctx[index].enc_ctx = enc_ctx
+            } else if dec_ctx.pointee.codec_type == AVMEDIA_TYPE_UNKNOWN {
+                print("Elementary stream #\(index) is of unknown type, cannot proceed")
+                return -19730225
+            } else {
+                let ret = avcodec_parameters_copy(out_stream.pointee.codecpar, in_stream.pointee.codecpar)
+                if ret < 0 {
+                    print("Copying parameters for stream #\(index) failed")
+                    return ret
+                }
+                out_stream.pointee.time_base = in_stream.pointee.time_base
+            }
+        }
+        av_dump_format(ofmt_ctx, 0, filename, 1)
+        
+        if (((ofmt_ctx?.pointee.oformat.pointee.flags ?? 0) & AVFMT_NOFILE) == 0) {
+            let ret = avio_open(&ofmt_ctx!.pointee.pb, filename, AVIO_FLAG_WRITE)
+            if ret < 0 {
+                print("Could not open output file '\(filename)'")
+                return ret
+            }
+        }
+        
+        let ret = avformat_write_header(ofmt_ctx, nil)
+        if ret < 0 {
+            print("Error occurred when opening output file")
+            return ret
+        }
+        
+        return 0
     }
     
     func tryMerge() {
@@ -103,6 +278,64 @@ class Downloader: NSObject {
             print(#function,
                   videoAsset.tracks(withMediaType: .video),
                   audioAsset.tracks(withMediaType: .audio), trace)
+            
+            var ifmt_ctx: UnsafeMutablePointer<AVFormatContext>?
+            var stream_ctx: [StreamContext] = []
+            var ret = open_input_file(filename: Kind.videoOnly.url.path, ifmt_ctx: &ifmt_ctx, stream_ctx: &stream_ctx)
+            if ret < 0 {
+                print(#function, ret)
+                return
+            }
+
+            var ofmt_ctx: UnsafeMutablePointer<AVFormatContext>?
+            let url = Kind.videoOnly.url.deletingLastPathComponent().appendingPathComponent("trans.mp4")
+            ret = open_output_file(filename: url.path, ifmt_ctx: ifmt_ctx!, stream_ctx: &stream_ctx, ofmt_ctx: &ofmt_ctx)
+            if ret < 0 {
+                print(#function, ret)
+                return
+            }
+
+            var packet = AVPacket()
+            
+            while true {
+                ret = av_read_frame(ifmt_ctx, &packet)
+                if ret < 0 {
+                    break
+                }
+                let stream_index = Int(packet.stream_index)
+                let type = ifmt_ctx?.pointee.streams[stream_index]?.pointee.codecpar.pointee.codec_type
+                
+                av_packet_rescale_ts(&packet, ifmt_ctx!.pointee.streams[stream_index]!.pointee.time_base, ofmt_ctx!.pointee.streams[stream_index]!.pointee.time_base)
+                ret = av_interleaved_write_frame(ofmt_ctx, &packet)
+                if ret < 0 {
+                    print(#function, ret)
+                    return
+                }
+                
+                av_packet_unref(&packet)
+            }
+
+            av_write_trailer(ofmt_ctx)
+            
+            // FIXME: ...
+            
+            if (((ofmt_ctx?.pointee.oformat.pointee.flags ?? 0) & AVFMT_NOFILE) == 0) {
+                avio_closep(&ofmt_ctx!.pointee.pb)
+            }
+            
+            // FIXME: ...
+            
+            do {
+                try FileManager.default.moveItem(at: Kind.videoOnly.url, to: Kind.videoOnly.url.appendingPathExtension("webm"))
+                
+                try FileManager.default.moveItem(at: url, to: Kind.videoOnly.url)
+                
+                tryMerge()
+            }
+            catch {
+                print(#function, error)
+            }
+            
             return
         }
         
@@ -202,7 +435,7 @@ func extractInfo(url: URL, completionHandler: @escaping ([Format], Info?) -> Voi
         let youtube_dl = Python.import("youtube_dl")
         
         let options: PythonObject = [
-            "format": "bestvideo[ext=mp4],bestaudio[ext=m4a]",
+            "format": "bestvideo,bestaudio[ext=m4a]",
             //        "outtmpl": location.path.pythonObject,
             //        "progress_hooks": [progress_hook],
             //        "nooverwrites": false,
@@ -277,25 +510,27 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             }
         }
         
-//        do {
-//            let location = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-//                .appendingPathComponent("video")
-//                .appendingPathExtension("mp4")
-//
-//            try download(url: URL(fileURLWithPath: ""), to: location)
-//        }
-//        catch {
-//            print(error)
-//        }
-        
 //        if #available(iOS 11.0, *) {
 //            download(URL(string:
 ////                            "https://m.youtube.com/watch?feature=youtu.be&v=fv-6WoaV6oY"
-//                        "https://youtu.be/QBT5mDJF4E8"
+//                        "https://youtu.be/61P3OwsriOM"
 //            )!)
 //        } else {
 //            // Fallback on earlier versions
 //        }
+
+        extractInfo(url: URL(string: "https://youtu.be/61P3OwsriOM")!) { formats, info in
+            print(info?.formats ?? "no formats?", info ?? "no info?", info?.dict ?? "no dict?")
+            DispatchQueue.main.async {
+                downloadViewController?.info = info
+
+                downloadViewController?.performSegue(withIdentifier: "formats", sender: nil)
+            }
+        }
+        
+        Downloader.shared.tryMerge()
+        
+//        window?.rootViewController = UIHostingController(rootView: DetailView())
         
         return true
     }
@@ -327,12 +562,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 //                    task.progress
                     progress
                 
-                if #available(iOS 13.0, *) {
-                    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound, .announcement, .providesAppNotificationSettings]) { (granted, error) in
-                        print(granted, error)
-                    }
-                } else {
-                    // Fallback on earlier versions
+                UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound, .announcement, .providesAppNotificationSettings]) { (granted, error) in
+                    print(granted, error ?? "no error")
                 }
                 
                 let content = UNMutableNotificationContent()
@@ -344,7 +575,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
     
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-        print(userActivity.interaction)
+        print(userActivity.interaction ?? "no interaction?")
         if #available(iOS 12.0, *) {
             guard let parameter = INParameter(keyPath: \DownloadIntent.url),
                 let url = userActivity.interaction?.parameterValue(for: parameter) as? URL else

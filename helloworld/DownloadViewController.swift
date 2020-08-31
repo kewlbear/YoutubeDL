@@ -12,6 +12,8 @@ import AVKit
 
 class DownloadViewController: UIViewController {
 
+    var info: Info?
+    
     @IBOutlet weak var progressView: UIProgressView!
     
     var documentInteractionController: UIDocumentInteractionController?
@@ -326,16 +328,17 @@ class DownloadViewController: UIViewController {
         }
     }
     
-    /*
     // MARK: - Navigation
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+        switch segue.identifier {
+        case "formats":
+            let viewController = segue.destination as? FormatTableViewController
+            viewController?.formats = info?.formats ?? []
+        default:
+            assertionFailure()
+        }
     }
-    */
-
 }
 
 extension DownloadViewController: PHPhotoLibraryChangeObserver {

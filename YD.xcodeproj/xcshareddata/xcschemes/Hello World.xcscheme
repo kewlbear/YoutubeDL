@@ -16,8 +16,8 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "60796EE119190F4100A9926B"
                BuildableName = "Y.app"
-               BlueprintName = "Hello World"
-               ReferencedContainer = "container:Hello World.xcodeproj">
+               BlueprintName = "YD"
+               ReferencedContainer = "container:YD.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -35,7 +35,7 @@
                BlueprintIdentifier = "4C0A8EED24D7D0F40071AE7D"
                BuildableName = "YTests.xctest"
                BlueprintName = "YTests"
-               ReferencedContainer = "container:Hello World.xcodeproj">
+               ReferencedContainer = "container:YD.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -56,8 +56,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "60796EE119190F4100A9926B"
             BuildableName = "Y.app"
-            BlueprintName = "Hello World"
-            ReferencedContainer = "container:Hello World.xcodeproj">
+            BlueprintName = "YD"
+            ReferencedContainer = "container:YD.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -73,8 +73,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "60796EE119190F4100A9926B"
             BuildableName = "Y.app"
-            BlueprintName = "Hello World"
-            ReferencedContainer = "container:Hello World.xcodeproj">
+            BlueprintName = "YD"
+            ReferencedContainer = "container:YD.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
