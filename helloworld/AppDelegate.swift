@@ -109,6 +109,8 @@ class Downloader: NSObject {
     
     var t = ProcessInfo.processInfo.systemUptime
     
+    var t0 = ProcessInfo.processInfo.systemUptime
+    
     var topViewController: UIViewController? {
         (UIApplication.shared.keyWindow?.rootViewController as? UINavigationController)?.topViewController
     }
@@ -271,7 +273,9 @@ extension Downloader: URLSessionDownloadDelegate {
         print(
 //            #function,
 //              session,
-              downloadTask.taskIdentifier, bytesWritten, totalBytesWritten, totalBytesExpectedToWrite)
+              downloadTask.taskIdentifier, bytesWritten, totalBytesWritten, totalBytesExpectedToWrite,
+            Double(totalBytesWritten) / (t - t0)
+            )
         DispatchQueue.main.async {
             self.topViewController?.navigationItem.title = self.percentFormatter.string(from: NSNumber(value: Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)))
         }
@@ -557,15 +561,15 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
         UNUserNotificationCenter.current().delegate = self
         
-        if #available(iOS 11.0, *) {
-            download(URL(string:
-//                            "https://m.youtube.com/watch?feature=youtu.be&v=fv-6WoaV6oY"
-//                        "https://youtu.be/61P3OwsriOM"
-                         "https://youtu.be/61P3OwsriOM"
-            )!)
-        } else {
-            // Fallback on earlier versions
-        }
+//        if #available(iOS 11.0, *) {
+//            download(URL(string:
+////                            "https://m.youtube.com/watch?feature=youtu.be&v=fv-6WoaV6oY"
+////                        "https://youtu.be/61P3OwsriOM"
+//                         "https://youtu.be/61P3OwsriOM"
+//            )!)
+//        } else {
+//            // Fallback on earlier versions
+//        }
 
 //        window?.rootViewController = UIHostingController(rootView: DetailView())
         
@@ -587,21 +591,25 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 download(format: bestVideo, start: true)
                 download(format: bestAudio, start: false)
             } else {
-                downloadViewController?.performSegue(withIdentifier: "formats", sender: nil)
+                DispatchQueue.main.async {
+                    self.downloadViewController?.performSegue(withIdentifier: "formats", sender: nil)
+                }
             }
             return
         }
         
-        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        alert.addAction(UIAlertAction(title: "Video+Audio.mp4 (\(bestHeight)p)", style: .default, handler: { _ in
-            self.download(format: best, start: true)
-        }))
-        alert.addAction(UIAlertAction(title: "Video.\(bestVideo.ext ?? "?") + Audio.m4a (\(bestVideoHeight)p)", style: .default, handler: { _ in
-            self.download(format: bestVideo, start: true)
-            self.download(format: bestAudio, start: false)
-        }))
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        window?.rootViewController?.present(alert, animated: true, completion: nil)
+        DispatchQueue.main.async {
+            let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+            alert.addAction(UIAlertAction(title: "Video+Audio.mp4 (\(bestHeight)p)", style: .default, handler: { _ in
+                self.download(format: best, start: true)
+            }))
+            alert.addAction(UIAlertAction(title: "Video.\(bestVideo.ext ?? "?") + Audio.m4a (\(bestVideoHeight)p)", style: .default, handler: { _ in
+                self.download(format: bestVideo, start: true)
+                self.download(format: bestAudio, start: false)
+            }))
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+            self.window?.rootViewController?.present(alert, animated: true, completion: nil)
+        }
     }
     
     func download(format: Format, start: Bool) {
@@ -610,6 +618,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                                                 ? (format.ext == "mp4" ? .videoOnly : .otherVideo)
                                                 : (format.isAudioOnly ? .audioOnly : .complete))
         if start {
+            Downloader.shared.t0 = ProcessInfo.processInfo.systemUptime
             task.resume()
         }
     }
