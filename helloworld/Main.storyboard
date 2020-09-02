@@ -30,6 +30,19 @@
                             <constraint firstItem="hgJ-EL-1mB" firstAttribute="trailing" secondItem="azB-Ti-YY7" secondAttribute="trailingMargin" id="trf-25-S3Z"/>
                         </constraints>
                     </view>
+                    <toolbarItems>
+                        <barButtonItem systemItem="trash" id="AaE-ng-hYL">
+                            <connections>
+                                <action selector="stopDownload:" destination="Sum-gd-pex" id="92M-lD-8nc"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem systemItem="flexibleSpace" id="yox-CE-j8l"/>
+                        <barButtonItem systemItem="pause" id="fmn-Oc-5yn">
+                            <connections>
+                                <action selector="pauseDownload:" destination="Sum-gd-pex" id="T7N-cn-OfD"/>
+                            </connections>
+                        </barButtonItem>
+                    </toolbarItems>
                     <navigationItem key="navigationItem" id="Y8W-PF-Ghw">
                         <barButtonItem key="rightBarButtonItem" title="Item" id="hYE-0Y-aDt">
                             <connections>
@@ -37,8 +50,11 @@
                             </connections>
                         </barButtonItem>
                     </navigationItem>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
+                        <outlet property="pauseItem" destination="fmn-Oc-5yn" id="YGJ-Sn-4zZ"/>
                         <outlet property="progressView" destination="hgJ-EL-1mB" id="2no-GM-0aI"/>
+                        <outlet property="stopItem" destination="AaE-ng-hYL" id="52j-SC-w3F"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="HKO-O0-CQx" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -69,6 +85,7 @@
                                             <nil key="highlightedColor"/>
                                         </label>
                                         <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="VYp-yF-4ky">
+                                            <rect key="frame" x="0.0" y="0.0" width="1000" height="1000"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </imageView>
                                     </subviews>
@@ -89,13 +106,17 @@
         <!--Navigation Controller-->
         <scene sceneID="Vc4-7J-eP2">
             <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="isX-he-tzB" sceneMemberID="viewController">
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" toolbarHidden="NO" id="isX-he-tzB" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="N2n-eK-Vuc">
                         <rect key="frame" x="0.0" y="44" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
+                    <toolbar key="toolbar" opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="eaM-2r-ZZJ">
+                        <rect key="frame" x="0.0" y="813" width="414" height="49"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </toolbar>
                     <connections>
                         <segue destination="Sum-gd-pex" kind="relationship" relationship="rootViewController" id="BFx-DB-jxx"/>
                     </connections>

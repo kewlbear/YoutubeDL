@@ -107,6 +107,8 @@ class Downloader: NSObject {
     
     let percentFormatter = NumberFormatter()
     
+    let dateComponentsFormatter = DateComponentsFormatter()
+    
     var t = ProcessInfo.processInfo.systemUptime
     
     var t0 = ProcessInfo.processInfo.systemUptime
@@ -119,7 +121,9 @@ class Downloader: NSObject {
         super.init()
         
         decimalFormatter.numberStyle = .decimal
+
         percentFormatter.numberStyle = .percent
+        percentFormatter.minimumFractionDigits = 1
         
         var configuration: URLSessionConfiguration
         if let identifier = backgroundURLSessionIdentifier {
@@ -131,6 +135,7 @@ class Downloader: NSObject {
         configuration.networkServiceType = .responsiveAV
         
         session = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
+        print(session, "created")
     }
     
     func download(request: URLRequest, kind: Kind) -> URLSessionDownloadTask {
@@ -145,10 +150,13 @@ class Downloader: NSObject {
         let task = session.downloadTask(with: request)
         task.taskDescription = kind.rawValue
         print(#function, request, trace)
+        task.priority = URLSessionTask.highPriority
         return task
     }
     
     func tryMerge() {
+        let t0 = ProcessInfo.processInfo.systemUptime
+        
         let videoAsset = AVAsset(url: Kind.videoOnly.url)
         let audioAsset = AVAsset(url: Kind.audioOnly.url)
         
@@ -157,6 +165,9 @@ class Downloader: NSObject {
             print(#function,
                   videoAsset.tracks(withMediaType: .video),
                   audioAsset.tracks(withMediaType: .audio), trace)
+            DispatchQueue.main.async {
+                self.topViewController?.navigationItem.title = "Merge failed"
+            }
             return
         }
         
@@ -171,6 +182,9 @@ class Downloader: NSObject {
         }
         catch {
             print(#function, error, trace)
+            DispatchQueue.main.async {
+                self.topViewController?.navigationItem.title = error.localizedDescription
+            }
             return
         }
         
@@ -185,8 +199,12 @@ class Downloader: NSObject {
         session.outputURL = outputURL
         session.outputFileType = .mp4
         print(#function, "merging...", trace)
+        DispatchQueue.main.async {
+            self.topViewController?.navigationItem.title = "Merging..."
+        }
         session.exportAsynchronously {
             print(#function, "finished merge", session.status.rawValue, trace)
+            print(#function, "took", self.dateComponentsFormatter.string(from: ProcessInfo.processInfo.systemUptime - t0) ?? "?")
             if session.status == .completed {
                 self.export(outputURL)
             }
@@ -196,14 +214,22 @@ class Downloader: NSObject {
     func transcode() {
         do {
             try FileManager.default.removeItem(at: Kind.videoOnly.url)
-            
-            Transcoder().transcode(from: Kind.otherVideo.url, to: Kind.videoOnly.url)
-            
-            tryMerge()
         }
         catch {
             print(#function, error)
         }
+        
+        DispatchQueue.main.async {
+            self.topViewController?.navigationItem.title = "Transcoding..."
+        }
+        
+        let t0 = ProcessInfo.processInfo.systemUptime
+        
+        Transcoder().transcode(from: Kind.otherVideo.url, to: Kind.videoOnly.url)
+        
+        print(#function, "took", dateComponentsFormatter.string(from: ProcessInfo.processInfo.systemUptime - t0) ?? "?")
+        
+        tryMerge()
     }
 }
 
@@ -226,13 +252,19 @@ extension Downloader: URLSessionTaskDelegate {
 extension Downloader: URLSessionDownloadDelegate {
     
     fileprivate func export(_ url: URL) {
+        DispatchQueue.main.async {
+            self.topViewController?.navigationItem.title = "Exporting..."
+        }
+        
         PHPhotoLibrary.shared().performChanges({
             let changeRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
             //                            changeRequest.contentEditingOutput = output
         }) { (success, error) in
             print(#function, success, error ?? "", trace)
             
-            self.topViewController?.notify(body: "Download complete!")
+            DispatchQueue.main.async {
+                self.topViewController?.notify(body: "Download complete!")
+            }
         }
     }
     
@@ -255,7 +287,9 @@ extension Downloader: URLSessionDownloadDelegate {
             case .videoOnly, .audioOnly:
                 tryMerge()
             case .otherVideo:
-                transcode()
+                DispatchQueue.global(qos: .userInitiated).async {
+                    self.transcode()
+                }
             }
         }
         catch {
@@ -265,19 +299,28 @@ extension Downloader: URLSessionDownloadDelegate {
     
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
         let t = ProcessInfo.processInfo.systemUptime
-        guard t - self.t > 0.1 else {
+        guard t - self.t > 0.9 else {
             return
         }
         self.t = t
         
-        print(
-//            #function,
-//              session,
-              downloadTask.taskIdentifier, bytesWritten, totalBytesWritten, totalBytesExpectedToWrite,
-            Double(totalBytesWritten) / (t - t0)
-            )
+        let elapsed = t - t0
+        let bytesPerSec = Double(totalBytesWritten) / elapsed
+        let remain = Double(totalBytesExpectedToWrite - totalBytesWritten) / bytesPerSec
+        
+//        print(
+////            #function,
+////              session,
+//              downloadTask.taskIdentifier,
+//            ByteCountFormatter.string(fromByteCount: bytesWritten, countStyle: .file),
+//            ByteCountFormatter.string(fromByteCount: totalBytesWritten, countStyle: .file),
+//            ByteCountFormatter.string(fromByteCount: totalBytesExpectedToWrite, countStyle: .file),
+//            ByteCountFormatter.string(fromByteCount: Int64(bytesPerSec), countStyle: .file), "/s",
+//            dateComponentsFormatter.string(from: elapsed) ?? "?", "elapsed",
+//            dateComponentsFormatter.string(from: remain) ?? "?", "remain"
+//            )
         DispatchQueue.main.async {
-            self.topViewController?.navigationItem.title = self.percentFormatter.string(from: NSNumber(value: Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)))
+            self.topViewController?.navigationItem.prompt = "\(self.percentFormatter.string(from: NSNumber(value: Double(totalBytesWritten) / Double(totalBytesExpectedToWrite))) ?? "?%") of \(ByteCountFormatter.string(fromByteCount: totalBytesExpectedToWrite, countStyle: .file)) at \(ByteCountFormatter.string(fromByteCount: Int64(bytesPerSec), countStyle: .file))/s ETA \(self.dateComponentsFormatter.string(from: remain) ?? "?") \(downloadTask.taskDescription ?? "no description?")"
         }
     }
 }
@@ -458,18 +501,22 @@ class Transcoder {
         return av_interleaved_write_frame(ofmt_ctx, &enc_pkt)
     }
     
-    func transcode(from: URL, to url: URL) {
+    func transcode(from: URL, to url: URL) -> Int32 {
         var ret = open_input_file(filename: from.path)
         if ret < 0 {
-            return
+            return ret
         }
 
         ret = open_output_file(filename: url.path)
         if ret < 0 {
-            return
+            return ret
         }
 
         var packet = AVPacket()
+        
+        let numberFormatter = NumberFormatter()
+        numberFormatter.minimumFractionDigits = 6
+        var tLast = ProcessInfo.processInfo.systemUptime
         
         while true {
             ret = av_read_frame(ifmt_ctx, &packet)
@@ -481,7 +528,7 @@ class Transcoder {
             
             var frame = av_frame_alloc()
             guard frame != nil else {
-                return
+                return ret
             }
             av_packet_rescale_ts(&packet, ifmt_ctx!.pointee.streams[stream_index]!.pointee.time_base, stream_ctx[stream_index].dec_ctx!.pointee.time_base)
             let dec_func = type == AVMEDIA_TYPE_VIDEO ? avcodec_decode_video2 : avcodec_decode_audio4
@@ -490,15 +537,24 @@ class Transcoder {
             if ret < 0 {
                 av_frame_free(&frame)
                 print("Decoding failed")
-                return
+                return ret
             }
             
             if got_frame != 0 {
+                let t = ProcessInfo.processInfo.systemUptime
+                if t - tLast > 0.5,
+                   let pts = frame?.pointee.pts,
+                   let stream = ifmt_ctx?.pointee.streams[stream_index] {
+                    tLast = t
+                    let d = av_q2d(stream.pointee.time_base)
+                    print(#function, "pts:", numberFormatter.string(from: NSNumber(value: Double(pts) * d)) ?? "?")
+                }
+                
                 frame?.pointee.pts = frame!.pointee.best_effort_timestamp
                 ret = encode_write_frame(filt_frame: &frame, stream_index: stream_index)
                 av_frame_free(&frame)
                 if ret < 0 {
-                    return
+                    return ret
                 }
             } else {
                 av_frame_free(&frame)
@@ -510,6 +566,8 @@ class Transcoder {
         if (((ofmt_ctx?.pointee.oformat.pointee.flags ?? 0) & AVFMT_NOFILE) == 0) {
             avio_closep(&ofmt_ctx!.pointee.pb)
         }
+        
+        return 0
     }
 }
 
@@ -560,6 +618,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
 
         UNUserNotificationCenter.current().delegate = self
+        
+        _ = Downloader.shared // create URL session
         
 //        if #available(iOS 11.0, *) {
 //            download(URL(string:
@@ -657,7 +717,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 extension UIViewController {
     func notify(body: String) {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound, .announcement, .providesAppNotificationSettings]) { (granted, error) in
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound, .providesAppNotificationSettings]) { (granted, error) in
             print(granted, error ?? "no error")
             guard granted else {
                 return

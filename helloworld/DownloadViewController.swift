@@ -16,6 +16,10 @@ class DownloadViewController: UIViewController {
     
     @IBOutlet weak var progressView: UIProgressView!
     
+    @IBOutlet weak var pauseItem: UIBarButtonItem!
+    
+    @IBOutlet weak var stopItem: UIBarButtonItem!
+    
     var documentInteractionController: UIDocumentInteractionController?
     
     override func viewDidLoad() {
@@ -337,6 +341,41 @@ class DownloadViewController: UIViewController {
             viewController?.formats = info?.formats ?? []
         default:
             assertionFailure()
+        }
+    }
+    
+    @IBAction func pauseDownload(_ sender: UIBarButtonItem) {
+        sender.isEnabled = false
+        
+        Downloader.shared.session.getTasksWithCompletionHandler { (_, _, tasks) in
+            let downloading = tasks.filter { $0.state == .running }
+            if downloading.isEmpty {
+                tasks.filter { $0.state == .suspended }.first?.resume()
+            } else {
+                for task in downloading {
+                    task.suspend()
+                }
+            }
+            
+            DispatchQueue.main.async {
+                self.navigationItem.prompt = downloading.isEmpty ? "Resumed" : "Paused"
+                sender.isEnabled = true
+            }
+        }
+    }
+    
+    @IBAction func stopDownload(_ sender: UIBarButtonItem) {
+        sender.isEnabled = false
+        
+        Downloader.shared.session.getTasksWithCompletionHandler { (_, _, tasks) in
+            for task in tasks {
+                task.cancel()
+            }
+            
+            DispatchQueue.main.async {
+                self.navigationItem.prompt = "Cancelled"
+                sender.isEnabled = true
+            }
         }
     }
 }

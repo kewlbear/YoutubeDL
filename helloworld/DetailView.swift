@@ -8,6 +8,7 @@
 
 import SwiftUI
 
+@available(iOS 13.0, *)
 struct DetailView: View {
     @State var progress = 0.7
     
@@ -39,6 +40,7 @@ struct DetailView: View {
     }
 }
 
+@available(iOS 13.0.0, *)
 struct DetailView_Previews: PreviewProvider {
     static var previews: some View {
         DetailView()
