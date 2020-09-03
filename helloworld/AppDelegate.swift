@@ -11,6 +11,7 @@ import Python
 import Intents
 import Photos
 import SwiftUI
+import VideoToolbox
 
 let trace = "trace"
 
@@ -116,6 +117,8 @@ class Downloader: NSObject {
     var topViewController: UIViewController? {
         (UIApplication.shared.keyWindow?.rootViewController as? UINavigationController)?.topViewController
     }
+    
+    var transcoder: Transcoder?
     
     init(backgroundURLSessionIdentifier: String?) {
         super.init()
@@ -225,9 +228,36 @@ class Downloader: NSObject {
         
         let t0 = ProcessInfo.processInfo.systemUptime
         
-        Transcoder().transcode(from: Kind.otherVideo.url, to: Kind.videoOnly.url)
+        transcoder = Transcoder()
+        var ret: Int32?
+
+        func requestProgress() {
+            DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
+                self.transcoder?.progressBlock = { progress in
+                    self.transcoder?.progressBlock = nil
+                    
+                    let elapsed = ProcessInfo.processInfo.systemUptime - t0
+                    let remain = (1 - progress) * elapsed
+                    
+                    DispatchQueue.main.async {
+                        self.topViewController?.navigationItem.title =
+                            "Transcoding \(self.percentFormatter.string(from: NSNumber(value: progress)) ?? "?") ETA \(self.dateComponentsFormatter.string(from: remain) ?? "?")"
+                    }
+                }
+                
+                if ret == nil {
+                    requestProgress()
+                }
+            }
+        }
         
-        print(#function, "took", dateComponentsFormatter.string(from: ProcessInfo.processInfo.systemUptime - t0) ?? "?")
+        requestProgress()
+        
+        ret = transcoder?.transcode(from: Kind.otherVideo.url, to: Kind.videoOnly.url)
+        
+        transcoder = nil
+        
+        print(#function, ret ?? "nil?", "took", dateComponentsFormatter.string(from: ProcessInfo.processInfo.systemUptime - t0) ?? "?")
         
         tryMerge()
     }
@@ -271,6 +301,10 @@ extension Downloader: URLSessionDownloadDelegate {
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         print(#function, session, downloadTask, location)
         
+        DispatchQueue.main.async {
+            self.topViewController?.navigationItem.prompt = "Download finished"
+        }
+        
         session.getTasksWithCompletionHandler { (_, _, tasks) in
             print(#function, tasks)
             tasks.first { $0.state == .suspended }?.resume()
@@ -285,6 +319,9 @@ extension Downloader: URLSessionDownloadDelegate {
             case .complete:
                 export(kind.url)
             case .videoOnly, .audioOnly:
+                guard transcoder != nil else {
+                    break
+                }
                 tryMerge()
             case .otherVideo:
                 DispatchQueue.global(qos: .userInitiated).async {
@@ -330,6 +367,10 @@ class Transcoder {
         var dec_ctx: UnsafeMutablePointer<AVCodecContext>?
         var enc_ctx: UnsafeMutablePointer<AVCodecContext>?
     }
+    
+    var isCancelled = false
+    
+    var progressBlock: ((Double) -> Void)?
     
     var ifmt_ctx: UnsafeMutablePointer<AVFormatContext>?
     
@@ -514,11 +555,11 @@ class Transcoder {
 
         var packet = AVPacket()
         
-        let numberFormatter = NumberFormatter()
-        numberFormatter.minimumFractionDigits = 6
-        var tLast = ProcessInfo.processInfo.systemUptime
+        let formatter = DateComponentsFormatter()
+        let AV_TIME_BASE: Int32 = 1000_000
+        let AV_TIME_BASE_Q = AVRational(num: 1, den: AV_TIME_BASE)
         
-        while true {
+        while !isCancelled {
             ret = av_read_frame(ifmt_ctx, &packet)
             if ret < 0 {
                 break
@@ -541,20 +582,23 @@ class Transcoder {
             }
             
             if got_frame != 0 {
-                let t = ProcessInfo.processInfo.systemUptime
-                if t - tLast > 0.5,
-                   let pts = frame?.pointee.pts,
-                   let stream = ifmt_ctx?.pointee.streams[stream_index] {
-                    tLast = t
-                    let d = av_q2d(stream.pointee.time_base)
-                    print(#function, "pts:", numberFormatter.string(from: NSNumber(value: Double(pts) * d)) ?? "?")
-                }
-                
                 frame?.pointee.pts = frame!.pointee.best_effort_timestamp
                 ret = encode_write_frame(filt_frame: &frame, stream_index: stream_index)
                 av_frame_free(&frame)
                 if ret < 0 {
                     return ret
+                }
+
+                if progressBlock != nil,
+                   let duration = ifmt_ctx?.pointee.duration,
+                   let stream = ofmt_ctx?.pointee.streams[stream_index] {
+                    let pts = av_rescale_q(av_stream_get_end_pts(stream), stream.pointee.time_base, AV_TIME_BASE_Q)
+                    let progress = Double(pts) / Double(duration)
+                    
+                    let t = TimeInterval(pts) / TimeInterval(AV_TIME_BASE)
+                    print(#function, "time =", formatter.string(from: t) ?? "?", progress)
+                    
+                    progressBlock?(progress)
                 }
             } else {
                 av_frame_free(&frame)
@@ -633,9 +677,28 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 //        window?.rootViewController = UIHostingController(rootView: DetailView())
         
+        testVP9()
+        
         return true
     }
     
+    func testVP9() {
+        var _formatDescription: CMVideoFormatDescription?
+        var status = CMVideoFormatDescriptionCreate(allocator: nil, codecType: kCMVideoCodecType_VP9, width: 320, height: 240, extensions: nil, formatDescriptionOut: &_formatDescription)
+        guard status == noErr, let formatDescription = _formatDescription else {
+            print(#function, "CMVideoFormatDescriptionCreate =", status)
+            return
+        }
+
+        var _decompressionSession: VTDecompressionSession?
+        status = VTDecompressionSessionCreate(allocator: nil, formatDescription: formatDescription, decoderSpecification: nil, imageBufferAttributes: nil, outputCallback: nil, decompressionSessionOut: &_decompressionSession)
+//        assert(status != kVTCouldNotFindVideoDecoderErr)
+        guard status == noErr, let decompressionSession = _decompressionSession else {
+            print(#function, "VTDecompressionSessionCreate =", status)
+            return
+        }
+    }
+
     func check(formats: [Format]) {
         let _bestAudio = formats.filter { $0.isAudioOnly && $0.ext == "m4a" }.last
         let _bestVideo = formats.filter { $0.isVideoOnly }.last

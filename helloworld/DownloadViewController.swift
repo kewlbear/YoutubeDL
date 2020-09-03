@@ -372,6 +372,8 @@ class DownloadViewController: UIViewController {
                 task.cancel()
             }
             
+            Downloader.shared.transcoder?.isCancelled = true
+            
             DispatchQueue.main.async {
                 self.navigationItem.prompt = "Cancelled"
                 sender.isEnabled = true
