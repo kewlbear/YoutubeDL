@@ -20,6 +20,8 @@ class DownloadViewController: UIViewController {
     
     @IBOutlet weak var stopItem: UIBarButtonItem!
     
+    @IBOutlet weak var transcodeItem: UIBarButtonItem!
+    
     var documentInteractionController: UIDocumentInteractionController?
     
     override func viewDidLoad() {
@@ -378,6 +380,16 @@ class DownloadViewController: UIViewController {
                 self.navigationItem.prompt = "Cancelled"
                 sender.isEnabled = true
             }
+        }
+    }
+    
+    @IBAction func transcode(_ sender: UIBarButtonItem) {
+        if Downloader.shared.transcoder == nil {
+            DispatchQueue.global(qos: .userInitiated).async {
+                Downloader.shared.transcode()
+            }
+        } else {
+            Downloader.shared.transcoder?.isCancelled = true
         }
     }
 }

@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		4C0A8EF124D7D0F40071AE7D /* YTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A8EF024D7D0F40071AE7D /* YTests.swift */; };
+		4CB0C65F2500C9940009FB1F /* Transcoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB0C65E2500C9940009FB1F /* Transcoder.swift */; };
+		4CB0C6612500CA340009FB1F /* YoutubeDL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB0C6602500CA340009FB1F /* YoutubeDL.swift */; };
+		4CB0C6632500CA800009FB1F /* Downloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB0C6622500CA800009FB1F /* Downloader.swift */; };
 		4CD1DB3724FC9737000091B5 /* FormatTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD1DB3624FC9737000091B5 /* FormatTableViewController.swift */; };
 		4CD1DB3A24FCBF50000091B5 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB3824FCBF50000091B5 /* libavcodec.a */; };
 		4CD1DB3B24FCBF50000091B5 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB3924FCBF50000091B5 /* libavformat.a */; };
@@ -89,6 +92,9 @@
 		4C0A8EEE24D7D0F40071AE7D /* YTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C0A8EF024D7D0F40071AE7D /* YTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YTests.swift; sourceTree = "<group>"; };
 		4C0A8EF224D7D0F40071AE7D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4CB0C65E2500C9940009FB1F /* Transcoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transcoder.swift; sourceTree = "<group>"; };
+		4CB0C6602500CA340009FB1F /* YoutubeDL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YoutubeDL.swift; sourceTree = "<group>"; };
+		4CB0C6622500CA800009FB1F /* Downloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Downloader.swift; sourceTree = "<group>"; };
 		4CD1DB3624FC9737000091B5 /* FormatTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatTableViewController.swift; sourceTree = "<group>"; };
 		4CD1DB3824FCBF50000091B5 /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = "../../../../Volumes/SSD - 데이터/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib/libavcodec.a"; sourceTree = "<group>"; };
 		4CD1DB3924FCBF50000091B5 /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavformat.a; path = "../../../../Volumes/SSD - 데이터/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib/libavformat.a"; sourceTree = "<group>"; };
@@ -267,6 +273,9 @@
 				C775AF442419EA7C0044C43E /* Hello World-Bridging-Header.h */,
 				4CFF393924DA71A900131F73 /* DetailView.swift */,
 				4CD1DB3624FC9737000091B5 /* FormatTableViewController.swift */,
+				4CB0C65E2500C9940009FB1F /* Transcoder.swift */,
+				4CB0C6602500CA340009FB1F /* YoutubeDL.swift */,
+				4CB0C6622500CA800009FB1F /* Downloader.swift */,
 			);
 			path = helloworld;
 			sourceTree = "<group>";
@@ -511,7 +520,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4CB0C6632500CA800009FB1F /* Downloader.swift in Sources */,
 				C784637A244D57EA007CFD0E /* AppDelegate.swift in Sources */,
+				4CB0C65F2500C9940009FB1F /* Transcoder.swift in Sources */,
 				C7846378244D5705007CFD0E /* PythonLibrary+Symbols.swift in Sources */,
 				4CD1DB3724FC9737000091B5 /* FormatTableViewController.swift in Sources */,
 				C7681292241B6C9400EA5FD8 /* Intents.intentdefinition in Sources */,
@@ -519,6 +530,7 @@
 				600000000000000000100100 /* main.m in Sources */,
 				E19B09AC241C84440016CB29 /* DownloadViewController.swift in Sources */,
 				C775AF462419EA7D0044C43E /* Python.swift in Sources */,
+				4CB0C6612500CA340009FB1F /* YoutubeDL.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

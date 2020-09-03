@@ -37,9 +37,15 @@
                             </connections>
                         </barButtonItem>
                         <barButtonItem systemItem="flexibleSpace" id="yox-CE-j8l"/>
-                        <barButtonItem systemItem="pause" id="fmn-Oc-5yn">
+                        <barButtonItem title="트랜스코딩" id="fmn-Oc-5yn">
                             <connections>
-                                <action selector="pauseDownload:" destination="Sum-gd-pex" id="T7N-cn-OfD"/>
+                                <action selector="transcode:" destination="Sum-gd-pex" id="QoK-wk-EZU"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem systemItem="flexibleSpace" id="XGS-OM-kwW"/>
+                        <barButtonItem systemItem="pause" id="BO8-2m-axj">
+                            <connections>
+                                <action selector="pauseDownload:" destination="Sum-gd-pex" id="5EY-sf-zI3"/>
                             </connections>
                         </barButtonItem>
                     </toolbarItems>
@@ -55,6 +61,7 @@
                         <outlet property="pauseItem" destination="fmn-Oc-5yn" id="YGJ-Sn-4zZ"/>
                         <outlet property="progressView" destination="hgJ-EL-1mB" id="2no-GM-0aI"/>
                         <outlet property="stopItem" destination="AaE-ng-hYL" id="52j-SC-w3F"/>
+                        <outlet property="transcodeItem" destination="fmn-Oc-5yn" id="wo1-hG-5yf"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="HKO-O0-CQx" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
