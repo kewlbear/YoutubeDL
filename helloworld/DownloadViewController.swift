@@ -12,6 +12,12 @@ import AVKit
 
 class DownloadViewController: UIViewController {
 
+    var url: URL? {
+        didSet {
+            url.map { extractInfo($0) }
+        }
+    }
+    
     var info: Info?
     
     @IBOutlet weak var progressView: UIProgressView!
@@ -404,5 +410,85 @@ extension DownloadViewController: UIGestureRecognizerDelegate {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         print(#function, gestureRecognizer, otherGestureRecognizer)
         return true
+    }
+}
+
+extension DownloadViewController {
+    func check(info: Info?) {
+        guard let formats = info?.formats else {
+            return
+        }
+        
+        let _bestAudio = formats.filter { $0.isAudioOnly && $0.ext == "m4a" }.last
+        let _bestVideo = formats.filter { $0.isVideoOnly
+            && $0.ext == "webm"
+        }.last
+        let _best = formats.filter { !$0.isVideoOnly && !$0.isAudioOnly && $0.ext == "mp4" }.last
+        print(_best ?? "no best?", _bestVideo ?? "no bestvideo?", _bestAudio ?? "no bestaudio?")
+        guard let best = _best, let bestVideo = _bestVideo, let bestAudio = _bestAudio,
+              let bestHeight = best.height, let bestVideoHeight = bestVideo.height
+//              , bestVideoHeight > bestHeight
+        else
+        {
+            if let best = _best {
+                notify(body: #""\#(info?.title ?? "No title?")" 다운로드 시작"#)
+                download(format: best, start: true)
+            } else if let bestVideo = _bestVideo, let bestAudio = _bestAudio {
+                download(format: bestVideo, start: true)
+                download(format: bestAudio, start: false)
+            } else {
+                DispatchQueue.main.async {
+                    self.performSegue(withIdentifier: "formats", sender: nil)
+                }
+            }
+            return
+        }
+        
+        DispatchQueue.main.async {
+            let alert = UIAlertController(title: "다운로드 포맷 선택", message: "MP4 이외의 비디오는 다운로드 후 변환이 필요합니다.", preferredStyle: .actionSheet)
+            alert.addAction(UIAlertAction(title: "Video+Audio.mp4 (\(bestHeight)p)", style: .default, handler: { _ in
+                self.download(format: best, start: true)
+            }))
+            alert.addAction(UIAlertAction(title: "Video.\(bestVideo.ext ?? "?") + Audio.m4a (\(bestVideoHeight)p)", style: .default, handler: { _ in
+                self.download(format: bestVideo, start: true)
+                self.download(format: bestAudio, start: false)
+            }))
+            alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
+            self.present(alert, animated: true, completion: nil)
+        }
+    }
+    
+    func download(format: Format, start: Bool) {
+        guard let request = format.urlRequest else { fatalError() }
+        let task = Downloader.shared.download(request: request, kind: format.isVideoOnly
+                                                ? (format.ext == "mp4" ? .videoOnly : .otherVideo)
+                                                : (format.isAudioOnly ? .audioOnly : .complete))
+        if start {
+            Downloader.shared.t0 = ProcessInfo.processInfo.systemUptime
+            task.resume()
+        }
+    }
+    
+    @available(iOS 11.0, *)
+    fileprivate func extractInfo(_ url: URL) {
+        navigationItem.title = url.absoluteString
+        
+        Downloader.shared.session.getAllTasks {
+            for task in $0 {
+                task.cancel()
+            }
+        }
+        
+        notify(body: "영상 정보 받는중...")
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            (_, self.info) = YoutubeDL().extractInfo(url: url)
+            
+            DispatchQueue.main.async {
+                self.navigationItem.title = self.info?.title
+            }
+            
+            self.check(info: self.info)
+        }
     }
 }

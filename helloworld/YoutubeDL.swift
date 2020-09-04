@@ -71,34 +71,32 @@ struct Format: CustomStringConvertible {
 }
 
 class YoutubeDL {
-    func extractInfo(url: URL, completionHandler: @escaping ([Format], Info?) -> Void) {
-        DispatchQueue.global(qos: .userInitiated).async {
-            let youtube_dl = Python.import("youtube_dl")
-            
-            let options: PythonObject = [
-                "format": "bestvideo,bestaudio[ext=m4a]",
-                //        "outtmpl": location.path.pythonObject,
-                //        "progress_hooks": [progress_hook],
-                //        "nooverwrites": false,
-                "nocheckcertificate": true,
-                //            "update_self": true,
-            ]
-            
-            let youtubeDL = youtube_dl.YoutubeDL(options)
-            
-            print(#function, url, trace)
-            let info = youtubeDL.extract_info(url.absoluteString, download: false, process: true)
-            
-            let format_selector = youtubeDL.build_format_selector(options["format"])
-            let formats_to_download = format_selector(info)
-            var formats: [Format] = []
-            for format in formats_to_download {
-                guard let dict: [String: PythonObject] = Dictionary(format) else { fatalError() }
-                formats.append(Format(format: dict))
-            }
-            
-            completionHandler(formats, Info(info: info))
+    func extractInfo(url: URL) -> ([Format], Info?) {
+        let youtube_dl = Python.import("youtube_dl")
+        
+        let options: PythonObject = [
+            "format": "bestvideo,bestaudio[ext=m4a]",
+            //        "outtmpl": location.path.pythonObject,
+            //        "progress_hooks": [progress_hook],
+            //        "nooverwrites": false,
+            "nocheckcertificate": true,
+            //            "update_self": true,
+        ]
+        
+        let youtubeDL = youtube_dl.YoutubeDL(options)
+        
+        print(#function, url, trace)
+        let info = youtubeDL.extract_info(url.absoluteString, download: false, process: true)
+        
+        let format_selector = youtubeDL.build_format_selector(options["format"])
+        let formats_to_download = format_selector(info)
+        var formats: [Format] = []
+        for format in formats_to_download {
+            guard let dict: [String: PythonObject] = Dictionary(format) else { fatalError() }
+            formats.append(Format(format: dict))
         }
+        
+        return (formats, Info(info: info))
     }
 }
 

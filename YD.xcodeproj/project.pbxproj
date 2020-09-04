@@ -841,6 +841,7 @@
 					"$(PROJECT_DIR)/Support/OpenSSL",
 					"$(PROJECT_DIR)/Support/XZ",
 					"$(PROJECT_DIR)/Support/Python",
+					"\"/Volumes/Dark SSD/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YD;
 				PRODUCT_NAME = Y;

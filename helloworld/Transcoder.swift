@@ -113,6 +113,8 @@ class Transcoder {
 //                        encoder.pointee.pix_fmts?.pointee ??
                         dec_ctx.pointee.pix_fmt
                     enc_ctx.pointee.time_base = av_inv_q(dec_ctx.pointee.framerate)
+                    
+//                    enc_ctx.pointee.thread_count = 4
                 } else {
                     enc_ctx.pointee.sample_rate = dec_ctx.pointee.sample_rate
                     enc_ctx.pointee.channel_layout = dec_ctx.pointee.channel_layout

@@ -66,69 +66,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         }
     }
 
-    func check(formats: [Format]) {
-        let _bestAudio = formats.filter { $0.isAudioOnly && $0.ext == "m4a" }.last
-        let _bestVideo = formats.filter { $0.isVideoOnly }.last
-        let _best = formats.filter { !$0.isVideoOnly && !$0.isAudioOnly && $0.ext == "mp4" }.last
-        print(_best ?? "no best?", _bestVideo ?? "no bestvideo?", _bestAudio ?? "no bestaudio?")
-        guard let best = _best, let bestVideo = _bestVideo, let bestAudio = _bestAudio,
-              let bestHeight = best.height, let bestVideoHeight = bestVideo.height,
-              bestVideoHeight > bestHeight else
-        {
-            if let best = _best {
-                notify(body: #""\#(best.title ?? "No title?")" 다운로드 시작"#)
-                download(format: best, start: true)
-            } else if let bestVideo = _bestVideo, let bestAudio = _bestAudio {
-                download(format: bestVideo, start: true)
-                download(format: bestAudio, start: false)
-            } else {
-                DispatchQueue.main.async {
-                    self.downloadViewController?.performSegue(withIdentifier: "formats", sender: nil)
-                }
-            }
-            return
-        }
-        
-        DispatchQueue.main.async {
-            let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-            alert.addAction(UIAlertAction(title: "Video+Audio.mp4 (\(bestHeight)p)", style: .default, handler: { _ in
-                self.download(format: best, start: true)
-            }))
-            alert.addAction(UIAlertAction(title: "Video.\(bestVideo.ext ?? "?") + Audio.m4a (\(bestVideoHeight)p)", style: .default, handler: { _ in
-                self.download(format: bestVideo, start: true)
-                self.download(format: bestAudio, start: false)
-            }))
-            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-            self.window?.rootViewController?.present(alert, animated: true, completion: nil)
-        }
-    }
-    
-    func download(format: Format, start: Bool) {
-        guard let request = format.urlRequest else { fatalError() }
-        let task = Downloader.shared.download(request: request, kind: format.isVideoOnly
-                                                ? (format.ext == "mp4" ? .videoOnly : .otherVideo)
-                                                : (format.isAudioOnly ? .audioOnly : .complete))
-        if start {
-            Downloader.shared.t0 = ProcessInfo.processInfo.systemUptime
-            task.resume()
-        }
-    }
-    
-    @available(iOS 11.0, *)
-    fileprivate func download(_ url: URL) {
-        downloadViewController?.navigationItem.title = url.absoluteString
-        
-        Downloader.shared.session.getAllTasks {
-            for task in $0 {
-                task.cancel()
-            }
-        }
-        
-        youtubeDL.extractInfo(url: url) { formats, info in
-            self.check(formats: info?.formats ?? [])
-        }
-    }
-    
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
         print(userActivity.interaction ?? "no interaction?")
         if #available(iOS 12.0, *) {
@@ -138,7 +75,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 fatalError()
             }
             
-            download(url)
+            downloadViewController?.url = url
         } else {
             // Fallback on earlier versions
         }
@@ -152,16 +89,16 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
 }
 
-func notify(body: String) {
+func notify(body: String, identifier: String = "Download") {
     UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound, .providesAppNotificationSettings]) { (granted, error) in
-        print(granted, error ?? "no error")
+        print(#function, "granted =", granted, error ?? "no error")
         guard granted else {
             return
         }
         
         let content = UNMutableNotificationContent()
         content.body = body
-        let notificationRequest = UNNotificationRequest(identifier: "Download", content: content, trigger: nil)
+        let notificationRequest = UNNotificationRequest(identifier: identifier, content: content, trigger: nil)
         UNUserNotificationCenter.current().add(notificationRequest, withCompletionHandler: nil)
     }
 }
@@ -169,5 +106,15 @@ func notify(body: String) {
 extension AppDelegate: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler(.alert)
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        print(#function, response.actionIdentifier)
+        if response.actionIdentifier == UNNotificationDefaultActionIdentifier && response.notification.request.identifier == NotificationRequestIdentifier.transcode.rawValue {
+            DispatchQueue.global(qos: .userInitiated).async {
+                Downloader.shared.transcode()
+            }
+        }
+        completionHandler()
     }
 }

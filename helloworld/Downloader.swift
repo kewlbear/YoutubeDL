@@ -10,6 +10,10 @@ import UIKit
 import AVFoundation
 import Photos
 
+enum NotificationRequestIdentifier: String {
+    case transcode
+}
+
 class Downloader: NSObject {
 
     enum Kind: String {
@@ -150,11 +154,13 @@ class Downloader: NSObject {
     func transcode() {
         DispatchQueue.main.async {
             guard UIApplication.shared.applicationState == .active else {
-                notify(body: "앱을 실행하고 트랜스코딩을 하세요.")
+                notify(body: "앱을 실행하고 트랜스코딩을 하세요.", identifier: NotificationRequestIdentifier.transcode.rawValue)
                 return
             }
             
-            notify(body: "트랜스코딩이 끝날 때까지 다른 앱으로 전환하지 마세요.")
+            let alert = UIAlertController(title: nil, message: "트랜스코딩이 끝날 때까지 다른 앱으로 전환하지 마세요.", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
+            self.topViewController?.present(alert, animated: true, completion: nil)
         }
         
         do {
@@ -179,11 +185,14 @@ class Downloader: NSObject {
                     self.transcoder?.progressBlock = nil
                     
                     let elapsed = ProcessInfo.processInfo.systemUptime - t0
-                    let remain = (1 - progress) * elapsed
+                    let speed = progress / elapsed
+                    let ETA = (1 - progress) / speed
+                    
+                    guard ETA.isFinite else { return }
                     
                     DispatchQueue.main.async {
                         self.topViewController?.navigationItem.title =
-                            "Transcoding \(self.percentFormatter.string(from: NSNumber(value: progress)) ?? "?") ETA \(self.dateComponentsFormatter.string(from: remain) ?? "?")"
+                            "Transcoding \(self.percentFormatter.string(from: NSNumber(value: progress)) ?? "?") ETA \(self.dateComponentsFormatter.string(from: ETA) ?? "?")"
                     }
                 }
                 
