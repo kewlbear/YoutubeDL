@@ -11,6 +11,8 @@
 		4CB0C65F2500C9940009FB1F /* Transcoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB0C65E2500C9940009FB1F /* Transcoder.swift */; };
 		4CB0C6612500CA340009FB1F /* YoutubeDL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB0C6602500CA340009FB1F /* YoutubeDL.swift */; };
 		4CB0C6632500CA800009FB1F /* Downloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB0C6622500CA800009FB1F /* Downloader.swift */; };
+		4CBA67B7250225F600DF6C24 /* libavfilter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CBA67B6250225F600DF6C24 /* libavfilter.a */; };
+		4CBA67B92502266B00DF6C24 /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CBA67B82502266B00DF6C24 /* libswscale.a */; };
 		4CD1DB3724FC9737000091B5 /* FormatTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD1DB3624FC9737000091B5 /* FormatTableViewController.swift */; };
 		4CD1DB3A24FCBF50000091B5 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB3824FCBF50000091B5 /* libavcodec.a */; };
 		4CD1DB3B24FCBF50000091B5 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB3924FCBF50000091B5 /* libavformat.a */; };
@@ -95,6 +97,8 @@
 		4CB0C65E2500C9940009FB1F /* Transcoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transcoder.swift; sourceTree = "<group>"; };
 		4CB0C6602500CA340009FB1F /* YoutubeDL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YoutubeDL.swift; sourceTree = "<group>"; };
 		4CB0C6622500CA800009FB1F /* Downloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Downloader.swift; sourceTree = "<group>"; };
+		4CBA67B6250225F600DF6C24 /* libavfilter.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavfilter.a; path = "../../../../Volumes/SSD - 데이터/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib/libavfilter.a"; sourceTree = "<group>"; };
+		4CBA67B82502266B00DF6C24 /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswscale.a; path = "../../../../Volumes/SSD - 데이터/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib/libswscale.a"; sourceTree = "<group>"; };
 		4CD1DB3624FC9737000091B5 /* FormatTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatTableViewController.swift; sourceTree = "<group>"; };
 		4CD1DB3824FCBF50000091B5 /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = "../../../../Volumes/SSD - 데이터/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib/libavcodec.a"; sourceTree = "<group>"; };
 		4CD1DB3924FCBF50000091B5 /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavformat.a; path = "../../../../Volumes/SSD - 데이터/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib/libavformat.a"; sourceTree = "<group>"; };
@@ -157,9 +161,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4CBA67B92502266B00DF6C24 /* libswscale.a in Frameworks */,
+				4CD1DB3F24FCC09E000091B5 /* libswresample.a in Frameworks */,
+				4CBA67B7250225F600DF6C24 /* libavfilter.a in Frameworks */,
 				4CD1DB4324FCC0B7000091B5 /* libiconv.tbd in Frameworks */,
 				4CD1DB4124FCC0A7000091B5 /* VideoToolbox.framework in Frameworks */,
-				4CD1DB3F24FCC09E000091B5 /* libswresample.a in Frameworks */,
 				4CD1DB3D24FCC061000091B5 /* libavutil.a in Frameworks */,
 				4CD1DB3A24FCBF50000091B5 /* libavcodec.a in Frameworks */,
 				4CD1DB3B24FCBF50000091B5 /* libavformat.a in Frameworks */,
@@ -233,6 +239,8 @@
 		60796EE419190F4100A9926B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4CBA67B82502266B00DF6C24 /* libswscale.a */,
+				4CBA67B6250225F600DF6C24 /* libavfilter.a */,
 				4CD1DB4224FCC0B7000091B5 /* libiconv.tbd */,
 				4CD1DB4024FCC0A7000091B5 /* VideoToolbox.framework */,
 				4CD1DB3E24FCC09E000091B5 /* libswresample.a */,

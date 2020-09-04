@@ -9,11 +9,6 @@
 import Foundation
 
 class Transcoder {
-    struct StreamContext {
-        var dec_ctx: UnsafeMutablePointer<AVCodecContext>?
-        var enc_ctx: UnsafeMutablePointer<AVCodecContext>?
-    }
-    
     var isCancelled = false
     
     var progressBlock: ((Double) -> Void)?
@@ -22,6 +17,19 @@ class Transcoder {
     
     var ofmt_ctx: UnsafeMutablePointer<AVFormatContext>?
 
+    struct FilteringContext {
+        var buffersink_ctx: UnsafeMutablePointer<AVFilterContext>?
+        var buffersrc_ctx: UnsafeMutablePointer<AVFilterContext>?
+        var filter_graph: UnsafeMutablePointer<AVFilterGraph>?
+    }
+
+    var filter_ctx: [FilteringContext] = []
+    
+    struct StreamContext {
+        var dec_ctx: UnsafeMutablePointer<AVCodecContext>?
+        var enc_ctx: UnsafeMutablePointer<AVCodecContext>?
+    }
+    
     var stream_ctx: [StreamContext] = []
 
     func open_input_file(filename: String) -> Int32 {
@@ -113,8 +121,6 @@ class Transcoder {
 //                        encoder.pointee.pix_fmts?.pointee ??
                         dec_ctx.pointee.pix_fmt
                     enc_ctx.pointee.time_base = av_inv_q(dec_ctx.pointee.framerate)
-                    
-//                    enc_ctx.pointee.thread_count = 4
                 } else {
                     enc_ctx.pointee.sample_rate = dec_ctx.pointee.sample_rate
                     enc_ctx.pointee.channel_layout = dec_ctx.pointee.channel_layout
@@ -171,12 +177,144 @@ class Transcoder {
         return 0
     }
     
-    func encode_write_frame(filt_frame: inout UnsafeMutablePointer<AVFrame>?, stream_index: Int) -> Int32 {
+    func init_filters() -> Int32 {
+        guard let ifmt_ctx = self.ifmt_ctx else {
+            return -9999
+        }
+        filter_ctx = Array(repeating: FilteringContext(), count: Int(ifmt_ctx.pointee.nb_streams))
+        
+        for index in 0..<Int(ifmt_ctx.pointee.nb_streams) {
+            let codec_type = ifmt_ctx.pointee.streams[index]?.pointee.codecpar.pointee.codec_type
+            guard [AVMEDIA_TYPE_AUDIO, AVMEDIA_TYPE_VIDEO].contains(codec_type) else {
+                continue
+            }
+            var filter_spec: String
+            if codec_type == AVMEDIA_TYPE_VIDEO {
+                filter_spec = "null"
+            } else {
+                filter_spec = "null"
+            }
+            let ret = init_filter(fctx: &filter_ctx[index], dec_ctx: stream_ctx[index].dec_ctx!, enc_ctx: stream_ctx[index].enc_ctx!, filter_spec: filter_spec)
+            guard ret == 0 else {
+                return ret
+            }
+        }
+        
+        return 0
+    }
+    
+    func init_filter(fctx: UnsafeMutablePointer<FilteringContext>, dec_ctx: UnsafePointer<AVCodecContext>, enc_ctx: UnsafeMutablePointer<AVCodecContext>, filter_spec: String) -> Int32 {
+        var outputs: UnsafeMutablePointer<AVFilterInOut>? = avfilter_inout_alloc()
+        defer {
+            avfilter_inout_free(&outputs)
+        }
+        var inputs: UnsafeMutablePointer<AVFilterInOut>? = avfilter_inout_alloc()
+        defer {
+            avfilter_inout_free(&inputs)
+        }
+        guard outputs != nil && inputs != nil,
+              let filter_graph = avfilter_graph_alloc() else
+        {
+            return -999
+        }
+        
+        var buffersrc_ctx: UnsafeMutablePointer<AVFilterContext>?
+        var buffersink_ctx: UnsafeMutablePointer<AVFilterContext>?
+
+        switch dec_ctx.pointee.codec_type {
+        case AVMEDIA_TYPE_VIDEO:
+            guard let buffersrc = avfilter_get_by_name("buffer"),
+                  let buffersink = avfilter_get_by_name("buffersink") else
+            {
+                print("filtering source or sink element not found")
+                return -999
+            }
+            let args = "video_size=\(dec_ctx.pointee.width)x\(dec_ctx.pointee.height):pix_fmt=\(dec_ctx.pointee.pix_fmt.rawValue):time_base=\(dec_ctx.pointee.time_base.num)/\(dec_ctx.pointee.time_base.den):pixel_aspect=\(dec_ctx.pointee.sample_aspect_ratio.num)/\(dec_ctx.pointee.sample_aspect_ratio.den)"
+            
+            var ret = avfilter_graph_create_filter(&buffersrc_ctx, buffersrc, "in", args, nil, filter_graph)
+            if ret < 0 {
+                print("Cannot create buffer source")
+                return ret
+            }
+            
+            ret = avfilter_graph_create_filter(&buffersink_ctx, buffersink, "out", nil, nil, filter_graph)
+            if ret < 0 {
+                print("Cannot create buffer sink")
+                return ret
+            }
+            
+            let size = MemoryLayout<AVPixelFormat>.size
+            withUnsafePointer(to: enc_ctx.pointee.pix_fmt) {
+                $0.withMemoryRebound(to: UInt8.self, capacity: size) {
+                    ret = av_opt_set_bin(buffersink_ctx, "pix_fmts", $0, Int32(size), AV_OPT_SEARCH_CHILDREN)
+                }
+            }
+            if ret < 0 {
+                return ret
+            }
+        default:
+            fatalError()
+        }
+        
+        outputs?.pointee.name = strdup("in")
+        outputs?.pointee.filter_ctx = buffersrc_ctx
+        outputs?.pointee.pad_idx = 0
+        outputs?.pointee.next = nil
+        
+        inputs?.pointee.name = strdup("out")
+        inputs?.pointee.filter_ctx = buffersink_ctx
+        inputs?.pointee.pad_idx = 0
+        inputs?.pointee.next = nil
+        
+        var ret = avfilter_graph_parse_ptr(filter_graph, filter_spec, &inputs, &outputs, nil)
+        if ret < 0 {
+            return ret
+        }
+        
+        ret = avfilter_graph_config(filter_graph, nil)
+        if ret < 0 {
+            return ret
+        }
+        
+        fctx.pointee.buffersrc_ctx = buffersrc_ctx
+        fctx.pointee.buffersink_ctx = buffersink_ctx
+        fctx.pointee.filter_graph = filter_graph
+        
+        return 0
+    }
+    
+    func filter_encode_write_frame(frame: UnsafeMutablePointer<AVFrame>?, stream_index: Int) -> Int32 {
+        var ret = av_buffersrc_add_frame_flags(filter_ctx[stream_index].buffersrc_ctx, frame, 0)
+        if ret < 0 {
+            print("Error while feeding the filtergraph")
+            return ret
+        }
+        
+        while true {
+            var filt_frame: UnsafeMutablePointer<AVFrame>? = av_frame_alloc()
+            guard filt_frame != nil else {
+                return -999
+            }
+            ret = av_buffersink_get_frame(filter_ctx[stream_index].buffersink_ctx, filt_frame)
+            if ret < 0 {
+                av_frame_free(&filt_frame)
+                return (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) ? 0 : ret
+            }
+            
+            filt_frame?.pointee.pict_type = AV_PICTURE_TYPE_NONE
+            var got_frame: Int32 = 0
+            ret = encode_write_frame(filt_frame: &filt_frame, stream_index: stream_index, got_frame: &got_frame)
+            if ret < 0 {
+                return ret
+            }
+        }
+    }
+
+    func encode_write_frame(filt_frame: UnsafeMutablePointer<UnsafeMutablePointer<AVFrame>?>?, stream_index: Int, got_frame: inout Int32) -> Int32 {
         var enc_pkt = AVPacket()
         av_init_packet(&enc_pkt)
-        var got_frame: Int32 = 0
-        let ret = avcodec_encode_video2(stream_ctx[stream_index].enc_ctx, &enc_pkt, filt_frame, &got_frame)
-        av_frame_free(&filt_frame)
+        let ret = avcodec_encode_video2(stream_ctx[stream_index].enc_ctx, &enc_pkt, filt_frame?.pointee, &got_frame)
+        av_frame_free(filt_frame)
         if ret < 0 {
             return ret
         }
@@ -190,6 +328,24 @@ class Transcoder {
         return av_interleaved_write_frame(ofmt_ctx, &enc_pkt)
     }
     
+    func flush_encoder(stream_index: Int) -> Int32 {
+        guard (stream_ctx[stream_index].enc_ctx!.pointee.codec.pointee.capabilities & AV_CODEC_CAP_DELAY) != 0 else {
+            return 0
+        }
+        
+        while true {
+            print("Flushing stream #\(stream_index) encoder")
+            var got_frame: Int32 = 0
+            let ret = encode_write_frame(filt_frame: nil, stream_index: stream_index, got_frame: &got_frame)
+            if ret < 0 {
+                return ret
+            }
+            if got_frame == 0 {
+                return 0
+            }
+        }
+    }
+    
     func transcode(from: URL, to url: URL) -> Int32 {
         var ret = open_input_file(filename: from.path)
         if ret < 0 {
@@ -201,6 +357,11 @@ class Transcoder {
             return ret
         }
 
+        ret = init_filters()
+        if ret < 0 {
+            return ret
+        }
+        
         var packet = AVPacket()
         
         let formatter = DateComponentsFormatter()
@@ -231,7 +392,7 @@ class Transcoder {
             
             if got_frame != 0 {
                 frame?.pointee.pts = frame!.pointee.best_effort_timestamp
-                ret = encode_write_frame(filt_frame: &frame, stream_index: stream_index)
+                ret = filter_encode_write_frame(frame: frame, stream_index: stream_index)
                 av_frame_free(&frame)
                 if ret < 0 {
                     return ret
@@ -254,11 +415,53 @@ class Transcoder {
             av_packet_unref(&packet)
         }
 
+        for index in 0..<Int(ifmt_ctx!.pointee.nb_streams) {
+            if filter_ctx[index].filter_graph == nil {
+                continue
+            }
+            ret = filter_encode_write_frame(frame: nil, stream_index: index)
+            if ret < 0 {
+                print("Flushing filter failed")
+                return ret
+            }
+            
+            ret = flush_encoder(stream_index: index)
+            if ret < 0 {
+                print("Flushing encoder failed")
+                return ret
+            }
+        }
+        
         av_write_trailer(ofmt_ctx)
+        
+        av_packet_unref(&packet)
+        for index in 0..<Int(ifmt_ctx?.pointee.nb_streams ?? 0) {
+            avcodec_free_context(&stream_ctx[index].dec_ctx)
+            if ofmt_ctx?.pointee.nb_streams ?? 0 > index && ofmt_ctx?.pointee.streams[index] != nil && (stream_ctx[index].enc_ctx != nil) {
+                avcodec_free_context(&stream_ctx[index].enc_ctx)
+            }
+            if filter_ctx[index].filter_graph != nil {
+                avfilter_graph_free(&filter_ctx[index].filter_graph)
+            }
+        }
+        avformat_close_input(&ifmt_ctx)
         if (((ofmt_ctx?.pointee.oformat.pointee.flags ?? 0) & AVFMT_NOFILE) == 0) {
             avio_closep(&ofmt_ctx!.pointee.pb)
         }
+        avformat_free_context(ofmt_ctx)
         
-        return 0
+        if ret < 0 {
+            var buffer: [Int8] = Array(repeating: 0, count: 1024)
+            let message = String(utf8String: av_make_error_string(&buffer, buffer.count, ret))
+            print("Error occurred: \(message ?? "nil?")")
+        }
+        
+        return ret
     }
 }
+
+func AVERROR(_ e: Int32) -> Int32 {
+    -e
+}
+
+let AVERROR_EOF: Int32 = -541478725
