@@ -70,7 +70,14 @@ class Transcoder {
                 if codec_ctx.pointee.codec_type == AVMEDIA_TYPE_VIDEO {
                     codec_ctx.pointee.framerate = av_guess_frame_rate(ifmt_ctx, stream, nil)
                 }
-                ret = avcodec_open2(codec_ctx, dec, nil)
+                
+                var options: OpaquePointer?
+                // blueming - none: 3:10, auto: 2:15, 4: 2:01
+                // poong - auto: 7:06, 4: 7:02
+                // bbang - auto: 5:53
+                ret = av_dict_set(&options, "threads", "auto", 0)
+                
+                ret = avcodec_open2(codec_ctx, dec, &options)
                 if ret < 0 {
                     print("Failed to open decoder for stream #\(index)")
                     return ret
