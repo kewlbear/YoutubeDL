@@ -9,6 +9,9 @@
 import UIKit
 import Photos
 import AVKit
+import MetalKit
+import MetalPerformanceShaders
+import CoreVideo
 
 class DownloadViewController: UIViewController {
 
@@ -30,15 +33,74 @@ class DownloadViewController: UIViewController {
     
     var documentInteractionController: UIDocumentInteractionController?
     
+    var metalView: MTKView?
+    
+    var device = MTLCreateSystemDefaultDevice()
+    
+    var textureCache: CVMetalTextureCache?
+    
+    var textures: [MTLTexture?] = []
+    
+    var commandQueue: MTLCommandQueue?
+    
+    var pixelBuffer: CVPixelBuffer? {
+        didSet {
+            updateTextures()
+            metalView?.setNeedsDisplay()
+        }
+    }
+    
+    var computePipelineState: MTLComputePipelineState?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
         PHPhotoLibrary.shared().register(self)
+        
+        device = MTLCreateSystemDefaultDevice()
+        metalView = MTKView(frame: view.bounds)
+        metalView?.contentMode = .scaleAspectFit
+        metalView?.device = device
+        metalView?.delegate = self
+        metalView?.clearColor = MTLClearColorMake(1, 1, 1, 1)
+        metalView?.colorPixelFormat = .bgra8Unorm
+        metalView?.framebufferOnly = false
+        metalView?.autoResizeDrawable = false
+        metalView?.enableSetNeedsDisplay = true
+        
+        _ = device.map { CVMetalTextureCacheCreate(nil, nil, $0, nil, &textureCache) }
+        
+        metalView.map { view.addSubview($0) }
+        
+        let library = device?.makeDefaultLibrary()
+        let function = library?.makeFunction(name: "capturedImageFragmentShader")
+//        computePipelineState = try! device?.makeComputePipelineState(function: function!)
     }
     
     @IBAction
     func handlePan(_ sender: UIPanGestureRecognizer) {
         print(#function, sender)
+    }
+    
+    func updateTextures() {
+        guard let pixelBuffer = self.pixelBuffer else {
+            return
+        }
+        textures = (0..<3).map { createTexture(fromPixelBuffer: pixelBuffer, pixelFormat: .r8Unorm, planeIndex: $0) }
+    }
+    
+    func createTexture(fromPixelBuffer pixelBuffer: CVPixelBuffer, pixelFormat: MTLPixelFormat, planeIndex: Int) -> MTLTexture? {
+        var mtlTexture: MTLTexture? = nil
+        let width = CVPixelBufferGetWidthOfPlane(pixelBuffer, planeIndex)
+        let height = CVPixelBufferGetHeightOfPlane(pixelBuffer, planeIndex)
+        
+        var texture: CVMetalTexture? = nil
+        let status = textureCache.map { CVMetalTextureCacheCreateTextureFromImage(nil, $0, pixelBuffer, nil, pixelFormat, width, height, planeIndex, &texture) }
+        if status == kCVReturnSuccess {
+            mtlTexture = CVMetalTextureGetTexture(texture!)
+        }
+        
+        return mtlTexture
     }
     
     @IBAction func crop(_ sender: UIBarButtonItem) {
@@ -400,6 +462,38 @@ class DownloadViewController: UIViewController {
     }
 }
 
+extension DownloadViewController: MTKViewDelegate {
+    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+        // FIXME: ?
+    }
+    
+    func draw(in view: MTKView) {
+        guard !textures.isEmpty,
+              let commandBuffer = commandQueue?.makeCommandBuffer(),
+              let drawable = view.currentDrawable,
+              let device = device else
+        {
+            return
+        }
+        
+        let drawingTexture = drawable.texture
+        
+        let encoder = commandBuffer.makeComputeCommandEncoder()
+        encoder?.setComputePipelineState(computePipelineState!)
+        for index in 0..<3 {
+            encoder?.setTexture(textures[index], index: index)
+        }
+        
+//        encoder?.dispatchThreadgroups(textures[0]!.thr, threadsPerThreadgroup: <#T##MTLSize#>)
+        encoder?.endEncoding()
+        
+        commandBuffer.present(drawable)
+        commandBuffer.commit()
+        
+        self.textures = []
+    }
+}
+
 extension DownloadViewController: PHPhotoLibraryChangeObserver {
     func photoLibraryDidChange(_ changeInstance: PHChange) {
         print(changeInstance)
@@ -421,7 +515,9 @@ extension DownloadViewController {
         
         let _bestAudio = formats.filter { $0.isAudioOnly && $0.ext == "m4a" }.last
         let _bestVideo = formats.filter { $0.isVideoOnly
-            && $0.ext == "webm"
+            && $0.ext ==
+//            "webm"
+            "mp4"
         }.last
         let _best = formats.filter { !$0.isVideoOnly && !$0.isAudioOnly && $0.ext == "mp4" }.last
         print(_best ?? "no best?", _bestVideo ?? "no bestvideo?", _bestAudio ?? "no bestaudio?")

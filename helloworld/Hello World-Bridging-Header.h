@@ -8,3 +8,5 @@
 #import "libavfilter/buffersrc.h"
 #import "libavutil/opt.h"
 #import "libavutil/pixdesc.h"
+
+#import "ShaderTypes.h"

@@ -7,11 +7,14 @@
 //
 
 import Foundation
+import CoreVideo
 
 class Transcoder {
     var isCancelled = false
     
     var progressBlock: ((Double) -> Void)?
+    
+    var frameBlock: ((CVPixelBuffer) -> Void)?
     
     var ifmt_ctx: UnsafeMutablePointer<AVFormatContext>?
     
@@ -76,6 +79,15 @@ class Transcoder {
                 // poong - auto: 7:06, 4: 7:02
                 // bbang - auto: 5:53
                 ret = av_dict_set(&options, "threads", "auto", 0)
+                
+                codec_ctx.pointee.get_format = { _, formats in
+                    guard var pointer = formats else { fatalError() }
+                    while pointer.pointee != AVPixelFormat(-1) {
+                        print("format:", pointer.pointee.rawValue)
+                        pointer += 1
+                    }
+                    return formats!.pointee
+                }
                 
                 ret = avcodec_open2(codec_ctx, dec, &options)
                 if ret < 0 {
@@ -399,6 +411,20 @@ class Transcoder {
             
             if got_frame != 0 {
                 frame?.pointee.pts = frame!.pointee.best_effort_timestamp
+                
+                if frameBlock != nil && frame?.pointee.format == AV_PIX_FMT_YUV420P.rawValue,
+                   let frame = frame {
+                    var planeBaseAddress: [UnsafeMutableRawPointer?] = [UnsafeMutableRawPointer(frame.pointee.data.0), UnsafeMutableRawPointer(frame.pointee.data.1), UnsafeMutableRawPointer(frame.pointee.data.2)]
+                    var planeWidth: [Int] = [Int(frame.pointee.width), Int(frame.pointee.width + 1) / 2, Int(frame.pointee.width + 1) / 2]
+                    var planeHeight: [Int] = [Int(frame.pointee.height), Int(frame.pointee.height + 1) / 2, Int(frame.pointee.height + 1) / 2]
+                    var planeBytesPerRow: [Int] = [Int(frame.pointee.linesize.0), Int(frame.pointee.linesize.1), Int(frame.pointee.linesize.2)]
+                    var pixelBuffer: CVPixelBuffer?
+                    let ret = CVPixelBufferCreateWithPlanarBytes(nil, Int(frame.pointee.width), Int(frame.pointee.height), kCVPixelFormatType_420YpCbCr8Planar, nil, 0, 3, &planeBaseAddress, &planeWidth, &planeHeight, &planeBytesPerRow, nil, nil, nil, &pixelBuffer)
+                    print(ret, pixelBuffer ?? "nil")
+                    
+                    pixelBuffer.map { frameBlock?($0) }
+                }
+                
                 ret = filter_encode_write_frame(frame: frame, stream_index: stream_index)
                 av_frame_free(&frame)
                 if ret < 0 {

@@ -20,6 +20,7 @@
 		4CD1DB3F24FCC09E000091B5 /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB3E24FCC09E000091B5 /* libswresample.a */; };
 		4CD1DB4124FCC0A7000091B5 /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB4024FCC0A7000091B5 /* VideoToolbox.framework */; };
 		4CD1DB4324FCC0B7000091B5 /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB4224FCC0B7000091B5 /* libiconv.tbd */; };
+		4CF3881225075B7D0078DB2B /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 4CF3881125075B7D0078DB2B /* Shaders.metal */; };
 		4CFF393A24DA71A900131F73 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFF393924DA71A900131F73 /* DetailView.swift */; };
 		600000000000000000000100 /* libbzip2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000100 /* libbzip2.a */; };
 		600000000000000000000200 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000200 /* libsqlite3.tbd */; };
@@ -106,6 +107,8 @@
 		4CD1DB3E24FCC09E000091B5 /* libswresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswresample.a; path = "../../../../Volumes/SSD - 데이터/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib/libswresample.a"; sourceTree = "<group>"; };
 		4CD1DB4024FCC0A7000091B5 /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
 		4CD1DB4224FCC0B7000091B5 /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
+		4CF3881125075B7D0078DB2B /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
+		4CF3881325075E320078DB2B /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
 		4CFF393924DA71A900131F73 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
 		610000000000000000000100 /* libbzip2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libbzip2.a; path = Support/BZip2/libbzip2.a; sourceTree = "<group>"; };
 		610000000000000000000200 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
@@ -284,6 +287,8 @@
 				4CB0C65E2500C9940009FB1F /* Transcoder.swift */,
 				4CB0C6602500CA340009FB1F /* YoutubeDL.swift */,
 				4CB0C6622500CA800009FB1F /* Downloader.swift */,
+				4CF3881125075B7D0078DB2B /* Shaders.metal */,
+				4CF3881325075E320078DB2B /* ShaderTypes.h */,
 			);
 			path = helloworld;
 			sourceTree = "<group>";
@@ -528,6 +533,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4CF3881225075B7D0078DB2B /* Shaders.metal in Sources */,
 				4CB0C6632500CA800009FB1F /* Downloader.swift in Sources */,
 				C784637A244D57EA007CFD0E /* AppDelegate.swift in Sources */,
 				4CB0C65F2500C9940009FB1F /* Transcoder.swift in Sources */,

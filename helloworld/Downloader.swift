@@ -196,6 +196,13 @@ class Downloader: NSObject {
                     }
                 }
                 
+                self.transcoder?.frameBlock = { pixelBuffer in
+                    self.transcoder?.frameBlock = nil
+                    
+                    DispatchQueue.main.async {
+                        (self.topViewController as? DownloadViewController)?.pixelBuffer = pixelBuffer
+                    }
+                }
                 if ret == nil {
                     requestProgress()
                 }
@@ -273,7 +280,7 @@ extension Downloader: URLSessionDownloadDelegate {
             case .complete:
                 export(kind.url)
             case .videoOnly, .audioOnly:
-                guard transcoder != nil else {
+                guard transcoder == nil else {
                     break
                 }
                 tryMerge()
