@@ -284,6 +284,20 @@ extension Downloader: URLSessionDownloadDelegate {
                scanner.scanInt(&size) {
                 guard end + 1 >= size else {
                     if var request = downloadTask.originalRequest {
+                        do {
+                            let data = try Data(contentsOf: location)
+                            let file = try FileHandle(forUpdating: kind.url)
+                            if #available(iOS 13.4, *) {
+                                try file.seekToEnd()
+                            } else {
+                                // Fallback on earlier versions
+                            }
+                            file.write(data)
+                        }
+                        catch {
+                            print(error)
+                        }
+                        
                         let random = ((end + 1)..<min(end + chunkSize * 95 / 100, size)).randomElement()
                         let newEnd = random ?? (size - 1)
                         request.setValue("bytes=\(end + 1)-\(newEnd)", forHTTPHeaderField: "Range")
@@ -304,7 +318,7 @@ extension Downloader: URLSessionDownloadDelegate {
         }
         
         do {
-            try FileManager.default.moveItem(at: location, to: kind.url)
+//            try FileManager.default.moveItem(at: location, to: kind.url)
             
             switch kind {
             case .complete:
