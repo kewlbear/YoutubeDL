@@ -34,6 +34,8 @@ struct Info: CustomStringConvertible {
     }
 }
 
+let chunkSize = 10_000_000
+
 @dynamicMemberLookup
 struct Format: CustomStringConvertible {
     let format: [String: PythonObject]
@@ -52,10 +54,18 @@ struct Format: CustomStringConvertible {
         for (field, value) in httpHeaders {
             request.addValue(value, forHTTPHeaderField: field)
         }
+        
+        // https://github.com/ytdl-org/youtube-dl/issues/15271#issuecomment-362834889
+        let random = (0...(chunkSize * 95 / 100)).randomElement()
+        let end = random ?? (chunkSize - 1)
+        request.setValue("bytes=0-\(end)", forHTTPHeaderField: "Range")
+
         return request
     }
     
     var height: Int? { format["height"].flatMap { Int($0) } }
+    
+    var filesize: Int? { format["filesize"].flatMap { Int($0) } }
     
     var isAudioOnly: Bool { self.vcodec == "none" }
     

@@ -260,7 +260,39 @@ extension Downloader: URLSessionDownloadDelegate {
     }
     
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
-        print(#function, session, downloadTask, location)
+        var contentRange: String?
+        if #available(iOS 13.0, *) {
+            contentRange = (downloadTask.response as? HTTPURLResponse)?.value(forHTTPHeaderField: "Content-Range")
+        } else {
+            // Fallback on earlier versions
+        }
+        print(#function, session, contentRange ?? "no Content-Range?", location)
+        
+        let kind = Kind(rawValue: downloadTask.taskDescription ?? "") ?? .complete
+
+        if let contentRange = contentRange {
+            let scanner = Scanner(string: contentRange)
+            var prefix: NSString?
+            var start = -1
+            var end = -1
+            var size = -1
+            if scanner.scanUpToCharacters(from: .decimalDigits, into: &prefix),
+               scanner.scanInt(&start),
+               scanner.scanString("-", into: nil),
+               scanner.scanInt(&end),
+               scanner.scanString("/", into: nil),
+               scanner.scanInt(&size) {
+                guard end + 1 >= size else {
+                    if var request = downloadTask.originalRequest {
+                        let random = ((end + 1)..<min(end + chunkSize * 95 / 100, size)).randomElement()
+                        let newEnd = random ?? (size - 1)
+                        request.setValue("bytes=\(end + 1)-\(newEnd)", forHTTPHeaderField: "Range")
+                        download(request: request, kind: kind).resume()
+                    }
+                    return
+                }
+            }
+        }
         
         DispatchQueue.main.async {
             self.topViewController?.navigationItem.prompt = "Download finished"
@@ -272,8 +304,6 @@ extension Downloader: URLSessionDownloadDelegate {
         }
         
         do {
-            let kind = Kind(rawValue: downloadTask.taskDescription ?? "") ?? .complete
-            
             try FileManager.default.moveItem(at: location, to: kind.url)
             
             switch kind {
