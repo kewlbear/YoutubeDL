@@ -528,10 +528,10 @@ extension DownloadViewController {
         {
             if let best = _best {
                 notify(body: #""\#(info?.title ?? "No title?")" 다운로드 시작"#)
-                download(format: best, start: true)
+                download(format: best, start: true, faster: false)
             } else if let bestVideo = _bestVideo, let bestAudio = _bestAudio {
-                download(format: bestVideo, start: true)
-                download(format: bestAudio, start: false)
+                download(format: bestVideo, start: true, faster: true)
+                download(format: bestAudio, start: false, faster: true)
             } else {
                 DispatchQueue.main.async {
                     self.performSegue(withIdentifier: "formats", sender: nil)
@@ -543,25 +543,45 @@ extension DownloadViewController {
         DispatchQueue.main.async {
             let alert = UIAlertController(title: "다운로드 포맷 선택", message: "MP4 이외의 비디오는 다운로드 후 변환이 필요합니다.", preferredStyle: .actionSheet)
             alert.addAction(UIAlertAction(title: "Video+Audio.mp4 (\(bestHeight)p)", style: .default, handler: { _ in
-                self.download(format: best, start: true)
+                self.download(format: best, start: true, faster: false)
             }))
             alert.addAction(UIAlertAction(title: "Video.\(bestVideo.ext ?? "?") + Audio.m4a (\(bestVideoHeight)p)", style: .default, handler: { _ in
-                self.download(format: bestVideo, start: true)
-                self.download(format: bestAudio, start: false)
+                self.download(format: bestVideo, start: true, faster: true)
+                self.download(format: bestAudio, start: false, faster: true)
             }))
             alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
             self.present(alert, animated: true, completion: nil)
         }
     }
     
-    func download(format: Format, start: Bool) {
-        guard let request = format.urlRequest else { fatalError() }
-        let task = Downloader.shared.download(request: request, kind: format.isVideoOnly
-                                                ? (format.ext == "mp4" ? .videoOnly : .otherVideo)
-                                                : (format.isAudioOnly ? .audioOnly : .complete))
+    func download(format: Format, start: Bool, faster: Bool) {
+        let kind: Downloader.Kind = format.isVideoOnly
+            ? (format.ext == "mp4" ? .videoOnly : .otherVideo)
+            : (format.isAudioOnly ? .audioOnly : .complete)
+
+        var requests: [URLRequest] = []
+        
+        if faster, let size = format.filesize {
+            if !FileManager.default.createFile(atPath: kind.url.part.path, contents: Data(), attributes: nil) {
+                print(#function, "couldn't create \(kind.url.part.lastPathComponent)")
+            }
+
+            var end: Int64 = -1
+            while end < size - 1 {
+                guard var request = format.urlRequest else { fatalError() }
+                // https://github.com/ytdl-org/youtube-dl/issues/15271#issuecomment-362834889
+                end = request.setRange(start: end + 1, fullSize: size)
+                requests.append(request)
+            }
+        } else {
+            guard let request = format.urlRequest else { fatalError() }
+            requests.append(request)
+        }
+
+        let tasks = requests.map { Downloader.shared.download(request: $0, kind: kind) }
         if start {
             Downloader.shared.t0 = ProcessInfo.processInfo.systemUptime
-            task.resume()
+            tasks.first?.resume()
         }
     }
     
@@ -586,5 +606,11 @@ extension DownloadViewController {
             
             self.check(info: self.info)
         }
+    }
+}
+
+extension URL {
+    var part: URL {
+        appendingPathExtension("part")
     }
 }

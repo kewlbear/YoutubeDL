@@ -84,12 +84,15 @@ class Downloader: NSObject {
             print(#function, "removed", kind.url.lastPathComponent)
         }
         catch {
-            print(#function, error)
+            let error = error as NSError
+            if error.domain != NSCocoaErrorDomain || error.code != CocoaError.fileNoSuchFile.rawValue {
+                print(#function, error)
+            }
         }
 
         let task = session.downloadTask(with: request)
         task.taskDescription = kind.rawValue
-        print(#function, request, trace)
+//        print(#function, request, trace)
         task.priority = URLSessionTask.highPriority
         return task
     }
@@ -147,6 +150,11 @@ class Downloader: NSObject {
             print(#function, "took", self.dateComponentsFormatter.string(from: ProcessInfo.processInfo.systemUptime - t0) ?? "?")
             if session.status == .completed {
                 self.export(outputURL)
+            } else {
+                print(#function, session.error ?? "no error?")
+                DispatchQueue.main.async {
+                    self.topViewController?.navigationItem.title = "Merge failed: \(session.error?.localizedDescription ?? "no error?")"
+                }
             }
         }
     }
@@ -235,7 +243,9 @@ extension Downloader: URLSessionDelegate {
 
 extension Downloader: URLSessionTaskDelegate {
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        print(#function, session, task, error ?? "no error")
+        if let error = error {
+            print(#function, session, task, error)
+        }
     }
 }
 
@@ -259,66 +269,59 @@ extension Downloader: URLSessionDownloadDelegate {
         }
     }
     
-    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
-        var contentRange: String?
+    fileprivate func appendChunk(_ location: URL, to url: URL, offset: UInt64) throws {
+        let data = try Data(contentsOf: location, options: .alwaysMapped)
+
+        let file = try FileHandle(forWritingTo: url)
         if #available(iOS 13.0, *) {
-            contentRange = (downloadTask.response as? HTTPURLResponse)?.value(forHTTPHeaderField: "Content-Range")
+            try file.seek(toOffset: offset)
         } else {
-            // Fallback on earlier versions
+            file.seek(toFileOffset: offset)
         }
-        print(#function, session, contentRange ?? "no Content-Range?", location)
+        file.write(data)
+//        if #available(iOS 13.0, *) {
+//            try file.close()
+//        } else {
+//            // Fallback on earlier versions
+//        }
+    }
+    
+    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
+        let (_, range, size) = (downloadTask.response as? HTTPURLResponse)?.contentRange
+            ?? (nil, -1 ..< -1, -1)
+//        print(#function, session, location)
         
         let kind = Kind(rawValue: downloadTask.taskDescription ?? "") ?? .complete
 
-        if let contentRange = contentRange {
-            let scanner = Scanner(string: contentRange)
-            var prefix: NSString?
-            var start = -1
-            var end = -1
-            var size = -1
-            if scanner.scanUpToCharacters(from: .decimalDigits, into: &prefix),
-               scanner.scanInt(&start),
-               scanner.scanString("-", into: nil),
-               scanner.scanInt(&end),
-               scanner.scanString("/", into: nil),
-               scanner.scanInt(&size) {
-                guard end + 1 >= size else {
-                    if var request = downloadTask.originalRequest {
-                        do {
-                            let data = try Data(contentsOf: location)
-                            let file = try FileHandle(forUpdating: kind.url)
-                            if #available(iOS 13.4, *) {
-                                try file.seekToEnd()
-                            } else {
-                                // Fallback on earlier versions
-                            }
-                            file.write(data)
-                        }
-                        catch {
-                            print(error)
-                        }
-                        
-                        let random = ((end + 1)..<min(end + chunkSize * 95 / 100, size)).randomElement()
-                        let newEnd = random ?? (size - 1)
-                        request.setValue("bytes=\(end + 1)-\(newEnd)", forHTTPHeaderField: "Range")
-                        download(request: request, kind: kind).resume()
+        do {
+            if range.isEmpty {
+                try FileManager.default.moveItem(at: location, to: kind.url)
+            } else {
+                let part = kind.url.part
+                try appendChunk(location, to: part, offset: UInt64(range.lowerBound))
+                
+                guard range.upperBound >= size else {
+                    session.getTasksWithCompletionHandler { (_, _, tasks) in
+                        tasks.first {
+                            $0.originalRequest?.url == downloadTask.originalRequest?.url
+                                && ($0.originalRequest?.value(forHTTPHeaderField: "Range") ?? "")
+                                .hasPrefix("bytes=\(range.upperBound)-") }?
+                            .resume()
                     }
                     return
                 }
+                
+                try FileManager.default.moveItem(at: part, to: kind.url)
             }
-        }
-        
-        DispatchQueue.main.async {
-            self.topViewController?.navigationItem.prompt = "Download finished"
-        }
-        
-        session.getTasksWithCompletionHandler { (_, _, tasks) in
-            print(#function, tasks)
-            tasks.first { $0.state == .suspended }?.resume()
-        }
-        
-        do {
-//            try FileManager.default.moveItem(at: location, to: kind.url)
+            
+            DispatchQueue.main.async {
+                self.topViewController?.navigationItem.prompt = "Download finished"
+            }
+            
+            session.getTasksWithCompletionHandler { (_, _, tasks) in
+                print(#function, tasks)
+                tasks.first { $0.state == .suspended }?.resume()
+            }
             
             switch kind {
             case .complete:
@@ -347,8 +350,10 @@ extension Downloader: URLSessionDownloadDelegate {
         self.t = t
         
         let elapsed = t - t0
-        let bytesPerSec = Double(totalBytesWritten) / elapsed
-        let remain = Double(totalBytesExpectedToWrite - totalBytesWritten) / bytesPerSec
+        let (_, range, size) = (downloadTask.response as? HTTPURLResponse)?.contentRange ?? (nil, 0..<0, totalBytesExpectedToWrite)
+        let count = range.lowerBound + totalBytesWritten
+        let bytesPerSec = Double(count) / elapsed
+        let remain = Double(size - count) / bytesPerSec
         
 //        print(
 ////            #function,
@@ -361,8 +366,46 @@ extension Downloader: URLSessionDownloadDelegate {
 //            dateComponentsFormatter.string(from: elapsed) ?? "?", "elapsed",
 //            dateComponentsFormatter.string(from: remain) ?? "?", "remain"
 //            )
+        let percent = percentFormatter.string(from: NSNumber(value: Double(count) / Double(size)))
         DispatchQueue.main.async {
-            self.topViewController?.navigationItem.prompt = "\(self.percentFormatter.string(from: NSNumber(value: Double(totalBytesWritten) / Double(totalBytesExpectedToWrite))) ?? "?%") of \(ByteCountFormatter.string(fromByteCount: totalBytesExpectedToWrite, countStyle: .file)) at \(ByteCountFormatter.string(fromByteCount: Int64(bytesPerSec), countStyle: .file))/s ETA \(self.dateComponentsFormatter.string(from: remain) ?? "?") \(downloadTask.taskDescription ?? "no description?")"
+            self.topViewController?.navigationItem.prompt = "\(percent ?? "?%") of \(ByteCountFormatter.string(fromByteCount: size, countStyle: .file)) at \(ByteCountFormatter.string(fromByteCount: Int64(bytesPerSec), countStyle: .file))/s ETA \(self.dateComponentsFormatter.string(from: remain) ?? "?") \(downloadTask.taskDescription ?? "no description?")"
         }
+    }
+}
+
+extension HTTPURLResponse {
+    var contentRange: (String?, Range<Int64>, Int64)? {
+        var contentRange: String?
+        if #available(iOS 13.0, *) {
+            contentRange = value(forHTTPHeaderField: "Content-Range")
+        } else {
+            // Fallback on earlier versions
+            assertionFailure()
+            return nil
+        }
+        print(#function, contentRange ?? "no Content-Range?")
+        
+        guard let string = contentRange else { return nil }
+        let scanner = Scanner(string: string)
+        var prefix: NSString?
+        var start: Int64 = -1
+        var end: Int64 = -1
+        var size: Int64 = -1
+        guard scanner.scanUpToCharacters(from: .decimalDigits, into: &prefix),
+              scanner.scanInt64(&start),
+              scanner.scanString("-", into: nil),
+              scanner.scanInt64(&end),
+              scanner.scanString("/", into: nil),
+              scanner.scanInt64(&size) else { return nil }
+        return (prefix as String?, Range(start...end), size)
+    }
+}
+
+extension URLRequest {
+    mutating func setRange(start: Int64, fullSize: Int64) -> Int64 {
+        let random = (1..<(chunkSize * 95 / 100)).randomElement().map { start + $0 }
+        let end = random ?? (fullSize - 1)
+        setValue("bytes=\(start)-\(end)", forHTTPHeaderField: "Range")
+        return end
     }
 }
