@@ -77,11 +77,11 @@ class Downloader: NSObject {
         session = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
         print(session, "created")
     }
-    
-    func download(request: URLRequest, kind: Kind) -> URLSessionDownloadTask {
+
+    func removeItem(at url: URL) {
         do {
-            try FileManager.default.removeItem(at: kind.url)
-            print(#function, "removed", kind.url.lastPathComponent)
+            try FileManager.default.removeItem(at: url)
+            print(#function, "removed", url.lastPathComponent)
         }
         catch {
             let error = error as NSError
@@ -89,6 +89,10 @@ class Downloader: NSObject {
                 print(#function, error)
             }
         }
+    }
+    
+    func download(request: URLRequest, kind: Kind) -> URLSessionDownloadTask {
+        removeItem(at: kind.url)
 
         let task = session.downloadTask(with: request)
         task.taskDescription = kind.rawValue
@@ -171,63 +175,67 @@ class Downloader: NSObject {
             self.topViewController?.present(alert, animated: true, completion: nil)
         }
         
-        do {
-            try FileManager.default.removeItem(at: Kind.videoOnly.url)
-        }
-        catch {
-            print(#function, error)
-        }
-        
-        DispatchQueue.main.async {
-            self.topViewController?.navigationItem.title = "Transcoding..."
-        }
-        
-        let t0 = ProcessInfo.processInfo.systemUptime
-        
-        transcoder = Transcoder()
-        var ret: Int32?
-
-        func requestProgress() {
-            DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
-                self.transcoder?.progressBlock = { progress in
-                    self.transcoder?.progressBlock = nil
-                    
-                    let elapsed = ProcessInfo.processInfo.systemUptime - t0
-                    let speed = progress / elapsed
-                    let ETA = (1 - progress) / speed
-                    
-                    guard ETA.isFinite else { return }
-                    
-                    DispatchQueue.main.async {
-                        self.topViewController?.navigationItem.title =
-                            "Transcoding \(self.percentFormatter.string(from: NSNumber(value: progress)) ?? "?") ETA \(self.dateComponentsFormatter.string(from: ETA) ?? "?")"
-                    }
-                }
-                
-                self.transcoder?.frameBlock = { pixelBuffer in
-                    self.transcoder?.frameBlock = nil
-                    
-                    DispatchQueue.main.async {
-                        (self.topViewController as? DownloadViewController)?.pixelBuffer = pixelBuffer
-                    }
-                }
-                if ret == nil {
-                    requestProgress()
-                }
-            }
-        }
-        
-        requestProgress()
-        
-        ret = transcoder?.transcode(from: Kind.otherVideo.url, to: Kind.videoOnly.url)
-        
-        transcoder = nil
-        
-        print(#function, ret ?? "nil?", "took", dateComponentsFormatter.string(from: ProcessInfo.processInfo.systemUptime - t0) ?? "?")
-        
-        notify(body: "트랜스코딩 완료")
-        
+        assemble(to: Kind.videoOnly.url, size: .max)
+        assemble(to: Kind.audioOnly.url, size: .max)
         tryMerge()
+
+//        do {
+//            try FileManager.default.removeItem(at: Kind.videoOnly.url)
+//        }
+//        catch {
+//            print(#function, error)
+//        }
+//
+//        DispatchQueue.main.async {
+//            self.topViewController?.navigationItem.title = "Transcoding..."
+//        }
+//
+//        let t0 = ProcessInfo.processInfo.systemUptime
+//
+//        transcoder = Transcoder()
+//        var ret: Int32?
+//
+//        func requestProgress() {
+//            DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
+//                self.transcoder?.progressBlock = { progress in
+//                    self.transcoder?.progressBlock = nil
+//
+//                    let elapsed = ProcessInfo.processInfo.systemUptime - t0
+//                    let speed = progress / elapsed
+//                    let ETA = (1 - progress) / speed
+//
+//                    guard ETA.isFinite else { return }
+//
+//                    DispatchQueue.main.async {
+//                        self.topViewController?.navigationItem.title =
+//                            "Transcoding \(self.percentFormatter.string(from: NSNumber(value: progress)) ?? "?") ETA \(self.dateComponentsFormatter.string(from: ETA) ?? "?")"
+//                    }
+//                }
+//
+//                self.transcoder?.frameBlock = { pixelBuffer in
+//                    self.transcoder?.frameBlock = nil
+//
+//                    DispatchQueue.main.async {
+//                        (self.topViewController as? DownloadViewController)?.pixelBuffer = pixelBuffer
+//                    }
+//                }
+//                if ret == nil {
+//                    requestProgress()
+//                }
+//            }
+//        }
+//
+//        requestProgress()
+//
+//        ret = transcoder?.transcode(from: Kind.otherVideo.url, to: Kind.videoOnly.url)
+//
+//        transcoder = nil
+//
+//        print(#function, ret ?? "nil?", "took", dateComponentsFormatter.string(from: ProcessInfo.processInfo.systemUptime - t0) ?? "?")
+//
+//        notify(body: "트랜스코딩 완료")
+//
+//        tryMerge()
     }
 }
 
@@ -268,22 +276,35 @@ extension Downloader: URLSessionDownloadDelegate {
             }
         }
     }
-    
-    fileprivate func appendChunk(_ location: URL, to url: URL, offset: UInt64) throws {
-        let data = try Data(contentsOf: location, options: .alwaysMapped)
-
-        let file = try FileHandle(forWritingTo: url)
-        if #available(iOS 13.0, *) {
-            try file.seek(toOffset: offset)
-        } else {
-            file.seek(toFileOffset: offset)
+        
+    func assemble(to url: URL, size: UInt64) {
+        FileManager.default.createFile(atPath: url.path, contents: nil, attributes: nil)
+        
+        do {
+            let file = try FileHandle(forWritingTo: url)
+            
+            var offset: UInt64 = 0
+            
+            repeat {
+                let part = url.appendingPathExtension("part-\(offset)")
+                let data = try Data(contentsOf: part, options: .alwaysMapped)
+                
+                if #available(iOS 13.0, *) {
+                    try file.seek(toOffset: offset)
+                } else {
+                    file.seek(toFileOffset: offset)
+                }
+                
+                file.write(data)
+                
+                removeItem(at: part)
+                
+                offset += UInt64(data.count)
+            } while offset < size - 1
         }
-        file.write(data)
-//        if #available(iOS 13.0, *) {
-//            try file.close()
-//        } else {
-//            // Fallback on earlier versions
-//        }
+        catch {
+            print(#function, error)
+        }
     }
     
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
@@ -297,9 +318,12 @@ extension Downloader: URLSessionDownloadDelegate {
             if range.isEmpty {
                 try FileManager.default.moveItem(at: location, to: kind.url)
             } else {
-                let part = kind.url.part
-                try appendChunk(location, to: part, offset: UInt64(range.lowerBound))
-                
+//                let part = kind.url.part
+//                try appendChunk(location, to: part, offset: UInt64(range.lowerBound))
+                let part = kind.url.appendingPathExtension("part-\(range.lowerBound)")
+                removeItem(at: part)
+                try FileManager.default.moveItem(at: location, to: part)
+
                 guard range.upperBound >= size else {
                     session.getTasksWithCompletionHandler { (_, _, tasks) in
                         tasks.first {
@@ -311,7 +335,8 @@ extension Downloader: URLSessionDownloadDelegate {
                     return
                 }
                 
-                try FileManager.default.moveItem(at: part, to: kind.url)
+//                try FileManager.default.moveItem(at: part, to: kind.url)
+//                assemble(to: kind.url, size: UInt64(size))
             }
             
             DispatchQueue.main.async {
@@ -321,6 +346,10 @@ extension Downloader: URLSessionDownloadDelegate {
             session.getTasksWithCompletionHandler { (_, _, tasks) in
                 print(#function, tasks)
                 tasks.first { $0.state == .suspended }?.resume()
+                
+                if tasks.isEmpty {
+                    self.transcode()
+                }
             }
             
             switch kind {
