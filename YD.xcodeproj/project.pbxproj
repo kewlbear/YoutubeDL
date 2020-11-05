@@ -793,7 +793,7 @@
 					"\"$(PROJECT_DIR)/Support/OpenSSL/Headers\"",
 					"\"$(PROJECT_DIR)/Support/XZ/Headers\"",
 					"\"$(PROJECT_DIR)/Support/Python/Headers\"",
-					"\"/Volumes/Dark SSD/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/include\"",
+					"\"/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/include\"",
 				);
 				INFOPLIST_FILE = "helloworld/helloworld-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -806,7 +806,7 @@
 					"$(PROJECT_DIR)/Support/OpenSSL",
 					"$(PROJECT_DIR)/Support/XZ",
 					"$(PROJECT_DIR)/Support/BZip2",
-					"\"/Volumes/Dark SSD/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib\"",
+					"\"/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YD;
 				PRODUCT_NAME = Y;
@@ -842,7 +842,7 @@
 					"\"$(PROJECT_DIR)/Support/OpenSSL/Headers\"",
 					"\"$(PROJECT_DIR)/Support/XZ/Headers\"",
 					"\"$(PROJECT_DIR)/Support/Python/Headers\"",
-					"\"/Volumes/Dark SSD/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/include\"",
+					"\"/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/include\"",
 				);
 				INFOPLIST_FILE = "helloworld/helloworld-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (

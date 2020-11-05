@@ -4088,12 +4088,12 @@ def js_to_json(code):
                 '\\\n': '',
                 '\\x': '\\u00',
             }.get(m.group(0), m.group(0)), v[1:-1])
-
-        for regex, base in INTEGER_TABLE:
-            im = re.match(regex, v)
-            if im:
-                i = int(im.group(1), base)
-                return '"%d":' % i if v.endswith(':') else '%d' % i
+        else:
+            for regex, base in INTEGER_TABLE:
+                im = re.match(regex, v)
+                if im:
+                    i = int(im.group(1), base)
+                    return '"%d":' % i if v.endswith(':') else '%d' % i
 
         return '"%s"' % v
 
@@ -4198,6 +4198,7 @@ def mimetype2ext(mt):
         'vnd.ms-sstr+xml': 'ism',
         'quicktime': 'mov',
         'mp2t': 'ts',
+        'x-wav': 'wav',
     }.get(res, res)
 
 

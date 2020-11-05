@@ -1264,7 +1264,23 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             'params': {
                 'skip_download': True,
             },
-        }
+        },
+        {
+            # empty description results in an empty string
+            'url': 'https://www.youtube.com/watch?v=x41yOUIvK2k',
+            'info_dict': {
+                'id': 'x41yOUIvK2k',
+                'ext': 'mp4',
+                'title': 'IMG 3456',
+                'description': '',
+                'upload_date': '20170613',
+                'uploader_id': 'ElevageOrVert',
+                'uploader': 'ElevageOrVert',
+            },
+            'params': {
+                'skip_download': True,
+            },
+        },
     ]
 
     def __init__(self, *args, **kwargs):
@@ -1825,7 +1841,8 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         # Get video info
         video_info = {}
         embed_webpage = None
-        if re.search(r'player-age-gate-content">', video_webpage) is not None:
+        if (self._og_search_property('restrictions:age', video_webpage, default=None) == '18+'
+                or re.search(r'player-age-gate-content">', video_webpage) is not None):
             age_gate = True
             # We simulate the access to the video from www.youtube.com/v/{video_id}
             # this can be viewed without login into Youtube
@@ -1930,7 +1947,9 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             ''', replace_url, video_description)
             video_description = clean_html(video_description)
         else:
-            video_description = video_details.get('shortDescription') or self._html_search_meta('description', video_webpage)
+            video_description = video_details.get('shortDescription')
+            if video_description is None:
+                video_description = self._html_search_meta('description', video_webpage)
 
         if not smuggled_data.get('force_singlefeed', False):
             if not self._downloader.params.get('noplaylist'):
@@ -2067,7 +2086,10 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
 
                 if cipher:
                     if 's' in url_data or self._downloader.params.get('youtube_include_dash_manifest', True):
-                        ASSETS_RE = r'"assets":.+?"js":\s*("[^"]+")'
+                        ASSETS_RE = (
+                            r'<script[^>]+\bsrc=("[^"]+")[^>]+\bname=["\']player_ias/base',
+                            r'"jsUrl"\s*:\s*("[^"]+")',
+                            r'"assets":.+?"js":\s*("[^"]+")')
                         jsplayer_url_json = self._search_regex(
                             ASSETS_RE,
                             embed_webpage if age_gate else video_webpage,
@@ -3008,7 +3030,7 @@ class YoutubeChannelIE(YoutubePlaylistBaseInfoExtractor):
 
 class YoutubeUserIE(YoutubeChannelIE):
     IE_DESC = 'YouTube.com user videos (URL or "ytuser" keyword)'
-    _VALID_URL = r'(?:(?:https?://(?:\w+\.)?youtube\.com/(?:(?P<user>user|c)/)?(?!(?:attribution_link|watch|results|shared)(?:$|[^a-z_A-Z0-9-])))|ytuser:)(?!feed/)(?P<id>[A-Za-z0-9_-]+)'
+    _VALID_URL = r'(?:(?:https?://(?:\w+\.)?youtube\.com/(?:(?P<user>user|c)/)?(?!(?:attribution_link|watch|results|shared)(?:$|[^a-z_A-Z0-9%-])))|ytuser:)(?!feed/)(?P<id>[A-Za-z0-9_%-]+)'
     _TEMPLATE_URL = 'https://www.youtube.com/%s/%s/videos'
     IE_NAME = 'youtube:user'
 
@@ -3037,6 +3059,9 @@ class YoutubeUserIE(YoutubeChannelIE):
         'only_matching': True,
     }, {
         'url': 'https://www.youtube.com/c/gametrailers',
+        'only_matching': True,
+    }, {
+        'url': 'https://www.youtube.com/c/Pawe%C5%82Zadro%C5%BCniak',
         'only_matching': True,
     }, {
         'url': 'https://www.youtube.com/gametrailers',
@@ -3159,54 +3184,94 @@ class YoutubeSearchIE(SearchInfoExtractor, YoutubeSearchBaseInfoExtractor):
     _MAX_RESULTS = float('inf')
     IE_NAME = 'youtube:search'
     _SEARCH_KEY = 'ytsearch'
-    _EXTRA_QUERY_ARGS = {}
+    _SEARCH_PARAMS = None
     _TESTS = []
+
+    def _entries(self, query, n):
+        data = {
+            'context': {
+                'client': {
+                    'clientName': 'WEB',
+                    'clientVersion': '2.20201021.03.00',
+                }
+            },
+            'query': query,
+        }
+        if self._SEARCH_PARAMS:
+            data['params'] = self._SEARCH_PARAMS
+        total = 0
+        for page_num in itertools.count(1):
+            search = self._download_json(
+                'https://www.youtube.com/youtubei/v1/search?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
+                video_id='query "%s"' % query,
+                note='Downloading page %s' % page_num,
+                errnote='Unable to download API page', fatal=False,
+                data=json.dumps(data).encode('utf8'),
+                headers={'content-type': 'application/json'})
+            if not search:
+                break
+            slr_contents = try_get(
+                search,
+                (lambda x: x['contents']['twoColumnSearchResultsRenderer']['primaryContents']['sectionListRenderer']['contents'],
+                 lambda x: x['onResponseReceivedCommands'][0]['appendContinuationItemsAction']['continuationItems']),
+                list)
+            if not slr_contents:
+                break
+            isr_contents = try_get(
+                slr_contents,
+                lambda x: x[0]['itemSectionRenderer']['contents'],
+                list)
+            if not isr_contents:
+                break
+            for content in isr_contents:
+                if not isinstance(content, dict):
+                    continue
+                video = content.get('videoRenderer')
+                if not isinstance(video, dict):
+                    continue
+                video_id = video.get('videoId')
+                if not video_id:
+                    continue
+                title = try_get(video, lambda x: x['title']['runs'][0]['text'], compat_str)
+                description = try_get(video, lambda x: x['descriptionSnippet']['runs'][0]['text'], compat_str)
+                duration = parse_duration(try_get(video, lambda x: x['lengthText']['simpleText'], compat_str))
+                view_count_text = try_get(video, lambda x: x['viewCountText']['simpleText'], compat_str) or ''
+                view_count = int_or_none(self._search_regex(
+                    r'^(\d+)', re.sub(r'\s', '', view_count_text),
+                    'view count', default=None))
+                uploader = try_get(video, lambda x: x['ownerText']['runs'][0]['text'], compat_str)
+                total += 1
+                yield {
+                    '_type': 'url_transparent',
+                    'ie_key': YoutubeIE.ie_key(),
+                    'id': video_id,
+                    'url': video_id,
+                    'title': title,
+                    'description': description,
+                    'duration': duration,
+                    'view_count': view_count,
+                    'uploader': uploader,
+                }
+                if total == n:
+                    return
+            token = try_get(
+                slr_contents,
+                lambda x: x[1]['continuationItemRenderer']['continuationEndpoint']['continuationCommand']['token'],
+                compat_str)
+            if not token:
+                break
+            data['continuation'] = token
 
     def _get_n_results(self, query, n):
         """Get a specified number of results for a query"""
-
-        videos = []
-        limit = n
-
-        url_query = {
-            'search_query': query.encode('utf-8'),
-        }
-        url_query.update(self._EXTRA_QUERY_ARGS)
-        result_url = 'https://www.youtube.com/results?' + compat_urllib_parse_urlencode(url_query)
-
-        for pagenum in itertools.count(1):
-            data = self._download_json(
-                result_url, video_id='query "%s"' % query,
-                note='Downloading page %s' % pagenum,
-                errnote='Unable to download API page',
-                query={'spf': 'navigate'})
-            html_content = data[1]['body']['content']
-
-            if 'class="search-message' in html_content:
-                raise ExtractorError(
-                    '[youtube] No video results', expected=True)
-
-            new_videos = list(self._process_page(html_content))
-            videos += new_videos
-            if not new_videos or len(videos) > limit:
-                break
-            next_link = self._html_search_regex(
-                r'href="(/results\?[^"]*\bsp=[^"]+)"[^>]*>\s*<span[^>]+class="[^"]*\byt-uix-button-content\b[^"]*"[^>]*>Next',
-                html_content, 'next link', default=None)
-            if next_link is None:
-                break
-            result_url = compat_urlparse.urljoin('https://www.youtube.com/', next_link)
-
-        if len(videos) > n:
-            videos = videos[:n]
-        return self.playlist_result(videos, query)
+        return self.playlist_result(self._entries(query, n), query)
 
 
 class YoutubeSearchDateIE(YoutubeSearchIE):
     IE_NAME = YoutubeSearchIE.IE_NAME + ':date'
     _SEARCH_KEY = 'ytsearchdate'
     IE_DESC = 'YouTube.com searches, newest videos first'
-    _EXTRA_QUERY_ARGS = {'search_sort': 'video_date_uploaded'}
+    _SEARCH_PARAMS = 'CAI%3D'
 
 
 class YoutubeSearchURLIE(YoutubeSearchBaseInfoExtractor):
