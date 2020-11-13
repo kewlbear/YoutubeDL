@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import YoutubeDL
 
 class FormatTableViewController: UITableViewController {
 

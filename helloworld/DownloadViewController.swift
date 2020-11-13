@@ -12,6 +12,7 @@ import AVKit
 import MetalKit
 import MetalPerformanceShaders
 import CoreVideo
+import YoutubeDL
 
 class DownloadViewController: UIViewController {
 
@@ -598,7 +599,7 @@ extension DownloadViewController {
         notify(body: "영상 정보 받는중...")
         
         DispatchQueue.global(qos: .userInitiated).async {
-            (_, self.info) = YoutubeDL().extractInfo(url: url)
+            (_, self.info) = try! YoutubeDL().extractInfo(url: url)
             
             DispatchQueue.main.async {
                 self.navigationItem.title = self.info?.title

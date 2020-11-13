@@ -7,10 +7,10 @@
 //
 
 import UIKit
-import Python
 import Intents
 import SwiftUI
 import VideoToolbox
+import YoutubeDL
 
 let trace = "trace"
 
@@ -24,7 +24,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         return navigationController?.topViewController as? DownloadViewController
     }
     
-    let youtubeDL = YoutubeDL()
+    let youtubeDL = try! YoutubeDL()
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
 

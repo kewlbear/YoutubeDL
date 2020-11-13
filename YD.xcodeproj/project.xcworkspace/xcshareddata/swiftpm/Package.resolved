@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "YoutubeDL-iOS",
+        "repositoryURL": "https://github.com/kewlbear/YoutubeDL-iOS.git",
+        "state": {
+          "branch": "main",
+          "revision": "bab40ffe2cc76a620c0775b28043553b3cb46f3f",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}

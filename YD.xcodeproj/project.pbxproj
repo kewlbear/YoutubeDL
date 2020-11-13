@@ -3,31 +3,19 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		4C0A8EF124D7D0F40071AE7D /* YTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A8EF024D7D0F40071AE7D /* YTests.swift */; };
-		4CB0C65F2500C9940009FB1F /* Transcoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB0C65E2500C9940009FB1F /* Transcoder.swift */; };
-		4CB0C6612500CA340009FB1F /* YoutubeDL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB0C6602500CA340009FB1F /* YoutubeDL.swift */; };
-		4CB0C6632500CA800009FB1F /* Downloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB0C6622500CA800009FB1F /* Downloader.swift */; };
-		4CBA67B7250225F600DF6C24 /* libavfilter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CBA67B6250225F600DF6C24 /* libavfilter.a */; };
-		4CBA67B92502266B00DF6C24 /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CBA67B82502266B00DF6C24 /* libswscale.a */; };
+		4C479257255E62B900F7EDE0 /* YoutubeDL in Frameworks */ = {isa = PBXBuildFile; productRef = 4C479256255E62B900F7EDE0 /* YoutubeDL */; };
 		4CD1DB3724FC9737000091B5 /* FormatTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD1DB3624FC9737000091B5 /* FormatTableViewController.swift */; };
-		4CD1DB3A24FCBF50000091B5 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB3824FCBF50000091B5 /* libavcodec.a */; };
-		4CD1DB3B24FCBF50000091B5 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB3924FCBF50000091B5 /* libavformat.a */; };
-		4CD1DB3D24FCC061000091B5 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB3C24FCC061000091B5 /* libavutil.a */; };
-		4CD1DB3F24FCC09E000091B5 /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB3E24FCC09E000091B5 /* libswresample.a */; };
 		4CD1DB4124FCC0A7000091B5 /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB4024FCC0A7000091B5 /* VideoToolbox.framework */; };
 		4CD1DB4324FCC0B7000091B5 /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB4224FCC0B7000091B5 /* libiconv.tbd */; };
 		4CF3881225075B7D0078DB2B /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 4CF3881125075B7D0078DB2B /* Shaders.metal */; };
 		4CFF393A24DA71A900131F73 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFF393924DA71A900131F73 /* DetailView.swift */; };
-		600000000000000000000100 /* libbzip2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000100 /* libbzip2.a */; };
 		600000000000000000000200 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000200 /* libsqlite3.tbd */; };
-		600000000000000000000300 /* libxz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000300 /* libxz.a */; };
 		600000000000000000000400 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000400 /* libz.tbd */; };
-		600000000000000000000500 /* libOpenSSL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000500 /* libOpenSSL.a */; };
-		600000000000000000000600 /* libPython.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000600 /* libPython.a */; };
 		600000000000000000000700 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000700 /* CoreFoundation.framework */; };
 		600000000000000000000800 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000800 /* CoreGraphics.framework */; };
 		600000000000000000000900 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000900 /* Foundation.framework */; };
@@ -46,8 +34,6 @@
 		C76812A8241B73E200EA5FD8 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C76812A6241B73E200EA5FD8 /* MainInterface.storyboard */; };
 		C76812AC241B73E200EA5FD8 /* IntentsUIExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C76812A0241B73E200EA5FD8 /* IntentsUIExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		C76812AF241B73E200EA5FD8 /* IntentsExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C7681297241B73E200EA5FD8 /* IntentsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		C775AF462419EA7D0044C43E /* Python.swift in Sources */ = {isa = PBXBuildFile; fileRef = C775AF452419EA7D0044C43E /* Python.swift */; };
-		C7846378244D5705007CFD0E /* PythonLibrary+Symbols.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7846377244D5705007CFD0E /* PythonLibrary+Symbols.swift */; };
 		C784637A244D57EA007CFD0E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7846379244D57EA007CFD0E /* AppDelegate.swift */; };
 		E19B09AC241C84440016CB29 /* DownloadViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19B09AB241C84440016CB29 /* DownloadViewController.swift */; };
 /* End PBXBuildFile section */
@@ -95,34 +81,22 @@
 		4C0A8EEE24D7D0F40071AE7D /* YTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C0A8EF024D7D0F40071AE7D /* YTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YTests.swift; sourceTree = "<group>"; };
 		4C0A8EF224D7D0F40071AE7D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4CB0C65E2500C9940009FB1F /* Transcoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transcoder.swift; sourceTree = "<group>"; };
-		4CB0C6602500CA340009FB1F /* YoutubeDL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YoutubeDL.swift; sourceTree = "<group>"; };
-		4CB0C6622500CA800009FB1F /* Downloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Downloader.swift; sourceTree = "<group>"; };
-		4CBA67B6250225F600DF6C24 /* libavfilter.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavfilter.a; path = "../../../../Volumes/SSD - 데이터/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib/libavfilter.a"; sourceTree = "<group>"; };
-		4CBA67B82502266B00DF6C24 /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswscale.a; path = "../../../../Volumes/SSD - 데이터/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib/libswscale.a"; sourceTree = "<group>"; };
+		4C47925C255E640800F7EDE0 /* Python-iOS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "Python-iOS"; path = "../tmp/Python-iOS"; sourceTree = "<group>"; };
+		4C479261255E642900F7EDE0 /* FFmpeg-iOS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "FFmpeg-iOS"; path = "../tmp/FFmpeg-iOS"; sourceTree = "<group>"; };
+		4C47926F255E66B000F7EDE0 /* YoutubeDL-iOS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "YoutubeDL-iOS"; path = "../tmp/YoutubeDL-iOS"; sourceTree = "<group>"; };
 		4CD1DB3624FC9737000091B5 /* FormatTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatTableViewController.swift; sourceTree = "<group>"; };
-		4CD1DB3824FCBF50000091B5 /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = "../../../../Volumes/SSD - 데이터/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib/libavcodec.a"; sourceTree = "<group>"; };
-		4CD1DB3924FCBF50000091B5 /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavformat.a; path = "../../../../Volumes/SSD - 데이터/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib/libavformat.a"; sourceTree = "<group>"; };
-		4CD1DB3C24FCC061000091B5 /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavutil.a; path = "../../../../Volumes/SSD - 데이터/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib/libavutil.a"; sourceTree = "<group>"; };
-		4CD1DB3E24FCC09E000091B5 /* libswresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswresample.a; path = "../../../../Volumes/SSD - 데이터/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib/libswresample.a"; sourceTree = "<group>"; };
 		4CD1DB4024FCC0A7000091B5 /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
 		4CD1DB4224FCC0B7000091B5 /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
 		4CF3881125075B7D0078DB2B /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		4CF3881325075E320078DB2B /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
 		4CFF393924DA71A900131F73 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
-		610000000000000000000100 /* libbzip2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libbzip2.a; path = Support/BZip2/libbzip2.a; sourceTree = "<group>"; };
 		610000000000000000000200 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
-		610000000000000000000300 /* libxz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libxz.a; path = Support/XZ/libxz.a; sourceTree = "<group>"; };
 		610000000000000000000400 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
-		610000000000000000000500 /* libOpenSSL.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libOpenSSL.a; path = Support/OpenSSL/libOpenSSL.a; sourceTree = "<group>"; };
-		610000000000000000000600 /* libPython.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libPython.a; path = Support/Python/libPython.a; sourceTree = "<group>"; };
 		610000000000000000000700 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		610000000000000000000800 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		610000000000000000000900 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		610000000000000000000A00 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		610000000000000000000B00 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
-		610000000000000000100000 /* Support */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Support; sourceTree = "<group>"; };
-		610000000000000000100100 /* app */ = {isa = PBXFileReference; lastKnownFileType = folder; path = app; sourceTree = "<group>"; };
 		610000000000000000100200 /* app_packages */ = {isa = PBXFileReference; lastKnownFileType = folder; path = app_packages; sourceTree = "<group>"; };
 		610000000000000000100300 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		610000000000000000100400 /* Y.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Y.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -143,11 +117,7 @@
 		C76812A4241B73E200EA5FD8 /* IntentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentViewController.swift; sourceTree = "<group>"; };
 		C76812A7241B73E200EA5FD8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
 		C76812A9241B73E200EA5FD8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C775AF422419E8E30044C43E /* module.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
-		C775AF432419E8F10044C43E /* Module.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Module.h; sourceTree = "<group>"; };
 		C775AF442419EA7C0044C43E /* Hello World-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Hello World-Bridging-Header.h"; sourceTree = "<group>"; };
-		C775AF452419EA7D0044C43E /* Python.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Python.swift; sourceTree = "<group>"; };
-		C7846377244D5705007CFD0E /* PythonLibrary+Symbols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PythonLibrary+Symbols.swift"; sourceTree = "<group>"; };
 		C7846379244D57EA007CFD0E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E19B09AB241C84440016CB29 /* DownloadViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -164,20 +134,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4CBA67B92502266B00DF6C24 /* libswscale.a in Frameworks */,
-				4CD1DB3F24FCC09E000091B5 /* libswresample.a in Frameworks */,
-				4CBA67B7250225F600DF6C24 /* libavfilter.a in Frameworks */,
 				4CD1DB4324FCC0B7000091B5 /* libiconv.tbd in Frameworks */,
 				4CD1DB4124FCC0A7000091B5 /* VideoToolbox.framework in Frameworks */,
-				4CD1DB3D24FCC061000091B5 /* libavutil.a in Frameworks */,
-				4CD1DB3A24FCBF50000091B5 /* libavcodec.a in Frameworks */,
-				4CD1DB3B24FCBF50000091B5 /* libavformat.a in Frameworks */,
-				600000000000000000000100 /* libbzip2.a in Frameworks */,
 				600000000000000000000200 /* libsqlite3.tbd in Frameworks */,
-				600000000000000000000300 /* libxz.a in Frameworks */,
+				4C479257255E62B900F7EDE0 /* YoutubeDL in Frameworks */,
 				600000000000000000000400 /* libz.tbd in Frameworks */,
-				600000000000000000000500 /* libOpenSSL.a in Frameworks */,
-				600000000000000000000600 /* libPython.a in Frameworks */,
 				600000000000000000000700 /* CoreFoundation.framework in Frameworks */,
 				600000000000000000000800 /* CoreGraphics.framework in Frameworks */,
 				600000000000000000000900 /* Foundation.framework in Frameworks */,
@@ -217,8 +178,10 @@
 		60796ED919190F4100A9926B = {
 			isa = PBXGroup;
 			children = (
+				4C47926F255E66B000F7EDE0 /* YoutubeDL-iOS */,
+				4C479261255E642900F7EDE0 /* FFmpeg-iOS */,
+				4C47925C255E640800F7EDE0 /* Python-iOS */,
 				C768128E241B68C000EA5FD8 /* Y.entitlements */,
-				610000000000000000100000 /* Support */,
 				60796EEB19190F4100A9926B /* helloworld */,
 				C7681298241B73E200EA5FD8 /* Intents */,
 				C76812A3241B73E200EA5FD8 /* IntentsUI */,
@@ -242,21 +205,11 @@
 		60796EE419190F4100A9926B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				4CBA67B82502266B00DF6C24 /* libswscale.a */,
-				4CBA67B6250225F600DF6C24 /* libavfilter.a */,
 				4CD1DB4224FCC0B7000091B5 /* libiconv.tbd */,
 				4CD1DB4024FCC0A7000091B5 /* VideoToolbox.framework */,
-				4CD1DB3E24FCC09E000091B5 /* libswresample.a */,
-				4CD1DB3C24FCC061000091B5 /* libavutil.a */,
-				4CD1DB3824FCBF50000091B5 /* libavcodec.a */,
-				4CD1DB3924FCBF50000091B5 /* libavformat.a */,
 				C768128F241B690700EA5FD8 /* Intents.framework */,
-				610000000000000000000100 /* libbzip2.a */,
 				610000000000000000000200 /* libsqlite3.tbd */,
-				610000000000000000000300 /* libxz.a */,
 				610000000000000000000400 /* libz.tbd */,
-				610000000000000000000500 /* libOpenSSL.a */,
-				610000000000000000000600 /* libPython.a */,
 				610000000000000000000700 /* CoreFoundation.framework */,
 				610000000000000000000800 /* CoreGraphics.framework */,
 				610000000000000000000900 /* Foundation.framework */,
@@ -270,9 +223,6 @@
 		60796EEB19190F4100A9926B /* helloworld */ = {
 			isa = PBXGroup;
 			children = (
-				C7846376244D56D4007CFD0E /* PythonKit */,
-				C775AF412419E8AD0044C43E /* Module */,
-				610000000000000000100100 /* app */,
 				610000000000000000100200 /* app_packages */,
 				610000000000000000100800 /* Images.xcassets */,
 				60796EEC19190F4100A9926B /* Supporting Files */,
@@ -284,9 +234,6 @@
 				C775AF442419EA7C0044C43E /* Hello World-Bridging-Header.h */,
 				4CFF393924DA71A900131F73 /* DetailView.swift */,
 				4CD1DB3624FC9737000091B5 /* FormatTableViewController.swift */,
-				4CB0C65E2500C9940009FB1F /* Transcoder.swift */,
-				4CB0C6602500CA340009FB1F /* YoutubeDL.swift */,
-				4CB0C6622500CA800009FB1F /* Downloader.swift */,
 				4CF3881125075B7D0078DB2B /* Shaders.metal */,
 				4CF3881325075E320078DB2B /* ShaderTypes.h */,
 			);
@@ -323,24 +270,6 @@
 			path = IntentsUI;
 			sourceTree = "<group>";
 		};
-		C775AF412419E8AD0044C43E /* Module */ = {
-			isa = PBXGroup;
-			children = (
-				C775AF422419E8E30044C43E /* module.modulemap */,
-				C775AF432419E8F10044C43E /* Module.h */,
-			);
-			path = Module;
-			sourceTree = "<group>";
-		};
-		C7846376244D56D4007CFD0E /* PythonKit */ = {
-			isa = PBXGroup;
-			children = (
-				C775AF452419EA7D0044C43E /* Python.swift */,
-				C7846377244D5705007CFD0E /* PythonLibrary+Symbols.swift */,
-			);
-			path = PythonKit;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -366,7 +295,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 60796F0E19190F4100A9926B /* Build configuration list for PBXNativeTarget "YD" */;
 			buildPhases = (
-				60796F2F1919C7E700A9926B /* Refresh Python source */,
 				60796EDE19190F4100A9926B /* Sources */,
 				60796EDF19190F4100A9926B /* Frameworks */,
 				60796EE019190F4100A9926B /* Resources */,
@@ -380,6 +308,7 @@
 			);
 			name = YD;
 			packageProductDependencies = (
+				4C479256255E62B900F7EDE0 /* YoutubeDL */,
 			);
 			productName = helloworld;
 			productReference = 610000000000000000100400 /* Y.app */;
@@ -454,6 +383,7 @@
 			);
 			mainGroup = 60796ED919190F4100A9926B;
 			packageReferences = (
+				4C479255255E62B900F7EDE0 /* XCRemoteSwiftPackageReference "YoutubeDL-iOS" */,
 			);
 			productRefGroup = 60796EE319190F4100A9926B /* Products */;
 			projectDirPath = "";
@@ -503,23 +433,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		60796F2F1919C7E700A9926B /* Refresh Python source */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Refresh Python source";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "mkdir -p \"$BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH/Library/Python\"\nmkdir -p \"$BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH/Library/Application Support/com.example.helloworld\"\nrsync -pvtrL --exclude .hg --exclude .svn --exclude .git \"$PROJECT_DIR/Support/Python/Resources/lib\" \"$BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH/Library/Python\"\nrsync -pvtrL --exclude .hg --exclude .svn --exclude .git \"$PROJECT_DIR/helloworld/app\" \"$BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH/Library/Application Support/com.example.helloworld\"\nrsync -pvtrL --exclude .hg --exclude .svn --exclude .git \"$PROJECT_DIR/helloworld/app_packages\" \"$BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH/Library/Application Support/com.example.helloworld\"";
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
 		4C0A8EEA24D7D0F40071AE7D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -534,17 +447,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				4CF3881225075B7D0078DB2B /* Shaders.metal in Sources */,
-				4CB0C6632500CA800009FB1F /* Downloader.swift in Sources */,
 				C784637A244D57EA007CFD0E /* AppDelegate.swift in Sources */,
-				4CB0C65F2500C9940009FB1F /* Transcoder.swift in Sources */,
-				C7846378244D5705007CFD0E /* PythonLibrary+Symbols.swift in Sources */,
 				4CD1DB3724FC9737000091B5 /* FormatTableViewController.swift in Sources */,
 				C7681292241B6C9400EA5FD8 /* Intents.intentdefinition in Sources */,
 				4CFF393A24DA71A900131F73 /* DetailView.swift in Sources */,
 				600000000000000000100100 /* main.m in Sources */,
 				E19B09AC241C84440016CB29 /* DownloadViewController.swift in Sources */,
-				C775AF462419EA7D0044C43E /* Python.swift in Sources */,
-				4CB0C6612500CA340009FB1F /* YoutubeDL.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1042,6 +950,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4C479255255E62B900F7EDE0 /* XCRemoteSwiftPackageReference "YoutubeDL-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kewlbear/YoutubeDL-iOS.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		4C479256255E62B900F7EDE0 /* YoutubeDL */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4C479255255E62B900F7EDE0 /* XCRemoteSwiftPackageReference "YoutubeDL-iOS" */;
+			productName = YoutubeDL;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 60796EDA19190F4100A9926B /* Project object */;
 }
