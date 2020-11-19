@@ -18,7 +18,14 @@ class DownloadViewController: UIViewController {
 
     var url: URL? {
         didSet {
-            url.map { extractInfo($0) }
+            url.map {
+                do {
+                    try extractInfo($0)
+                }
+                catch {
+                    print(#function, error)
+                }
+            }
         }
     }
     
@@ -587,7 +594,26 @@ extension DownloadViewController {
     }
     
     @available(iOS 11.0, *)
-    fileprivate func extractInfo(_ url: URL) {
+    fileprivate func extractInfo(_ url: URL) throws {
+        if YoutubeDL.shouldDownloadPythonModule {
+            print(#function, "downloading python module...")
+            YoutubeDL.downloadPythonModule { error in
+                guard error == nil else {
+                    print(#function, error ?? "no error??")
+                    return
+                }
+                print(#function, "downloaded python module")
+
+                // FIXME: better way?
+                DispatchQueue.main.async {
+                    self.alert(message: "Downloaded youtube_dl. Restart app.")
+                }
+            }
+            return
+        }
+        
+        let youtubeDL = try YoutubeDL()
+        
         navigationItem.title = url.absoluteString
         
         Downloader.shared.session.getAllTasks {
@@ -599,13 +625,18 @@ extension DownloadViewController {
         notify(body: "영상 정보 받는중...")
         
         DispatchQueue.global(qos: .userInitiated).async {
-            (_, self.info) = try! YoutubeDL().extractInfo(url: url)
-            
-            DispatchQueue.main.async {
-                self.navigationItem.title = self.info?.title
+            do {
+                (_, self.info) = try youtubeDL.extractInfo(url: url)
+                
+                DispatchQueue.main.async {
+                    self.navigationItem.title = self.info?.title
+                }
+                
+                self.check(info: self.info)
             }
-            
-            self.check(info: self.info)
+            catch {
+                print(#function, error)
+            }
         }
     }
 }
@@ -613,5 +644,13 @@ extension DownloadViewController {
 extension URL {
     var part: URL {
         appendingPathExtension("part")
+    }
+}
+
+extension UIViewController {
+    func alert(message: String) {
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(alert, animated: true, completion: nil)
     }
 }

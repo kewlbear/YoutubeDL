@@ -22,7 +22,6 @@
 		600000000000000000000A00 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000A00 /* UIKit.framework */; };
 		600000000000000000000B00 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000B00 /* WebKit.framework */; };
 		600000000000000000100000 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 60796EEE19190F4100A9926B /* InfoPlist.strings */; };
-		600000000000000000100100 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 610000000000000000100300 /* main.m */; };
 		600000000000000000100200 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 610000000000000000100800 /* Images.xcassets */; };
 		C7681276241B4E7800EA5FD8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C7681275241B4E7800EA5FD8 /* Main.storyboard */; };
 		C7681278241B4F2F00EA5FD8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C7681277241B4F2F00EA5FD8 /* LaunchScreen.storyboard */; };
@@ -87,6 +86,7 @@
 		4CD1DB3624FC9737000091B5 /* FormatTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatTableViewController.swift; sourceTree = "<group>"; };
 		4CD1DB4024FCC0A7000091B5 /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
 		4CD1DB4224FCC0B7000091B5 /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
+		4CD7420C2564D9E200442678 /* PythonKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PythonKit; path = ../tmp/PythonKit; sourceTree = "<group>"; };
 		4CF3881125075B7D0078DB2B /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		4CF3881325075E320078DB2B /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
 		4CFF393924DA71A900131F73 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
@@ -97,8 +97,6 @@
 		610000000000000000000900 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		610000000000000000000A00 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		610000000000000000000B00 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
-		610000000000000000100200 /* app_packages */ = {isa = PBXFileReference; lastKnownFileType = folder; path = app_packages; sourceTree = "<group>"; };
-		610000000000000000100300 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		610000000000000000100400 /* Y.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Y.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		610000000000000000100500 /* helloworld-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "helloworld-Info.plist"; sourceTree = "<group>"; };
 		610000000000000000100600 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -178,6 +176,7 @@
 		60796ED919190F4100A9926B = {
 			isa = PBXGroup;
 			children = (
+				4CD7420C2564D9E200442678 /* PythonKit */,
 				4C47926F255E66B000F7EDE0 /* YoutubeDL-iOS */,
 				4C479261255E642900F7EDE0 /* FFmpeg-iOS */,
 				4C47925C255E640800F7EDE0 /* Python-iOS */,
@@ -223,7 +222,6 @@
 		60796EEB19190F4100A9926B /* helloworld */ = {
 			isa = PBXGroup;
 			children = (
-				610000000000000000100200 /* app_packages */,
 				610000000000000000100800 /* Images.xcassets */,
 				60796EEC19190F4100A9926B /* Supporting Files */,
 				E19B09AB241C84440016CB29 /* DownloadViewController.swift */,
@@ -243,7 +241,6 @@
 		60796EEC19190F4100A9926B /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				610000000000000000100300 /* main.m */,
 				610000000000000000100500 /* helloworld-Info.plist */,
 				610000000000000000100700 /* helloworld-Prefix.pch */,
 				60796EEE19190F4100A9926B /* InfoPlist.strings */,
@@ -451,7 +448,6 @@
 				4CD1DB3724FC9737000091B5 /* FormatTableViewController.swift in Sources */,
 				C7681292241B6C9400EA5FD8 /* Intents.intentdefinition in Sources */,
 				4CFF393A24DA71A900131F73 /* DetailView.swift in Sources */,
-				600000000000000000100100 /* main.m in Sources */,
 				E19B09AC241C84440016CB29 /* DownloadViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -684,7 +680,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Y.entitlements;
 				DEVELOPMENT_TEAM = 265782UUTC;
@@ -732,7 +727,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Y.entitlements;
 				DEVELOPMENT_TEAM = 265782UUTC;

@@ -11,11 +11,11 @@ import Intents
 import SwiftUI
 import VideoToolbox
 import YoutubeDL
+import Resources
 
 let trace = "trace"
 
-//@UIApplicationMain
-@objc(PythonAppDelegate)
+@UIApplicationMain
 class AppDelegate: NSObject, UIApplicationDelegate {
     var window: UIWindow?
     
@@ -24,48 +24,19 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         return navigationController?.topViewController as? DownloadViewController
     }
     
-    let youtubeDL = try! YoutubeDL()
-    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
 
         UNUserNotificationCenter.current().delegate = self
         
+        Init()
+        
         _ = Downloader.shared // create URL session
         
-//        if #available(iOS 11.0, *) {
-//            download(URL(string:
-////                            "https://m.youtube.com/watch?feature=youtu.be&v=fv-6WoaV6oY"
-////                        "https://youtu.be/61P3OwsriOM"
-//                         "https://youtu.be/61P3OwsriOM"
-//            )!)
-//        } else {
-//            // Fallback on earlier versions
-//        }
-
-//        window?.rootViewController = UIHostingController(rootView: DetailView())
-        
-        testVP9()
+        downloadViewController?.url = URL(string: "https://youtu.be/CM4CkVFmTds")
         
         return true
     }
     
-    func testVP9() {
-        var _formatDescription: CMVideoFormatDescription?
-        var status = CMVideoFormatDescriptionCreate(allocator: nil, codecType: kCMVideoCodecType_VP9, width: 320, height: 240, extensions: nil, formatDescriptionOut: &_formatDescription)
-        guard status == noErr, let formatDescription = _formatDescription else {
-            print(#function, "CMVideoFormatDescriptionCreate =", status)
-            return
-        }
-
-        var _decompressionSession: VTDecompressionSession?
-        status = VTDecompressionSessionCreate(allocator: nil, formatDescription: formatDescription, decoderSpecification: nil, imageBufferAttributes: nil, outputCallback: nil, decompressionSessionOut: &_decompressionSession)
-//        assert(status != kVTCouldNotFindVideoDecoderErr)
-        guard status == noErr, let decompressionSession = _decompressionSession else {
-            print(#function, "VTDecompressionSessionCreate =", status)
-            return
-        }
-    }
-
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
         print(userActivity.interaction ?? "no interaction?")
         if #available(iOS 12.0, *) {

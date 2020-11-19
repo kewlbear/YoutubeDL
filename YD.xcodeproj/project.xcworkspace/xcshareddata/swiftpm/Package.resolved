@@ -2,11 +2,47 @@
   "object": {
     "pins": [
       {
-        "package": "YoutubeDL-iOS",
-        "repositoryURL": "https://github.com/kewlbear/YoutubeDL-iOS.git",
+        "package": "CSqlite3",
+        "repositoryURL": "https://github.com/alloyapple/CSqlite3.git",
+        "state": {
+          "branch": "master",
+          "revision": "fe433d74268135019da44fc79c853d9253ecc615",
+          "version": null
+        }
+      },
+      {
+        "package": "LoggerKit",
+        "repositoryURL": "https://github.com/pvieito/LoggerKit.git",
+        "state": {
+          "branch": "master",
+          "revision": "835b41248dbe474eb33dac2c1ef1376dea7dc11d",
+          "version": null
+        }
+      },
+      {
+        "package": "PythonKit",
+        "repositoryURL": "https://github.com/kewlbear/PythonKit.git",
+        "state": {
+          "branch": "master",
+          "revision": "59a868e84e1d6a5e01569cf92086554033415fa4",
+          "version": null
+        }
+      },
+      {
+        "package": "Rainbow",
+        "repositoryURL": "https://github.com/onevcat/Rainbow",
+        "state": {
+          "branch": null,
+          "revision": "626c3d4b6b55354b4af3aa309f998fae9b31a3d9",
+          "version": "3.2.0"
+        }
+      },
+      {
+        "package": "swift-argument-parser",
+        "repositoryURL": "https://github.com/apple/swift-argument-parser",
         "state": {
           "branch": "main",
-          "revision": "bab40ffe2cc76a620c0775b28043553b3cb46f3f",
+          "revision": "53555a04503c175eaffcf587e4b8c380a7c41a5c",
           "version": null
         }
       }
