@@ -45,8 +45,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         
         _ = Downloader.shared // create URL session
         
-        downloadViewController?.url = URL(string: "https://youtu.be/CM4CkVFmTds")
-        
         return true
     }
     
@@ -54,6 +52,18 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         if Downloader.shared.transcoder != nil {
             notify(body: "트랜스코딩이 중딘되었습니다. 앱으로 전환하고 트랜스코딩을 다시 하세요.")
         }
+    }
+    
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return false
+        }
+        components.scheme = "https"
+        guard let url = components.url else {
+            return false
+        }
+        downloadViewController?.url = url
+        return true
     }
 }
 
