@@ -571,6 +571,10 @@ extension DownloadViewController {
                 self.download(format: bestAudio, start: false, faster: true)
             }))
             alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
+            if self.traitCollection.userInterfaceIdiom == .pad {
+                alert.popoverPresentationController?.sourceView = self.progressView
+                alert.popoverPresentationController?.sourceRect = self.progressView.bounds
+            }
             self.present(alert, animated: true, completion: nil)
         }
     }
