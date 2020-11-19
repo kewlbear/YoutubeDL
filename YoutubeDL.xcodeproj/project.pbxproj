@@ -72,7 +72,7 @@
 		610000000000000000000900 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		610000000000000000000A00 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		610000000000000000000B00 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
-		610000000000000000100400 /* Y.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Y.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		610000000000000000100400 /* YoutubeDLApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = YoutubeDLApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		610000000000000000100500 /* YoutubeDL-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "YoutubeDL-Info.plist"; sourceTree = "<group>"; };
 		610000000000000000100600 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		610000000000000000100700 /* YoutubeDL-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "YoutubeDL-Prefix.pch"; sourceTree = "<group>"; };
@@ -144,7 +144,7 @@
 		60796EE319190F4100A9926B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				610000000000000000100400 /* Y.app */,
+				610000000000000000100400 /* YoutubeDLApp.app */,
 				4C0A8EEE24D7D0F40071AE7D /* YoutubeDLTests.xctest */,
 			);
 			name = Products;
@@ -234,7 +234,7 @@
 				4C479256255E62B900F7EDE0 /* YoutubeDL */,
 			);
 			productName = helloworld;
-			productReference = 610000000000000000100400 /* Y.app */;
+			productReference = 610000000000000000100400 /* YoutubeDLApp.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */

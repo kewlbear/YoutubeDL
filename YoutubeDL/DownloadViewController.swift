@@ -29,6 +29,7 @@ import MetalKit
 import MetalPerformanceShaders
 import CoreVideo
 import YoutubeDL
+import PythonKit
 
 class DownloadViewController: UIViewController {
 
@@ -653,6 +654,14 @@ extension DownloadViewController {
             }
             catch {
                 print(#function, error)
+                guard let error = error as? PythonError, case let .exception(exception, traceback: _) = error else {
+                    return
+                }
+                if (String(exception.args[0]) ?? "").contains("Unsupported URL: ") {
+                    DispatchQueue.main.async {
+                        self.alert(message: "Unsupported URL")
+                    }
+                }
             }
         }
     }
