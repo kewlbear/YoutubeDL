@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4C0A8EF124D7D0F40071AE7D /* YTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A8EF024D7D0F40071AE7D /* YTests.swift */; };
+		4C0A8EF124D7D0F40071AE7D /* YoutubeDLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A8EF024D7D0F40071AE7D /* YoutubeDLTests.swift */; };
 		4C479257255E62B900F7EDE0 /* YoutubeDL in Frameworks */ = {isa = PBXBuildFile; productRef = 4C479256255E62B900F7EDE0 /* YoutubeDL */; };
 		4CD1DB3724FC9737000091B5 /* FormatTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD1DB3624FC9737000091B5 /* FormatTableViewController.swift */; };
 		4CD1DB4124FCC0A7000091B5 /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB4024FCC0A7000091B5 /* VideoToolbox.framework */; };
@@ -77,8 +77,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		4C0A8EEE24D7D0F40071AE7D /* YTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		4C0A8EF024D7D0F40071AE7D /* YTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YTests.swift; sourceTree = "<group>"; };
+		4C0A8EEE24D7D0F40071AE7D /* YoutubeDLTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YoutubeDLTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4C0A8EF024D7D0F40071AE7D /* YoutubeDLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YoutubeDLTests.swift; sourceTree = "<group>"; };
 		4C0A8EF224D7D0F40071AE7D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4C47925C255E640800F7EDE0 /* Python-iOS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "Python-iOS"; path = "../tmp/Python-iOS"; sourceTree = "<group>"; };
 		4C479261255E642900F7EDE0 /* FFmpeg-iOS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "FFmpeg-iOS"; path = "../tmp/FFmpeg-iOS"; sourceTree = "<group>"; };
@@ -98,13 +98,13 @@
 		610000000000000000000A00 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		610000000000000000000B00 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		610000000000000000100400 /* Y.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Y.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		610000000000000000100500 /* helloworld-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "helloworld-Info.plist"; sourceTree = "<group>"; };
+		610000000000000000100500 /* YoutubeDL-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "YoutubeDL-Info.plist"; sourceTree = "<group>"; };
 		610000000000000000100600 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		610000000000000000100700 /* helloworld-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "helloworld-Prefix.pch"; sourceTree = "<group>"; };
+		610000000000000000100700 /* YoutubeDL-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "YoutubeDL-Prefix.pch"; sourceTree = "<group>"; };
 		610000000000000000100800 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		C7681275241B4E7800EA5FD8 /* Main.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		C7681277241B4F2F00EA5FD8 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
-		C768128E241B68C000EA5FD8 /* Y.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Y.entitlements; sourceTree = "<group>"; };
+		C768128E241B68C000EA5FD8 /* YoutubeDL.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = YoutubeDL.entitlements; sourceTree = "<group>"; };
 		C768128F241B690700EA5FD8 /* Intents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Intents.framework; path = System/Library/Frameworks/Intents.framework; sourceTree = SDKROOT; };
 		C7681291241B6C9400EA5FD8 /* Intents.intentdefinition */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; path = Intents.intentdefinition; sourceTree = "<group>"; };
 		C7681297241B73E200EA5FD8 /* IntentsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = IntentsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -115,7 +115,7 @@
 		C76812A4241B73E200EA5FD8 /* IntentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentViewController.swift; sourceTree = "<group>"; };
 		C76812A7241B73E200EA5FD8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
 		C76812A9241B73E200EA5FD8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C775AF442419EA7C0044C43E /* Hello World-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Hello World-Bridging-Header.h"; sourceTree = "<group>"; };
+		C775AF442419EA7C0044C43E /* YoutubeDL-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "YoutubeDL-Bridging-Header.h"; sourceTree = "<group>"; };
 		C7846379244D57EA007CFD0E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E19B09AB241C84440016CB29 /* DownloadViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -164,13 +164,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		4C0A8EEF24D7D0F40071AE7D /* YTests */ = {
+		4C0A8EEF24D7D0F40071AE7D /* YoutubeDLTests */ = {
 			isa = PBXGroup;
 			children = (
-				4C0A8EF024D7D0F40071AE7D /* YTests.swift */,
+				4C0A8EF024D7D0F40071AE7D /* YoutubeDLTests.swift */,
 				4C0A8EF224D7D0F40071AE7D /* Info.plist */,
 			);
-			path = YTests;
+			path = YoutubeDLTests;
 			sourceTree = "<group>";
 		};
 		60796ED919190F4100A9926B = {
@@ -180,11 +180,10 @@
 				4C47926F255E66B000F7EDE0 /* YoutubeDL-iOS */,
 				4C479261255E642900F7EDE0 /* FFmpeg-iOS */,
 				4C47925C255E640800F7EDE0 /* Python-iOS */,
-				C768128E241B68C000EA5FD8 /* Y.entitlements */,
-				60796EEB19190F4100A9926B /* helloworld */,
+				60796EEB19190F4100A9926B /* YoutubeDL */,
 				C7681298241B73E200EA5FD8 /* Intents */,
 				C76812A3241B73E200EA5FD8 /* IntentsUI */,
-				4C0A8EEF24D7D0F40071AE7D /* YTests */,
+				4C0A8EEF24D7D0F40071AE7D /* YoutubeDLTests */,
 				60796EE419190F4100A9926B /* Frameworks */,
 				60796EE319190F4100A9926B /* Products */,
 			);
@@ -196,7 +195,7 @@
 				610000000000000000100400 /* Y.app */,
 				C7681297241B73E200EA5FD8 /* IntentsExtension.appex */,
 				C76812A0241B73E200EA5FD8 /* IntentsUIExtension.appex */,
-				4C0A8EEE24D7D0F40071AE7D /* YTests.xctest */,
+				4C0A8EEE24D7D0F40071AE7D /* YoutubeDLTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -219,7 +218,7 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		60796EEB19190F4100A9926B /* helloworld */ = {
+		60796EEB19190F4100A9926B /* YoutubeDL */ = {
 			isa = PBXGroup;
 			children = (
 				610000000000000000100800 /* Images.xcassets */,
@@ -229,20 +228,21 @@
 				C7681291241B6C9400EA5FD8 /* Intents.intentdefinition */,
 				C7681275241B4E7800EA5FD8 /* Main.storyboard */,
 				C7681277241B4F2F00EA5FD8 /* LaunchScreen.storyboard */,
-				C775AF442419EA7C0044C43E /* Hello World-Bridging-Header.h */,
+				C775AF442419EA7C0044C43E /* YoutubeDL-Bridging-Header.h */,
 				4CFF393924DA71A900131F73 /* DetailView.swift */,
 				4CD1DB3624FC9737000091B5 /* FormatTableViewController.swift */,
 				4CF3881125075B7D0078DB2B /* Shaders.metal */,
 				4CF3881325075E320078DB2B /* ShaderTypes.h */,
 			);
-			path = helloworld;
+			path = YoutubeDL;
 			sourceTree = "<group>";
 		};
 		60796EEC19190F4100A9926B /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				610000000000000000100500 /* helloworld-Info.plist */,
-				610000000000000000100700 /* helloworld-Prefix.pch */,
+				C768128E241B68C000EA5FD8 /* YoutubeDL.entitlements */,
+				610000000000000000100500 /* YoutubeDL-Info.plist */,
+				610000000000000000100700 /* YoutubeDL-Prefix.pch */,
 				60796EEE19190F4100A9926B /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
@@ -270,9 +270,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		4C0A8EED24D7D0F40071AE7D /* YTests */ = {
+		4C0A8EED24D7D0F40071AE7D /* YoutubeDLTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4C0A8EF524D7D0F40071AE7D /* Build configuration list for PBXNativeTarget "YTests" */;
+			buildConfigurationList = 4C0A8EF524D7D0F40071AE7D /* Build configuration list for PBXNativeTarget "YoutubeDLTests" */;
 			buildPhases = (
 				4C0A8EEA24D7D0F40071AE7D /* Sources */,
 				4C0A8EEB24D7D0F40071AE7D /* Frameworks */,
@@ -283,14 +283,14 @@
 			dependencies = (
 				4C0A8EF424D7D0F40071AE7D /* PBXTargetDependency */,
 			);
-			name = YTests;
+			name = YoutubeDLTests;
 			productName = YTests;
-			productReference = 4C0A8EEE24D7D0F40071AE7D /* YTests.xctest */;
+			productReference = 4C0A8EEE24D7D0F40071AE7D /* YoutubeDLTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		60796EE119190F4100A9926B /* YD */ = {
+		60796EE119190F4100A9926B /* YoutubeDL */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 60796F0E19190F4100A9926B /* Build configuration list for PBXNativeTarget "YD" */;
+			buildConfigurationList = 60796F0E19190F4100A9926B /* Build configuration list for PBXNativeTarget "YoutubeDL" */;
 			buildPhases = (
 				60796EDE19190F4100A9926B /* Sources */,
 				60796EDF19190F4100A9926B /* Frameworks */,
@@ -303,7 +303,7 @@
 				C76812AB241B73E200EA5FD8 /* PBXTargetDependency */,
 				C76812AE241B73E200EA5FD8 /* PBXTargetDependency */,
 			);
-			name = YD;
+			name = YoutubeDL;
 			packageProductDependencies = (
 				4C479256255E62B900F7EDE0 /* YoutubeDL */,
 			);
@@ -370,7 +370,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 60796EDD19190F4100A9926B /* Build configuration list for PBXProject "YD" */;
+			buildConfigurationList = 60796EDD19190F4100A9926B /* Build configuration list for PBXProject "YoutubeDL" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -386,10 +386,10 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				60796EE119190F4100A9926B /* YD */,
+				60796EE119190F4100A9926B /* YoutubeDL */,
 				C7681296241B73E200EA5FD8 /* IntentsExtension */,
 				C768129F241B73E200EA5FD8 /* IntentsUIExtension */,
-				4C0A8EED24D7D0F40071AE7D /* YTests */,
+				4C0A8EED24D7D0F40071AE7D /* YoutubeDLTests */,
 			);
 		};
 /* End PBXProject section */
@@ -435,7 +435,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4C0A8EF124D7D0F40071AE7D /* YTests.swift in Sources */,
+				4C0A8EF124D7D0F40071AE7D /* YoutubeDLTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -473,7 +473,7 @@
 /* Begin PBXTargetDependency section */
 		4C0A8EF424D7D0F40071AE7D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 60796EE119190F4100A9926B /* YD */;
+			target = 60796EE119190F4100A9926B /* YoutubeDL */;
 			targetProxy = 4C0A8EF324D7D0F40071AE7D /* PBXContainerItemProxy */;
 		};
 		C76812AB241B73E200EA5FD8 /* PBXTargetDependency */ = {
@@ -521,9 +521,9 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = 265782UUTC;
+				DEVELOPMENT_TEAM = "";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = YTests/Info.plist;
+				INFOPLIST_FILE = YoutubeDLTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -531,7 +531,7 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YTests;
+				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YoutubeDLTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -555,9 +555,9 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 265782UUTC;
+				DEVELOPMENT_TEAM = "";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = YTests/Info.plist;
+				INFOPLIST_FILE = YoutubeDLTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -565,7 +565,7 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YTests;
+				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YoutubeDLTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
@@ -681,14 +681,14 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = Y.entitlements;
-				DEVELOPMENT_TEAM = 265782UUTC;
+				CODE_SIGN_ENTITLEMENTS = YoutubeDL/YoutubeDL.entitlements;
+				DEVELOPMENT_TEAM = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "helloworld/helloworld-Prefix.pch";
+				GCC_PREFIX_HEADER = "YoutubeDL/YoutubeDL-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
@@ -698,7 +698,7 @@
 					"\"$(PROJECT_DIR)/Support/Python/Headers\"",
 					"\"/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/include\"",
 				);
-				INFOPLIST_FILE = "helloworld/helloworld-Info.plist";
+				INFOPLIST_FILE = "YoutubeDL/YoutubeDL-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -711,10 +711,10 @@
 					"$(PROJECT_DIR)/Support/BZip2",
 					"\"/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib\"",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YD;
+				PRODUCT_BUNDLE_IDENTIFIER = "io.github.kewlbear.Youtube-DL";
 				PRODUCT_NAME = Y;
-				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/helloworld/Module";
-				SWIFT_OBJC_BRIDGING_HEADER = "helloworld/Hello World-Bridging-Header.h";
+				SWIFT_INCLUDE_PATHS = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "YoutubeDL/YoutubeDL-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				USER_HEADER_SEARCH_PATHS = "";
@@ -728,15 +728,15 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = Y.entitlements;
-				DEVELOPMENT_TEAM = 265782UUTC;
+				CODE_SIGN_ENTITLEMENTS = YoutubeDL/YoutubeDL.entitlements;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_TESTABILITY = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "helloworld/helloworld-Prefix.pch";
+				GCC_PREFIX_HEADER = "YoutubeDL/YoutubeDL-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
@@ -746,7 +746,7 @@
 					"\"$(PROJECT_DIR)/Support/Python/Headers\"",
 					"\"/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/include\"",
 				);
-				INFOPLIST_FILE = "helloworld/helloworld-Info.plist";
+				INFOPLIST_FILE = "YoutubeDL/YoutubeDL-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -759,10 +759,10 @@
 					"$(PROJECT_DIR)/Support/Python",
 					"\"/Volumes/Dark SSD/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib\"",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YD;
+				PRODUCT_BUNDLE_IDENTIFIER = "io.github.kewlbear.Youtube-DL";
 				PRODUCT_NAME = Y;
-				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/helloworld/Module";
-				SWIFT_OBJC_BRIDGING_HEADER = "helloworld/Hello World-Bridging-Header.h";
+				SWIFT_INCLUDE_PATHS = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "YoutubeDL/YoutubeDL-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VALID_ARCHS = "x86_64 arm64 arm64e";
 				WRAPPER_EXTENSION = app;
@@ -780,7 +780,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = 265782UUTC;
+				DEVELOPMENT_TEAM = "";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = IntentsUI/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -790,7 +790,7 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YD.IntentsUI;
+				PRODUCT_BUNDLE_IDENTIFIER = "io.github.kewlbear.Youtube-DL.IntentsUI";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -812,7 +812,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 265782UUTC;
+				DEVELOPMENT_TEAM = "";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = IntentsUI/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -822,7 +822,7 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YD.IntentsUI;
+				PRODUCT_BUNDLE_IDENTIFIER = "io.github.kewlbear.Youtube-DL.IntentsUI";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -843,7 +843,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = 265782UUTC;
+				DEVELOPMENT_TEAM = "";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = Intents/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -853,7 +853,7 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YD.Intents;
+				PRODUCT_BUNDLE_IDENTIFIER = "io.github.kewlbear.Youtube-DL.Intents";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -875,7 +875,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 265782UUTC;
+				DEVELOPMENT_TEAM = "";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = Intents/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -885,7 +885,7 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YD.Intents;
+				PRODUCT_BUNDLE_IDENTIFIER = "io.github.kewlbear.Youtube-DL.Intents";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -898,7 +898,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		4C0A8EF524D7D0F40071AE7D /* Build configuration list for PBXNativeTarget "YTests" */ = {
+		4C0A8EF524D7D0F40071AE7D /* Build configuration list for PBXNativeTarget "YoutubeDLTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4C0A8EF624D7D0F40071AE7D /* Debug */,
@@ -907,7 +907,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		60796EDD19190F4100A9926B /* Build configuration list for PBXProject "YD" */ = {
+		60796EDD19190F4100A9926B /* Build configuration list for PBXProject "YoutubeDL" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				60796F0C19190F4100A9926B /* Debug */,
@@ -916,7 +916,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		60796F0E19190F4100A9926B /* Build configuration list for PBXNativeTarget "YD" */ = {
+		60796F0E19190F4100A9926B /* Build configuration list for PBXNativeTarget "YoutubeDL" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				60796F0F19190F4100A9926B /* Debug */,

@@ -20,15 +20,6 @@
         }
       },
       {
-        "package": "PythonKit",
-        "repositoryURL": "https://github.com/kewlbear/PythonKit.git",
-        "state": {
-          "branch": "master",
-          "revision": "59a868e84e1d6a5e01569cf92086554033415fa4",
-          "version": null
-        }
-      },
-      {
         "package": "Rainbow",
         "repositoryURL": "https://github.com/onevcat/Rainbow",
         "state": {

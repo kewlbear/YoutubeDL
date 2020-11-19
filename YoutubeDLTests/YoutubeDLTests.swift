@@ -1,13 +1,13 @@
 //
-//  YTests.swift
-//  YTests
+//  YoutubeDLTests.swift
+//  YoutubeDLTests
 //
 //  Created by 안창범 on 2020/08/03.
 //  Copyright © 2020 Jane Developer. All rights reserved.
 //
 
 import XCTest
-@testable import Y
+@testable import YoutubeDL
 
 class YTests: XCTestCase {
 
@@ -20,7 +20,7 @@ class YTests: XCTestCase {
     }
 
     func testExample() throws {
-        appdele
+        
     }
 
     func testPerformanceExample() throws {
