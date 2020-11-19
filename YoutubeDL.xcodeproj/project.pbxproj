@@ -9,11 +9,9 @@
 /* Begin PBXBuildFile section */
 		4C0A8EF124D7D0F40071AE7D /* YoutubeDLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A8EF024D7D0F40071AE7D /* YoutubeDLTests.swift */; };
 		4C479257255E62B900F7EDE0 /* YoutubeDL in Frameworks */ = {isa = PBXBuildFile; productRef = 4C479256255E62B900F7EDE0 /* YoutubeDL */; };
-		4CD1DB3724FC9737000091B5 /* FormatTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD1DB3624FC9737000091B5 /* FormatTableViewController.swift */; };
 		4CD1DB4124FCC0A7000091B5 /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB4024FCC0A7000091B5 /* VideoToolbox.framework */; };
 		4CD1DB4324FCC0B7000091B5 /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB4224FCC0B7000091B5 /* libiconv.tbd */; };
 		4CF3881225075B7D0078DB2B /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 4CF3881125075B7D0078DB2B /* Shaders.metal */; };
-		4CFF393A24DA71A900131F73 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFF393924DA71A900131F73 /* DetailView.swift */; };
 		600000000000000000000200 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000200 /* libsqlite3.tbd */; };
 		600000000000000000000400 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000400 /* libz.tbd */; };
 		600000000000000000000700 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000700 /* CoreFoundation.framework */; };
@@ -26,13 +24,6 @@
 		C7681276241B4E7800EA5FD8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C7681275241B4E7800EA5FD8 /* Main.storyboard */; };
 		C7681278241B4F2F00EA5FD8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C7681277241B4F2F00EA5FD8 /* LaunchScreen.storyboard */; };
 		C7681290241B690700EA5FD8 /* Intents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C768128F241B690700EA5FD8 /* Intents.framework */; };
-		C7681292241B6C9400EA5FD8 /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = C7681291241B6C9400EA5FD8 /* Intents.intentdefinition */; };
-		C768129A241B73E200EA5FD8 /* IntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7681299241B73E200EA5FD8 /* IntentHandler.swift */; };
-		C76812A2241B73E200EA5FD8 /* IntentsUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C76812A1241B73E200EA5FD8 /* IntentsUI.framework */; };
-		C76812A5241B73E200EA5FD8 /* IntentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C76812A4241B73E200EA5FD8 /* IntentViewController.swift */; };
-		C76812A8241B73E200EA5FD8 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C76812A6241B73E200EA5FD8 /* MainInterface.storyboard */; };
-		C76812AC241B73E200EA5FD8 /* IntentsUIExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C76812A0241B73E200EA5FD8 /* IntentsUIExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		C76812AF241B73E200EA5FD8 /* IntentsExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C7681297241B73E200EA5FD8 /* IntentsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		C784637A244D57EA007CFD0E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7846379244D57EA007CFD0E /* AppDelegate.swift */; };
 		E19B09AC241C84440016CB29 /* DownloadViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19B09AB241C84440016CB29 /* DownloadViewController.swift */; };
 /* End PBXBuildFile section */
@@ -45,20 +36,6 @@
 			remoteGlobalIDString = 60796EE119190F4100A9926B;
 			remoteInfo = "Hello World";
 		};
-		C76812AA241B73E200EA5FD8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 60796EDA19190F4100A9926B /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = C768129F241B73E200EA5FD8;
-			remoteInfo = IntentsUI;
-		};
-		C76812AD241B73E200EA5FD8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 60796EDA19190F4100A9926B /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = C7681296241B73E200EA5FD8;
-			remoteInfo = Intents;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -68,8 +45,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				C76812AF241B73E200EA5FD8 /* IntentsExtension.appex in Embed App Extensions */,
-				C76812AC241B73E200EA5FD8 /* IntentsUIExtension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -83,13 +58,13 @@
 		4C47925C255E640800F7EDE0 /* Python-iOS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "Python-iOS"; path = "../tmp/Python-iOS"; sourceTree = "<group>"; };
 		4C479261255E642900F7EDE0 /* FFmpeg-iOS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "FFmpeg-iOS"; path = "../tmp/FFmpeg-iOS"; sourceTree = "<group>"; };
 		4C47926F255E66B000F7EDE0 /* YoutubeDL-iOS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "YoutubeDL-iOS"; path = "../tmp/YoutubeDL-iOS"; sourceTree = "<group>"; };
-		4CD1DB3624FC9737000091B5 /* FormatTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatTableViewController.swift; sourceTree = "<group>"; };
+		4C8FF54025662F930095A4AB /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		4C8FF54125662F930095A4AB /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		4CD1DB4024FCC0A7000091B5 /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
 		4CD1DB4224FCC0B7000091B5 /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
 		4CD7420C2564D9E200442678 /* PythonKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PythonKit; path = ../tmp/PythonKit; sourceTree = "<group>"; };
 		4CF3881125075B7D0078DB2B /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		4CF3881325075E320078DB2B /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
-		4CFF393924DA71A900131F73 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
 		610000000000000000000200 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 		610000000000000000000400 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		610000000000000000000700 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
@@ -106,15 +81,7 @@
 		C7681277241B4F2F00EA5FD8 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		C768128E241B68C000EA5FD8 /* YoutubeDL.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = YoutubeDL.entitlements; sourceTree = "<group>"; };
 		C768128F241B690700EA5FD8 /* Intents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Intents.framework; path = System/Library/Frameworks/Intents.framework; sourceTree = SDKROOT; };
-		C7681291241B6C9400EA5FD8 /* Intents.intentdefinition */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; path = Intents.intentdefinition; sourceTree = "<group>"; };
-		C7681297241B73E200EA5FD8 /* IntentsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = IntentsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		C7681299241B73E200EA5FD8 /* IntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentHandler.swift; sourceTree = "<group>"; };
-		C768129B241B73E200EA5FD8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C76812A0241B73E200EA5FD8 /* IntentsUIExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = IntentsUIExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		C76812A1241B73E200EA5FD8 /* IntentsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IntentsUI.framework; path = System/Library/Frameworks/IntentsUI.framework; sourceTree = SDKROOT; };
-		C76812A4241B73E200EA5FD8 /* IntentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentViewController.swift; sourceTree = "<group>"; };
-		C76812A7241B73E200EA5FD8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
-		C76812A9241B73E200EA5FD8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C775AF442419EA7C0044C43E /* YoutubeDL-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "YoutubeDL-Bridging-Header.h"; sourceTree = "<group>"; };
 		C7846379244D57EA007CFD0E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E19B09AB241C84440016CB29 /* DownloadViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadViewController.swift; sourceTree = "<group>"; };
@@ -146,21 +113,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C7681294241B73E200EA5FD8 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C768129D241B73E200EA5FD8 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				C76812A2241B73E200EA5FD8 /* IntentsUI.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -176,13 +128,13 @@
 		60796ED919190F4100A9926B = {
 			isa = PBXGroup;
 			children = (
+				4C8FF54125662F930095A4AB /* LICENSE */,
+				4C8FF54025662F930095A4AB /* README.md */,
 				4CD7420C2564D9E200442678 /* PythonKit */,
 				4C47926F255E66B000F7EDE0 /* YoutubeDL-iOS */,
 				4C479261255E642900F7EDE0 /* FFmpeg-iOS */,
 				4C47925C255E640800F7EDE0 /* Python-iOS */,
 				60796EEB19190F4100A9926B /* YoutubeDL */,
-				C7681298241B73E200EA5FD8 /* Intents */,
-				C76812A3241B73E200EA5FD8 /* IntentsUI */,
 				4C0A8EEF24D7D0F40071AE7D /* YoutubeDLTests */,
 				60796EE419190F4100A9926B /* Frameworks */,
 				60796EE319190F4100A9926B /* Products */,
@@ -193,8 +145,6 @@
 			isa = PBXGroup;
 			children = (
 				610000000000000000100400 /* Y.app */,
-				C7681297241B73E200EA5FD8 /* IntentsExtension.appex */,
-				C76812A0241B73E200EA5FD8 /* IntentsUIExtension.appex */,
 				4C0A8EEE24D7D0F40071AE7D /* YoutubeDLTests.xctest */,
 			);
 			name = Products;
@@ -225,12 +175,9 @@
 				60796EEC19190F4100A9926B /* Supporting Files */,
 				E19B09AB241C84440016CB29 /* DownloadViewController.swift */,
 				C7846379244D57EA007CFD0E /* AppDelegate.swift */,
-				C7681291241B6C9400EA5FD8 /* Intents.intentdefinition */,
 				C7681275241B4E7800EA5FD8 /* Main.storyboard */,
 				C7681277241B4F2F00EA5FD8 /* LaunchScreen.storyboard */,
 				C775AF442419EA7C0044C43E /* YoutubeDL-Bridging-Header.h */,
-				4CFF393924DA71A900131F73 /* DetailView.swift */,
-				4CD1DB3624FC9737000091B5 /* FormatTableViewController.swift */,
 				4CF3881125075B7D0078DB2B /* Shaders.metal */,
 				4CF3881325075E320078DB2B /* ShaderTypes.h */,
 			);
@@ -246,25 +193,6 @@
 				60796EEE19190F4100A9926B /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		C7681298241B73E200EA5FD8 /* Intents */ = {
-			isa = PBXGroup;
-			children = (
-				C7681299241B73E200EA5FD8 /* IntentHandler.swift */,
-				C768129B241B73E200EA5FD8 /* Info.plist */,
-			);
-			path = Intents;
-			sourceTree = "<group>";
-		};
-		C76812A3241B73E200EA5FD8 /* IntentsUI */ = {
-			isa = PBXGroup;
-			children = (
-				C76812A4241B73E200EA5FD8 /* IntentViewController.swift */,
-				C76812A6241B73E200EA5FD8 /* MainInterface.storyboard */,
-				C76812A9241B73E200EA5FD8 /* Info.plist */,
-			);
-			path = IntentsUI;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -300,8 +228,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				C76812AB241B73E200EA5FD8 /* PBXTargetDependency */,
-				C76812AE241B73E200EA5FD8 /* PBXTargetDependency */,
 			);
 			name = YoutubeDL;
 			packageProductDependencies = (
@@ -311,40 +237,6 @@
 			productReference = 610000000000000000100400 /* Y.app */;
 			productType = "com.apple.product-type.application";
 		};
-		C7681296241B73E200EA5FD8 /* IntentsExtension */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = C76812B3241B73E200EA5FD8 /* Build configuration list for PBXNativeTarget "IntentsExtension" */;
-			buildPhases = (
-				C7681293241B73E200EA5FD8 /* Sources */,
-				C7681294241B73E200EA5FD8 /* Frameworks */,
-				C7681295241B73E200EA5FD8 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = IntentsExtension;
-			productName = Intents;
-			productReference = C7681297241B73E200EA5FD8 /* IntentsExtension.appex */;
-			productType = "com.apple.product-type.app-extension";
-		};
-		C768129F241B73E200EA5FD8 /* IntentsUIExtension */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = C76812B0241B73E200EA5FD8 /* Build configuration list for PBXNativeTarget "IntentsUIExtension" */;
-			buildPhases = (
-				C768129C241B73E200EA5FD8 /* Sources */,
-				C768129D241B73E200EA5FD8 /* Frameworks */,
-				C768129E241B73E200EA5FD8 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = IntentsUIExtension;
-			productName = IntentsUI;
-			productReference = C76812A0241B73E200EA5FD8 /* IntentsUIExtension.appex */;
-			productType = "com.apple.product-type.app-extension";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -352,7 +244,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1200;
-				LastUpgradeCheck = 1140;
+				LastUpgradeCheck = 1220;
 				ORGANIZATIONNAME = Kewlbear;
 				TargetAttributes = {
 					4C0A8EED24D7D0F40071AE7D = {
@@ -361,12 +253,6 @@
 					};
 					60796EE119190F4100A9926B = {
 						LastSwiftMigration = 1140;
-					};
-					C7681296241B73E200EA5FD8 = {
-						CreatedOnToolsVersion = 11.4;
-					};
-					C768129F241B73E200EA5FD8 = {
-						CreatedOnToolsVersion = 11.4;
 					};
 				};
 			};
@@ -387,8 +273,6 @@
 			projectRoot = "";
 			targets = (
 				60796EE119190F4100A9926B /* YoutubeDL */,
-				C7681296241B73E200EA5FD8 /* IntentsExtension */,
-				C768129F241B73E200EA5FD8 /* IntentsUIExtension */,
 				4C0A8EED24D7D0F40071AE7D /* YoutubeDLTests */,
 			);
 		};
@@ -413,21 +297,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C7681295241B73E200EA5FD8 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C768129E241B73E200EA5FD8 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				C76812A8241B73E200EA5FD8 /* MainInterface.storyboard in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -445,26 +314,7 @@
 			files = (
 				4CF3881225075B7D0078DB2B /* Shaders.metal in Sources */,
 				C784637A244D57EA007CFD0E /* AppDelegate.swift in Sources */,
-				4CD1DB3724FC9737000091B5 /* FormatTableViewController.swift in Sources */,
-				C7681292241B6C9400EA5FD8 /* Intents.intentdefinition in Sources */,
-				4CFF393A24DA71A900131F73 /* DetailView.swift in Sources */,
 				E19B09AC241C84440016CB29 /* DownloadViewController.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C7681293241B73E200EA5FD8 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				C768129A241B73E200EA5FD8 /* IntentHandler.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C768129C241B73E200EA5FD8 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				C76812A5241B73E200EA5FD8 /* IntentViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -476,16 +326,6 @@
 			target = 60796EE119190F4100A9926B /* YoutubeDL */;
 			targetProxy = 4C0A8EF324D7D0F40071AE7D /* PBXContainerItemProxy */;
 		};
-		C76812AB241B73E200EA5FD8 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = C768129F241B73E200EA5FD8 /* IntentsUIExtension */;
-			targetProxy = C76812AA241B73E200EA5FD8 /* PBXContainerItemProxy */;
-		};
-		C76812AE241B73E200EA5FD8 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = C7681296241B73E200EA5FD8 /* IntentsExtension */;
-			targetProxy = C76812AD241B73E200EA5FD8 /* PBXContainerItemProxy */;
-		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
@@ -495,14 +335,6 @@
 				610000000000000000100600 /* en */,
 			);
 			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		C76812A6241B73E200EA5FD8 /* MainInterface.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				C76812A7241B73E200EA5FD8 /* Base */,
-			);
-			name = MainInterface.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -597,6 +429,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -651,6 +484,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -769,132 +603,6 @@
 			};
 			name = Release;
 		};
-		C76812B1241B73E200EA5FD8 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_STYLE = Automatic;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = "";
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = IntentsUI/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "io.github.kewlbear.Youtube-DL.IntentsUI";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		C76812B2241B73E200EA5FD8 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_STYLE = Automatic;
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = "";
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = IntentsUI/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "io.github.kewlbear.Youtube-DL.IntentsUI";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
-		C76812B4241B73E200EA5FD8 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_STYLE = Automatic;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = "";
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = Intents/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "io.github.kewlbear.Youtube-DL.Intents";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		C76812B5241B73E200EA5FD8 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_STYLE = Automatic;
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = "";
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = Intents/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "io.github.kewlbear.Youtube-DL.Intents";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -921,24 +629,6 @@
 			buildConfigurations = (
 				60796F0F19190F4100A9926B /* Debug */,
 				60796F1019190F4100A9926B /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		C76812B0241B73E200EA5FD8 /* Build configuration list for PBXNativeTarget "IntentsUIExtension" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				C76812B1241B73E200EA5FD8 /* Debug */,
-				C76812B2241B73E200EA5FD8 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		C76812B3241B73E200EA5FD8 /* Build configuration list for PBXNativeTarget "IntentsExtension" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				C76812B4241B73E200EA5FD8 /* Debug */,
-				C76812B5241B73E200EA5FD8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
