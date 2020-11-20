@@ -50,7 +50,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     
     func applicationDidEnterBackground(_ application: UIApplication) {
         if Downloader.shared.transcoder != nil {
-            notify(body: "트랜스코딩이 중딘되었습니다. 앱으로 전환하고 트랜스코딩을 다시 하세요.")
+            notify(body: NSLocalizedString("TranscodingStoppedMessage", comment: "Notification body"))
         }
     }
     
@@ -64,20 +64,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         }
         downloadViewController?.url = url
         return true
-    }
-}
-
-func notify(body: String, identifier: String = "Download") {
-    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound, .providesAppNotificationSettings]) { (granted, error) in
-        print(#function, "granted =", granted, error ?? "no error")
-        guard granted else {
-            return
-        }
-        
-        let content = UNMutableNotificationContent()
-        content.body = body
-        let notificationRequest = UNNotificationRequest(identifier: identifier, content: content, trigger: nil)
-        UNUserNotificationCenter.current().add(notificationRequest, withCompletionHandler: nil)
     }
 }
 

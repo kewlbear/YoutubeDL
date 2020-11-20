@@ -77,6 +77,10 @@ class DownloadViewController: UIViewController {
     
     var computePipelineState: MTLComputePipelineState?
     
+    var isRemuxingEnabled = true
+    
+    var isTranscodingEnabled = true
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -102,11 +106,6 @@ class DownloadViewController: UIViewController {
 //        computePipelineState = try! device?.makeComputePipelineState(function: function!)
     }
     
-    @IBAction
-    func handlePan(_ sender: UIPanGestureRecognizer) {
-        print(#function, sender)
-    }
-    
     func updateTextures() {
         guard let pixelBuffer = self.pixelBuffer else {
             return
@@ -126,305 +125,6 @@ class DownloadViewController: UIViewController {
         }
         
         return mtlTexture
-    }
-    
-    @IBAction func crop(_ sender: UIBarButtonItem) {
-//        let fetchOptions = PHFetchOptions()
-//        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "modificationDate", ascending: true)]
-//        let videos = PHAsset.fetchAssets(with: .video, options: fetchOptions)
-//        let video = videos[videos.count - 1]
-//        print(video)
-//
-//        video.requestContentEditingInput(with: nil) { (contentEditingInput, info) in
-//            print(contentEditingInput?.audiovisualAsset, info)
-//            guard let input = contentEditingInput,
-//                let asset = input.audiovisualAsset
-//                else { return }
-
-        do {
-            let location = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-                .appendingPathComponent("video")
-                .appendingPathExtension("mp4")
-            
-        let asset = AVURLAsset(url: location)
-            print(asset)
-            let compatiblePresets = AVAssetExportSession.exportPresets(compatibleWith: asset)
-            print(compatiblePresets)
-            if compatiblePresets.contains(AVAssetExportPresetHighestQuality) {
-                //                let output = PHContentEditingOutput(contentEditingInput: input)
-                do {
-                    let url = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true).appendingPathComponent("out.mp4")
-                    
-                    try? FileManager.default.removeItem(at: url)
-                    
-                    let composition = AVMutableComposition()
-                    guard let videoCompositionTrack = composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid),
-                        let audioCompositionTrack = composition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid)
-                        else { fatalError() }
-                    
-                    let videoAssetTrack = asset.tracks(withMediaType: .video)[0]
-                    let audioAssetTrack = asset.tracks(withMediaType: .audio)[0]
-                    
-                    let timeRange = CMTimeRange(start: .zero, duration: CMTime(seconds: 30, preferredTimescale: asset.duration.timescale))
-                    
-                    try videoCompositionTrack.insertTimeRange(timeRange, of: videoAssetTrack, at: .zero)
-                    try audioCompositionTrack.insertTimeRange(timeRange, of: audioAssetTrack, at: .zero)
-                    
-                    videoCompositionTrack.scaleTimeRange(timeRange, toDuration: CMTime(seconds: 60, preferredTimescale: asset.duration.timescale))
-                    
-                    let transform = videoAssetTrack.preferredTransform
-                    let isPortrait = transform.a == 0 && transform.d == 0 && abs(transform.b) == 1 && abs(transform.c) == 1
-                    
-                    let videoCompositionInstruction = AVMutableVideoCompositionInstruction()
-                    videoCompositionInstruction.timeRange = videoCompositionTrack.timeRange
-                    
-                    let videoLayerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: videoCompositionTrack)
-                    
-                    print(videoAssetTrack.preferredTransform)
-                    let translate = CGAffineTransform(translationX: -videoAssetTrack.naturalSize.width / 3, y: 0)
-                    videoLayerInstruction.setTransform(
-                        translate
-//                        transform
-                        , at: .zero)
-                    videoCompositionInstruction.layerInstructions = [videoLayerInstruction]
-                    
-                    let videoComposition = AVMutableVideoComposition()
-                    videoComposition.instructions = [videoCompositionInstruction]
-                    
-                    let size = videoAssetTrack.naturalSize
-                    videoComposition.renderSize =
-                        CGSize(width: size.width / 2, height: size.height)
-//                        size.applying(scale.inverted())
-                    videoComposition.renderScale = 1
-                    videoComposition.frameDuration =
-                        videoAssetTrack.minFrameDuration
-//                        CMTime(seconds: 1, preferredTimescale: 30)
-                    
-                    let mainQueue = DispatchQueue(label: "main")
-                    let videoQueue = DispatchQueue(label: "video")
-                    let audioQueue = DispatchQueue(label: "audio")
-
-                    var cancelled = false
-                    
-                    struct Context {
-                        let reader: AVAssetReader
-                        let writer: AVAssetWriter
-                        
-                        let readerVideoOutput: AVAssetReaderOutput
-                        let writerVideoInput: AVAssetWriterInput
-                    
-                        let readerAudioOutput: AVAssetReaderOutput
-                        let writerAudioInput: AVAssetWriterInput
-                    }
-                    
-                    func setupAssetReaderAndAssetWriter() throws -> Context {
-                        let reader = try AVAssetReader(asset:
-                            composition
-//                            asset
-                        )
-                        
-                        let writer = try AVAssetWriter(outputURL: url, fileType: .mov)
-
-                        guard let localComposition = reader.asset as? AVComposition else { fatalError() }
-                        let readerVideoOutput =
-                            AVAssetReaderVideoCompositionOutput(videoTracks: localComposition.tracks(withMediaType: .video), videoSettings: nil)
-//                            AVAssetReaderTrackOutput(track: videoAssetTrack, outputSettings: nil)
-                        
-                        readerVideoOutput.alwaysCopiesSampleData = false
-                        
-                        readerVideoOutput.videoComposition = videoComposition
-//                        if reader.canAdd(readerVideoOutput) {
-                            reader.add(readerVideoOutput)
-//                        }
-
-                        let writerVideoInput = AVAssetWriterInput(mediaType: .video, outputSettings: nil)
-//                        if writer.canAdd(writerVideoInput) {
-                            writer.add(writerVideoInput)
-//                        }
-                        
-                        let readerAudioOutput =
-                            AVAssetReaderTrackOutput(track:
-                                audioCompositionTrack
-//                                audioAssetTrack
-                                , outputSettings: nil)
-                        
-                        readerAudioOutput.alwaysCopiesSampleData = false
-                        
-//                        if reader.canAdd(readerAudioOutput) {
-                            reader.add(readerAudioOutput)
-//                        }
-                        
-                        let writerAudioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: nil)
-//                        if writer.canAdd(writerAudioInput) {
-                            writer.add(writerAudioInput)
-//                        }
-                        
-                        return Context(reader: reader, writer: writer, readerVideoOutput: readerVideoOutput, writerVideoInput: writerVideoInput, readerAudioOutput: readerAudioOutput, writerAudioInput: writerAudioInput)
-                    }
-                    
-                    func readingAndWritingDidFinish(successfully success: Bool, error: Error?, context: Context?) {
-                        if !success {
-                            context?.reader.cancelReading()
-                            context?.writer.cancelWriting()
-                            
-                            print(error)
-                        } else {
-                            PHPhotoLibrary.shared().performChanges({
-                                let changeRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
-                                //                            changeRequest.contentEditingOutput = output
-                            }) { (success, error) in
-                                print(success, error)
-
-                                DispatchQueue.main.async {
-                                    URL(string: "instagram://camera").map { UIApplication.shared.open($0, options: [:], completionHandler: nil)}
-                                }
-                            }
-                        }
-                    }
-                    
-                    func startAssetReaderAndAssetWriter(context: Context) throws {
-                        guard context.reader.startReading() else { throw context.reader.error! }
-
-                        guard context.writer.startWriting() else { throw context.writer.error! }
-                        
-                        let dispatchGroup = DispatchGroup()
-
-                        context.writer.startSession(atSourceTime: .zero)
-                        
-                        var videoFinished = false
-                        var audioFinished = false
-                        
-                        dispatchGroup.enter()
-                        
-                        context.writerVideoInput.requestMediaDataWhenReady(on: videoQueue) {
-                            if videoFinished {
-                                return
-                            }
-                            var completedOrFailed = false
-                            
-                            while context.writerVideoInput.isReadyForMoreMediaData && !completedOrFailed {
-                                guard let sampleBuffer = context.readerVideoOutput.copyNextSampleBuffer() else {
-                                    completedOrFailed = true
-                                    continue
-                                }
-                                completedOrFailed = !context.writerVideoInput.append(sampleBuffer)
-                            }
-                            
-                            if completedOrFailed {
-                                let oldFinished = videoFinished
-                                videoFinished = true
-                                if !oldFinished {
-                                    context.writerVideoInput.markAsFinished()
-                                }
-                                dispatchGroup.leave()
-                            }
-                        }
-
-                        dispatchGroup.enter()
-                        
-                        context.writerAudioInput.requestMediaDataWhenReady(on: audioQueue) {
-                            if audioFinished {
-                                return
-                            }
-                            var completedOrFailed = false
-                            
-                            while context.writerAudioInput.isReadyForMoreMediaData && !completedOrFailed {
-                                guard let sampleBuffer = context.readerAudioOutput.copyNextSampleBuffer() else {
-                                    completedOrFailed = true
-                                    continue
-                                }
-                                completedOrFailed = !context.writerAudioInput.append(sampleBuffer)
-                            }
-
-                            if completedOrFailed {
-                                let oldFinished = audioFinished
-                                audioFinished = true
-                                if !oldFinished {
-                                    context.writerAudioInput.markAsFinished()
-                                }
-                                audioFinished = true
-                                dispatchGroup.leave()
-                            }
-                        }
-                        
-                        dispatchGroup.notify(queue: mainQueue) {
-                            if cancelled {
-                                context.reader.cancelReading()
-                                context.writer.cancelWriting()
-                            } else {
-                                do {
-                                    guard context.reader.status != .failed else { throw context.reader.error! }
-                                    context.writer.finishWriting {
-                                        let success = context.writer.status != .failed
-                                        readingAndWritingDidFinish(successfully: success, error: success ? nil : context.writer.error, context: context)
-                                    }
-                                }
-                                catch {
-                                    readingAndWritingDidFinish(successfully: false, error: error, context: context)
-                                }
-                            }
-                        }
-                    }
-                    
-                    composition
-//                    asset
-                        .loadValuesAsynchronously(forKeys: ["tracks"]) {
-                        mainQueue.async {
-                            guard !cancelled else { return }
-                            
-                            do {
-                                var localError: NSError?
-                                guard asset.statusOfValue(forKey: "tracks", error: &localError) == .loaded else { throw localError! }
-                                
-                                try? FileManager.default.removeItem(at: url)
-                                
-                                let context = try setupAssetReaderAndAssetWriter()
-                                
-                                try startAssetReaderAndAssetWriter(context: context)
-                            }
-                            catch {
-                                readingAndWritingDidFinish(successfully: false, error: error, context: nil)
-                            }
-                        }
-                    }
-                    
-//                    let exportSession = AVAssetExportSession(asset: composition, presetName: AVAssetExportPresetHighestQuality)
-//                    exportSession?.outputURL = url
-//                    exportSession?.outputFileType =
-//                        //                        .mov
-//                        .mp4
-//
-//                    exportSession?.videoComposition = videoComposition
-//
-//                    exportSession?.exportAsynchronously {
-//                        switch exportSession?.status {
-//                        case .failed:
-//                            print("failed:", exportSession?.error)
-//                        case .cancelled:
-//                            print("canceled")
-//                        default:
-//                            PHPhotoLibrary.shared().performChanges({
-//                                let changeRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
-//                                //                            changeRequest.contentEditingOutput = output
-//                            }) { (success, error) in
-//                                print(success, error)
-//                            }
-////                            DispatchQueue.main.async {
-////                                self.present(UIActivityViewController(activityItems: [url], applicationActivities: nil), animated: true, completion: nil)
-////                            }
-//                        }
-//                    }
-                }
-                catch {
-                    print(error)
-                }
-            }
-            }
-            catch {
-                print(error)
-//            }
-
-        }
     }
     
     // MARK: - Navigation
@@ -450,7 +150,7 @@ class DownloadViewController: UIViewController {
             }
             
             DispatchQueue.main.async {
-                self.navigationItem.prompt = downloading.isEmpty ? "Resumed" : "Paused"
+                self.navigationItem.prompt = NSLocalizedString(downloading.isEmpty ? "Resumed" : "Paused", comment: "Prompt") 
                 sender.isEnabled = true
             }
         }
@@ -467,7 +167,7 @@ class DownloadViewController: UIViewController {
             Downloader.shared.transcoder?.isCancelled = true
             
             DispatchQueue.main.async {
-                self.navigationItem.prompt = "Cancelled"
+                self.navigationItem.prompt = NSLocalizedString("Cancelled", comment: "Prompt") 
                 sender.isEnabled = true
             }
         }
@@ -529,6 +229,18 @@ extension DownloadViewController: UIGestureRecognizerDelegate {
     }
 }
 
+let av1CodecPrefix = "av01."
+
+extension Format {
+    var isRemuxingNeeded: Bool { isVideoOnly || isAudioOnly }
+    
+    var isTranscodingNeeded: Bool {
+        self.ext == "mp4"
+            ? (self.vcodec ?? "").hasPrefix(av1CodecPrefix)
+            : self.ext != "m4a"
+    }
+}
+
 extension DownloadViewController {
     func check(info: Info?) {
         guard let formats = info?.formats else {
@@ -536,12 +248,9 @@ extension DownloadViewController {
         }
         
         let _bestAudio = formats.filter { $0.isAudioOnly && $0.ext == "m4a" }.last
-        let _bestVideo = formats.filter { $0.isVideoOnly
-            && $0.ext ==
-//            "webm"
-            "mp4"
-        }.last
-        let _best = formats.filter { !$0.isVideoOnly && !$0.isAudioOnly && $0.ext == "mp4" }.last
+        let _bestVideo = formats.filter {
+            $0.isVideoOnly && (isTranscodingEnabled || !$0.isTranscodingNeeded) }.last
+        let _best = formats.filter { !$0.isRemuxingNeeded && !$0.isTranscodingNeeded }.last
         print(_best ?? "no best?", _bestVideo ?? "no bestvideo?", _bestAudio ?? "no bestaudio?")
         guard let best = _best, let bestVideo = _bestVideo, let bestAudio = _bestAudio,
               let bestHeight = best.height, let bestVideoHeight = bestVideo.height
@@ -549,29 +258,40 @@ extension DownloadViewController {
         else
         {
             if let best = _best {
-                notify(body: #""\#(info?.title ?? "No title?")" 다운로드 시작"#)
+                notify(body: String(format: NSLocalizedString("DownloadStartFormat", comment: "Notification body"),
+                                    info?.title ?? NSLocalizedString("NoTitle?", comment: "Nil")))
                 download(format: best, start: true, faster: false)
             } else if let bestVideo = _bestVideo, let bestAudio = _bestAudio {
                 download(format: bestVideo, start: true, faster: true)
                 download(format: bestAudio, start: false, faster: true)
             } else {
                 DispatchQueue.main.async {
-                    self.performSegue(withIdentifier: "formats", sender: nil)
+                    self.alert(message: NSLocalizedString("NoSuitableFormat", comment: "Alert message"))
                 }
             }
             return
         }
         
         DispatchQueue.main.async {
-            let alert = UIAlertController(title: "다운로드 포맷 선택", message: "MP4 이외의 비디오는 다운로드 후 변환이 필요합니다.", preferredStyle: .actionSheet)
-            alert.addAction(UIAlertAction(title: "Video+Audio.mp4 (\(bestHeight)p)", style: .default, handler: { _ in
-                self.download(format: best, start: true, faster: false)
+            let alert = UIAlertController(title: NSLocalizedString("ChooseFormat", comment: "Alert title"),
+                                          message: NSLocalizedString("SomeFormatsNeedTranscoding", comment: "Alert message"),
+                                          preferredStyle: .actionSheet)
+            alert.addAction(UIAlertAction(title: String(format: NSLocalizedString("BestFormat", comment: "Alert action"), bestHeight),
+                                          style: .default,
+                                          handler: { _ in
+                                            self.download(format: best, start: true, faster: false)
+                                          }))
+            alert.addAction(UIAlertAction(title: String(format: NSLocalizedString("RemuxingFormat", comment: "Alert action"),
+                                                        bestVideo.ext ?? NSLocalizedString("NoExt?", comment: "Nil"),
+                                                        bestAudio.ext ?? NSLocalizedString("NoExt?", comment: "Nil"),
+                                                        bestHeight),
+                                          style: .default,
+                                          handler: { _ in
+                                            self.download(format: bestVideo, start: true, faster: true)
+                                            self.download(format: bestAudio, start: false, faster: true)
             }))
-            alert.addAction(UIAlertAction(title: "Video.\(bestVideo.ext ?? "?") + Audio.m4a (\(bestVideoHeight)p)", style: .default, handler: { _ in
-                self.download(format: bestVideo, start: true, faster: true)
-                self.download(format: bestAudio, start: false, faster: true)
-            }))
-            alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
+            alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: "Action title"),
+                                          style: .cancel, handler: nil))
             if self.traitCollection.userInterfaceIdiom == .pad {
                 alert.popoverPresentationController?.sourceView = self.progressView
                 alert.popoverPresentationController?.sourceRect = self.progressView.bounds
@@ -582,7 +302,7 @@ extension DownloadViewController {
     
     func download(format: Format, start: Bool, faster: Bool) {
         let kind: Downloader.Kind = format.isVideoOnly
-            ? (format.ext == "mp4" ? .videoOnly : .otherVideo)
+            ? (!format.isTranscodingNeeded ? .videoOnly : .otherVideo)
             : (format.isAudioOnly ? .audioOnly : .complete)
 
         var requests: [URLRequest] = []
@@ -624,7 +344,7 @@ extension DownloadViewController {
 
                 // FIXME: better way?
                 DispatchQueue.main.async {
-                    self.alert(message: "Downloaded youtube_dl. Restart app.")
+                    self.alert(message: NSLocalizedString("Downloaded youtube_dl. Restart app.", comment: "Alert message"))
                 }
             }
             return
@@ -640,7 +360,7 @@ extension DownloadViewController {
             }
         }
         
-        notify(body: "영상 정보 받는중...")
+        notify(body: NSLocalizedString("ExtractingInfo", comment: "Notification body"))
         
         DispatchQueue.global(qos: .userInitiated).async {
             do {
@@ -659,7 +379,7 @@ extension DownloadViewController {
                 }
                 if (String(exception.args[0]) ?? "").contains("Unsupported URL: ") {
                     DispatchQueue.main.async {
-                        self.alert(message: "Unsupported URL")
+                        self.alert(message: NSLocalizedString("Unsupported URL", comment: "Alert message"))
                     }
                 }
             }
@@ -676,7 +396,7 @@ extension URL {
 extension UIViewController {
     func alert(message: String) {
         let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Action"), style: .default, handler: nil))
         present(alert, animated: true, completion: nil)
     }
 }

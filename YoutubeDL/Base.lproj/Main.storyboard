@@ -37,7 +37,7 @@
                             </connections>
                         </barButtonItem>
                         <barButtonItem systemItem="flexibleSpace" id="yox-CE-j8l"/>
-                        <barButtonItem title="트랜스코딩" id="fmn-Oc-5yn">
+                        <barButtonItem title="Finish" id="fmn-Oc-5yn">
                             <connections>
                                 <action selector="transcode:" destination="Sum-gd-pex" id="QoK-wk-EZU"/>
                             </connections>

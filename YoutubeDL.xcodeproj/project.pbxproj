@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		4C0A8EF124D7D0F40071AE7D /* YoutubeDLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A8EF024D7D0F40071AE7D /* YoutubeDLTests.swift */; };
+		4C185D4C256791C400106D39 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4C185D4E256791C400106D39 /* Localizable.strings */; };
+		4C185D522567A5CA00106D39 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4C185D542567A5CA00106D39 /* Main.storyboard */; };
 		4C479257255E62B900F7EDE0 /* YoutubeDL in Frameworks */ = {isa = PBXBuildFile; productRef = 4C479256255E62B900F7EDE0 /* YoutubeDL */; };
 		4CD1DB4124FCC0A7000091B5 /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB4024FCC0A7000091B5 /* VideoToolbox.framework */; };
 		4CD1DB4324FCC0B7000091B5 /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CD1DB4224FCC0B7000091B5 /* libiconv.tbd */; };
@@ -21,7 +23,6 @@
 		600000000000000000000B00 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 610000000000000000000B00 /* WebKit.framework */; };
 		600000000000000000100000 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 60796EEE19190F4100A9926B /* InfoPlist.strings */; };
 		600000000000000000100200 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 610000000000000000100800 /* Images.xcassets */; };
-		C7681276241B4E7800EA5FD8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C7681275241B4E7800EA5FD8 /* Main.storyboard */; };
 		C7681278241B4F2F00EA5FD8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C7681277241B4F2F00EA5FD8 /* LaunchScreen.storyboard */; };
 		C7681290241B690700EA5FD8 /* Intents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C768128F241B690700EA5FD8 /* Intents.framework */; };
 		C784637A244D57EA007CFD0E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7846379244D57EA007CFD0E /* AppDelegate.swift */; };
@@ -55,6 +56,12 @@
 		4C0A8EEE24D7D0F40071AE7D /* YoutubeDLTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YoutubeDLTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C0A8EF024D7D0F40071AE7D /* YoutubeDLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YoutubeDLTests.swift; sourceTree = "<group>"; };
 		4C0A8EF224D7D0F40071AE7D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4C185D452567911000106D39 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		4C185D4D256791C400106D39 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		4C185D4F256791D300106D39 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Localizable.strings; sourceTree = "<group>"; };
+		4C185D532567A5CA00106D39 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		4C185D582567A5CF00106D39 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
+		4C185D5A2567A5D500106D39 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Main.strings; sourceTree = "<group>"; };
 		4C47925C255E640800F7EDE0 /* Python-iOS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "Python-iOS"; path = "../tmp/Python-iOS"; sourceTree = "<group>"; };
 		4C479261255E642900F7EDE0 /* FFmpeg-iOS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "FFmpeg-iOS"; path = "../tmp/FFmpeg-iOS"; sourceTree = "<group>"; };
 		4C47926F255E66B000F7EDE0 /* YoutubeDL-iOS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "YoutubeDL-iOS"; path = "../tmp/YoutubeDL-iOS"; sourceTree = "<group>"; };
@@ -72,12 +79,11 @@
 		610000000000000000000900 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		610000000000000000000A00 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		610000000000000000000B00 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
-		610000000000000000100400 /* YoutubeDLApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = YoutubeDLApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		610000000000000000100400 /* YoutubeDLApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = YoutubeDLApp.app; path = Y.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		610000000000000000100500 /* YoutubeDL-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "YoutubeDL-Info.plist"; sourceTree = "<group>"; };
 		610000000000000000100600 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		610000000000000000100700 /* YoutubeDL-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "YoutubeDL-Prefix.pch"; sourceTree = "<group>"; };
 		610000000000000000100800 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		C7681275241B4E7800EA5FD8 /* Main.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		C7681277241B4F2F00EA5FD8 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		C768128E241B68C000EA5FD8 /* YoutubeDL.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = YoutubeDL.entitlements; sourceTree = "<group>"; };
 		C768128F241B690700EA5FD8 /* Intents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Intents.framework; path = System/Library/Frameworks/Intents.framework; sourceTree = SDKROOT; };
@@ -175,7 +181,7 @@
 				60796EEC19190F4100A9926B /* Supporting Files */,
 				E19B09AB241C84440016CB29 /* DownloadViewController.swift */,
 				C7846379244D57EA007CFD0E /* AppDelegate.swift */,
-				C7681275241B4E7800EA5FD8 /* Main.storyboard */,
+				4C185D542567A5CA00106D39 /* Main.storyboard */,
 				C7681277241B4F2F00EA5FD8 /* LaunchScreen.storyboard */,
 				C775AF442419EA7C0044C43E /* YoutubeDL-Bridging-Header.h */,
 				4CF3881125075B7D0078DB2B /* Shaders.metal */,
@@ -191,6 +197,7 @@
 				610000000000000000100500 /* YoutubeDL-Info.plist */,
 				610000000000000000100700 /* YoutubeDL-Prefix.pch */,
 				60796EEE19190F4100A9926B /* InfoPlist.strings */,
+				4C185D4E256791C400106D39 /* Localizable.strings */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -263,6 +270,7 @@
 			knownRegions = (
 				en,
 				Base,
+				ko,
 			);
 			mainGroup = 60796ED919190F4100A9926B;
 			packageReferences = (
@@ -290,7 +298,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C7681276241B4E7800EA5FD8 /* Main.storyboard in Resources */,
+				4C185D4C256791C400106D39 /* Localizable.strings in Resources */,
+				4C185D522567A5CA00106D39 /* Main.storyboard in Resources */,
 				C7681278241B4F2F00EA5FD8 /* LaunchScreen.storyboard in Resources */,
 				600000000000000000100000 /* InfoPlist.strings in Resources */,
 				600000000000000000100200 /* Images.xcassets in Resources */,
@@ -329,10 +338,30 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		4C185D4E256791C400106D39 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4C185D4D256791C400106D39 /* en */,
+				4C185D4F256791D300106D39 /* ko */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		4C185D542567A5CA00106D39 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4C185D532567A5CA00106D39 /* Base */,
+				4C185D582567A5CF00106D39 /* en */,
+				4C185D5A2567A5D500106D39 /* ko */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
 		60796EEE19190F4100A9926B /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
 				610000000000000000100600 /* en */,
+				4C185D452567911000106D39 /* ko */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";

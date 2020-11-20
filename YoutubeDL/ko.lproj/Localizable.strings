@@ -1,0 +1,41 @@
+/* 
+  Localizable.strings
+
+  Copyright (c) 2020 Changbeom Ahn
+ 
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+ 
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+ 
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
+*/
+
+"TranscodingStoppedMessage" = "트랜스코딩이 중딘되었습니다. 앱으로 전환하고 트랜스코딩을 다시 하세요.";
+"Paused" = "일시중지됨";
+"Resumed" = "재개됨";
+"Cancelled" = "취소됨";
+"NoSuitableFormat" = "조건에 맞는 포맷의 비디오가 없습니다.";
+"DownloadStartFormat" = "다운로드 시작: %@";
+"NoTitle?" = "제목 없음?";
+"ChooseFormat" = "다운로드 포맷 선택";
+"SomeFormatsNeedTranscoding" = "어떤 포맷은 다운로드 후 변환이 필요합니다.";
+"BestFormat" = "Video+Audio.mp4 (%ldp)";
+"RemuxingFormat" = "Video.%@ + Audio.%@ (%ldp)";
+"NoExt?" = "확장자 없음?";
+"Cancel" = "취소";
+"Downloaded youtube-dl. Restart app." = "youtube-dl을 다운로드 했습니다. 앱을 재시작하세요.";
+"ExtractingInfo" = "영상 정보 받는중...";
+"Unsupported URL" = "지원하지 않는 URL";
+"OK" = "확인";
