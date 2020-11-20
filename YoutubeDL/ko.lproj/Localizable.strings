@@ -39,3 +39,15 @@
 "ExtractingInfo" = "영상 정보 받는중...";
 "Unsupported URL" = "지원하지 않는 URL";
 "OK" = "확인";
+"Merge failed" = "병합 실패";
+"Merging..." = "병합중...";
+"AskTranscode" = "앱을 실행하고 작업을 마무리 하세요.";
+"DoNotSwitch" = "변환이 끝날 때까지 다른 앱으로 전환하지 마세요.";
+"Transcoding..." = "변환중...";
+"TranscodeProgressFormat" = "변환율 %@, 남은 시간: %@";
+"FinishedTranscoding" = "트랜스코딩 완료";
+"Exporting..." = "저장중...";
+"Download complete!" = "다운로드 완료!";
+"Finished" = "완료";
+"Download finished" = "다운로드 완료";
+"DownloadProgressFormat" = "%@ 총 %@ 속도 %@/s 남은 시간 %@ %@";

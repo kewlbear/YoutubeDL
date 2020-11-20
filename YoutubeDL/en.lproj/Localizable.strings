@@ -26,3 +26,5 @@
 "NoSuitableFormat" = "No suitable format.";
 "DownloadStartFormat" = "Download start: %@";
 "NoTitle?" = "No title?";
+"TranscodeProgressFormat" = "Transcoding %@ ETA %@";
+"DownloadProgressFormat" = "%@ of %@ at %@/s ETA %@ %@";
