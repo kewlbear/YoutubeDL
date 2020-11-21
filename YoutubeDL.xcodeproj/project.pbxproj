@@ -62,14 +62,10 @@
 		4C185D532567A5CA00106D39 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		4C185D582567A5CF00106D39 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
 		4C185D5A2567A5D500106D39 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Main.strings; sourceTree = "<group>"; };
-		4C47925C255E640800F7EDE0 /* Python-iOS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "Python-iOS"; path = "../tmp/Python-iOS"; sourceTree = "<group>"; };
-		4C479261255E642900F7EDE0 /* FFmpeg-iOS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "FFmpeg-iOS"; path = "../tmp/FFmpeg-iOS"; sourceTree = "<group>"; };
-		4C47926F255E66B000F7EDE0 /* YoutubeDL-iOS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "YoutubeDL-iOS"; path = "../tmp/YoutubeDL-iOS"; sourceTree = "<group>"; };
 		4C8FF54025662F930095A4AB /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		4C8FF54125662F930095A4AB /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		4CD1DB4024FCC0A7000091B5 /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
 		4CD1DB4224FCC0B7000091B5 /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
-		4CD7420C2564D9E200442678 /* PythonKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PythonKit; path = ../tmp/PythonKit; sourceTree = "<group>"; };
 		4CF3881125075B7D0078DB2B /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		4CF3881325075E320078DB2B /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
 		610000000000000000000200 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
@@ -136,10 +132,6 @@
 			children = (
 				4C8FF54125662F930095A4AB /* LICENSE */,
 				4C8FF54025662F930095A4AB /* README.md */,
-				4CD7420C2564D9E200442678 /* PythonKit */,
-				4C47926F255E66B000F7EDE0 /* YoutubeDL-iOS */,
-				4C479261255E642900F7EDE0 /* FFmpeg-iOS */,
-				4C47925C255E640800F7EDE0 /* Python-iOS */,
 				60796EEB19190F4100A9926B /* YoutubeDL */,
 				4C0A8EEF24D7D0F40071AE7D /* YoutubeDLTests */,
 				60796EE419190F4100A9926B /* Frameworks */,
