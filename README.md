@@ -6,6 +6,11 @@ This iOS app uses youtube-dl.
 
 This app is NOT AppStore-safe.  Historically AppStore has been removing apps downloading videos from YouTube.  This app will likely be rejected by AppStore.
 
+## Features
+
+- Automatically downloads youtube-dl python module from https://yt-dl..org
+- Download media using URLSession
+
 ## Usage
 
 Run this app in a simulator.

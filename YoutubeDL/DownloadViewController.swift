@@ -284,7 +284,7 @@ extension DownloadViewController {
             alert.addAction(UIAlertAction(title: String(format: NSLocalizedString("RemuxingFormat", comment: "Alert action"),
                                                         bestVideo.ext ?? NSLocalizedString("NoExt?", comment: "Nil"),
                                                         bestAudio.ext ?? NSLocalizedString("NoExt?", comment: "Nil"),
-                                                        bestHeight),
+                                                        bestVideoHeight),
                                           style: .default,
                                           handler: { _ in
                                             self.download(format: bestVideo, start: true, faster: true)
@@ -335,16 +335,26 @@ extension DownloadViewController {
     fileprivate func extractInfo(_ url: URL) throws {
         if YoutubeDL.shouldDownloadPythonModule {
             print(#function, "downloading python module...")
+            notify(body: "Downloading Python module...")
             YoutubeDL.downloadPythonModule { error in
-                guard error == nil else {
-                    print(#function, error ?? "no error??")
-                    return
-                }
-                print(#function, "downloaded python module")
-
-                // FIXME: better way?
                 DispatchQueue.main.async {
-                    self.alert(message: NSLocalizedString("Downloaded youtube_dl. Restart app.", comment: "Alert message"))
+                    guard error == nil else {
+                        print(#function, error ?? "no error??")
+                        self.alert(message: error?.localizedDescription ?? "no error?")
+                        return
+                    }
+                    print(#function, "downloaded python module")
+
+                    // FIXME: better way?
+    //                DispatchQueue.main.async {
+    //                    self.alert(message: NSLocalizedString("Downloaded youtube_dl. Restart app.", comment: "Alert message"))
+    //                }
+                    do {
+                        try self.extractInfo(url)
+                    }
+                    catch {
+                        self.alert(message: error.localizedDescription)
+                    }
                 }
             }
             return

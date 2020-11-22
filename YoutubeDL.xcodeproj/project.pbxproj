@@ -86,6 +86,7 @@
 		C76812A1241B73E200EA5FD8 /* IntentsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IntentsUI.framework; path = System/Library/Frameworks/IntentsUI.framework; sourceTree = SDKROOT; };
 		C775AF442419EA7C0044C43E /* YoutubeDL-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "YoutubeDL-Bridging-Header.h"; sourceTree = "<group>"; };
 		C7846379244D57EA007CFD0E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		E12C253D2568BC3B0031EB29 /* YoutubeDL-iOS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "YoutubeDL-iOS"; path = "../YoutubeDL-iOS"; sourceTree = "<group>"; };
 		E19B09AB241C84440016CB29 /* DownloadViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -130,6 +131,7 @@
 		60796ED919190F4100A9926B = {
 			isa = PBXGroup;
 			children = (
+				E12C253D2568BC3B0031EB29 /* YoutubeDL-iOS */,
 				4C8FF54125662F930095A4AB /* LICENSE */,
 				4C8FF54025662F930095A4AB /* README.md */,
 				60796EEB19190F4100A9926B /* YoutubeDL */,

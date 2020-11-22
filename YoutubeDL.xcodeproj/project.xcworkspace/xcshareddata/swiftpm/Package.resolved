@@ -11,11 +11,38 @@
         }
       },
       {
+        "package": "FFmpeg-iOS",
+        "repositoryURL": "https://github.com/kewlbear/FFmpeg-iOS.git",
+        "state": {
+          "branch": "main",
+          "revision": "44dcaf804a2eda2615bb3e32c8dab89dda7ec2fd",
+          "version": null
+        }
+      },
+      {
         "package": "LoggerKit",
         "repositoryURL": "https://github.com/pvieito/LoggerKit.git",
         "state": {
           "branch": "master",
           "revision": "835b41248dbe474eb33dac2c1ef1376dea7dc11d",
+          "version": null
+        }
+      },
+      {
+        "package": "Python-iOS",
+        "repositoryURL": "https://github.com/kewlbear/Python-iOS.git",
+        "state": {
+          "branch": "main",
+          "revision": "7fd5aad9ccb42be540d8ddfb15e8641f9a859853",
+          "version": null
+        }
+      },
+      {
+        "package": "PythonKit",
+        "repositoryURL": "https://github.com/kewlbear/PythonKit.git",
+        "state": {
+          "branch": "master",
+          "revision": "3612c7e5bd1a2479655b3fe3972fb3cf5fe0b7f9",
           "version": null
         }
       },
