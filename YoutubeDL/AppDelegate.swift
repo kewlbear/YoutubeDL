@@ -25,6 +25,7 @@
 import UIKit
 import YoutubeDL
 import Resources
+import SwiftUI
 
 let trace = "trace"
 
@@ -44,6 +45,12 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         SetPythonHome()
         
         _ = Downloader.shared // create URL session
+        
+        if #available(iOS 13.0.0, *) {
+            (window?.rootViewController as? UINavigationController)?.viewControllers = [UIHostingController(rootView: MainView())]
+        } else {
+            // Fallback on earlier versions
+        }
         
         return true
     }
