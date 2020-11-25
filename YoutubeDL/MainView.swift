@@ -81,7 +81,10 @@ struct MainView: View {
                 if #available(iOS 14.0, *) {
                     ProgressView(progress)
                 } else {
-                    Text("\(progress)")
+                    VStack {
+                        Text("\(progress.localizedDescription)")
+                        Text("\(progress.localizedAdditionalDescription)")
+                    }
                 }
             }
             
@@ -93,7 +96,6 @@ struct MainView: View {
 //                    alert(message: "Nothing to paste")
 //                    return
 //                }
-                // FIXME: paste
                 guard let url = pasteBoard.url ?? pasteBoard.string.flatMap({ URL(string: $0) }) else {
                     alert(message: "Nothing to paste")
                     return

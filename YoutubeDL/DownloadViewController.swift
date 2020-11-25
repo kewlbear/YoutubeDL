@@ -104,6 +104,45 @@ class DownloadViewController: UIViewController {
         let library = device?.makeDefaultLibrary()
         let function = library?.makeFunction(name: "capturedImageFragmentShader")
 //        computePipelineState = try! device?.makeComputePipelineState(function: function!)
+        
+        let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        toolbarItems = [
+            flexibleSpace,
+            UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(add(_:))),
+            flexibleSpace,
+        ]
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        guard url == nil else {
+            return
+        }
+        
+        add(toolbarItems![1])
+    }
+    
+    @IBAction func add(_ sender: Any) {
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Paste URL", comment: "Action title"), style: .default, handler: { _ in
+            let pasteBoard = UIPasteboard.general
+            guard let url = pasteBoard.url ?? pasteBoard.string.flatMap({ URL(string: $0) }) else {
+                self.alert(message: "Nothing to paste")
+                return
+            }
+            self.url = url
+        }))
+        alert.addAction(UIAlertAction(title: NSLocalizedString(#"Prepend "y" to address in Safari "#, comment: "Action title"), style: .default, handler: { _ in
+            UIApplication.shared.open(URL(string: "https://youtube.com")!, options: [:], completionHandler: nil)
+        }))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Download shortcut", comment: "Action title"), style: .default, handler: { _ in
+            UIApplication.shared.open(URL(string: "https://www.icloud.com/shortcuts/e226114f6e6c4440b9c466d1ebe8fbfc")!, options: [:], completionHandler: nil)
+        }))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: "Action title"),
+                                      style: .cancel, handler: nil))
+        if traitCollection.userInterfaceIdiom == .pad {
+            alert.popoverPresentationController?.barButtonItem = sender as? UIBarButtonItem
+        }
+        present(alert, animated: true, completion: nil)
     }
     
     func updateTextures() {

@@ -46,10 +46,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         
         _ = Downloader.shared // create URL session
         
-        if #available(iOS 13.0.0, *) {
+        if #available(iOS 14, *) {
             (window?.rootViewController as? UINavigationController)?.viewControllers = [UIHostingController(rootView: MainView())]
-        } else {
-            // Fallback on earlier versions
         }
         
         return true
