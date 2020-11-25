@@ -111,6 +111,11 @@ struct MainView: View {
                 open(url: URL(string: "https://www.icloud.com/shortcuts/e226114f6e6c4440b9c466d1ebe8fbfc")!)
             }
         }
+        .onAppear(perform: {
+            if info == nil, let url = url {
+                extractInfo(url: url)
+            }
+        })
         .alert(isPresented: $isShowingAlert) {
             Alert(title: Text(alertMessage ?? "no message?"))
         }
