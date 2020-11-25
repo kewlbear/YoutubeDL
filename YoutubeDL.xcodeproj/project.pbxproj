@@ -543,7 +543,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = YoutubeDL/YoutubeDL.entitlements;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 265782UUTC;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -572,7 +572,7 @@
 					"$(PROJECT_DIR)/Support/BZip2",
 					"\"/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib\"",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "io.github.kewlbear.Youtube-DL";
+				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YD;
 				PRODUCT_NAME = Y;
 				SWIFT_INCLUDE_PATHS = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "YoutubeDL/YoutubeDL-Bridging-Header.h";
@@ -590,7 +590,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = YoutubeDL/YoutubeDL.entitlements;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 265782UUTC;
 				ENABLE_TESTABILITY = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -620,7 +620,7 @@
 					"$(PROJECT_DIR)/Support/Python",
 					"\"/Volumes/Dark SSD/Users/kewlbear/Projects/tmp/FFmpeg-iOS-build-script/FFmpeg-iOS/lib\"",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "io.github.kewlbear.Youtube-DL";
+				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YD;
 				PRODUCT_NAME = Y;
 				SWIFT_INCLUDE_PATHS = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "YoutubeDL/YoutubeDL-Bridging-Header.h";
