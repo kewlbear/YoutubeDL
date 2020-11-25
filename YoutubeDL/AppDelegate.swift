@@ -67,7 +67,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         guard let url = components.url else {
             return false
         }
-        downloadViewController?.url = url
+        if #available(iOS 14, *) {
+            (window?.rootViewController as? UINavigationController)?.viewControllers = [UIHostingController(rootView: MainView(url: url))]
+        } else {
+            downloadViewController?.url = url
+        }
         return true
     }
 }

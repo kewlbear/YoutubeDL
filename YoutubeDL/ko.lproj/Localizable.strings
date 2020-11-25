@@ -51,3 +51,7 @@
 "Finished" = "완료";
 "Download finished" = "다운로드 완료";
 "DownloadProgressFormat" = "%@ 총 %@ 속도 %@/s 남은 시간 %@ %@";
+"Paste URL" = "URL 붙여넣기";
+"Nothing to paste" = "붙여넣을 것이 없습니다";
+"Prepend \"y\" to URL in Safari" = "Safari에서 주소 앞에 \"y\"를 추가하세요";
+"Download shortcut" = "단축어 다운로드";
