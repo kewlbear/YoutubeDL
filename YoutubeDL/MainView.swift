@@ -24,6 +24,7 @@
 
 import SwiftUI
 import YoutubeDL
+import PythonKit
 
 @available(iOS 13.0.0, *)
 struct MainView: View {
@@ -43,7 +44,12 @@ struct MainView: View {
     
     @State var info: Info?
     
-    @State var error: Error?
+    @State var error: Error? {
+        didSet {
+            alertMessage = error?.localizedDescription
+            isShowingAlert = true
+        }
+    }
     
     @State var youtubeDL: YoutubeDL?
     
@@ -150,7 +156,16 @@ struct MainView: View {
                 }
             }
             catch {
-                self.error = error
+                indeterminateProgressKey = nil
+                guard let pyError = error as? PythonError, case let .exception(exception, traceback: _) = pyError else {
+                    self.error = error
+                    return
+                }
+                if (String(exception.args[0]) ?? "").contains("Unsupported URL: ") {
+                    DispatchQueue.main.async {
+                        self.alert(message: NSLocalizedString("Unsupported URL", comment: "Alert message"))
+                    }
+                }
             }
         }
     }
