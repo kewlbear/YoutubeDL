@@ -2,20 +2,11 @@
   "object": {
     "pins": [
       {
-        "package": "CSqlite3",
-        "repositoryURL": "https://github.com/alloyapple/CSqlite3.git",
-        "state": {
-          "branch": "master",
-          "revision": "fe433d74268135019da44fc79c853d9253ecc615",
-          "version": null
-        }
-      },
-      {
         "package": "FFmpeg-iOS",
         "repositoryURL": "https://github.com/kewlbear/FFmpeg-iOS.git",
         "state": {
           "branch": "main",
-          "revision": "44dcaf804a2eda2615bb3e32c8dab89dda7ec2fd",
+          "revision": "d69fb2d25e94b5fe27bc7db7493fd2c7778eaea0",
           "version": null
         }
       },
@@ -24,7 +15,7 @@
         "repositoryURL": "https://github.com/pvieito/LoggerKit.git",
         "state": {
           "branch": "master",
-          "revision": "835b41248dbe474eb33dac2c1ef1376dea7dc11d",
+          "revision": "9a10b40b3bdb6634571122f4a32d61fa34391e74",
           "version": null
         }
       },
@@ -32,8 +23,8 @@
         "package": "Python-iOS",
         "repositoryURL": "https://github.com/kewlbear/Python-iOS.git",
         "state": {
-          "branch": "main",
-          "revision": "7fd5aad9ccb42be540d8ddfb15e8641f9a859853",
+          "branch": "kivy-ios",
+          "revision": "7b6186385dd3d869fef2929478fd09a4841292c2",
           "version": null
         }
       },
@@ -42,7 +33,7 @@
         "repositoryURL": "https://github.com/kewlbear/PythonKit.git",
         "state": {
           "branch": "master",
-          "revision": "3612c7e5bd1a2479655b3fe3972fb3cf5fe0b7f9",
+          "revision": "6caffb495e6315a00413f52cb034575965d40989",
           "version": null
         }
       },
@@ -60,7 +51,7 @@
         "repositoryURL": "https://github.com/apple/swift-argument-parser",
         "state": {
           "branch": "main",
-          "revision": "53555a04503c175eaffcf587e4b8c380a7c41a5c",
+          "revision": "b936799bcaa6c2e4fbb74507109f9b18d6650de3",
           "version": null
         }
       },
@@ -69,7 +60,7 @@
         "repositoryURL": "https://github.com/kewlbear/YoutubeDL-iOS.git",
         "state": {
           "branch": "main",
-          "revision": "faae06ed2367a774cbbd40e4809eb85eecf5c2e5",
+          "revision": "632934f370e3dee5b9e8e58d1c824b647845a7c3",
           "version": null
         }
       }

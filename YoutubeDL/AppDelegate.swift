@@ -24,7 +24,7 @@
 
 import UIKit
 import YoutubeDL
-import Resources
+import PythonSupport
 import SwiftUI
 
 let trace = "trace"
@@ -42,7 +42,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
         UNUserNotificationCenter.current().delegate = self
         
-        SetPythonHome()
+        PythonSupport.initialize()
         
         _ = Downloader.shared // create URL session
         
