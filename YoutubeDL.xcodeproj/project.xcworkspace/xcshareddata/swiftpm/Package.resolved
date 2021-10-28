@@ -15,7 +15,7 @@
         "repositoryURL": "https://github.com/pvieito/LoggerKit.git",
         "state": {
           "branch": "master",
-          "revision": "9a10b40b3bdb6634571122f4a32d61fa34391e74",
+          "revision": "02487bf1d5b0dcec1fd6ffed750386d617051020",
           "version": null
         }
       },
@@ -24,7 +24,7 @@
         "repositoryURL": "https://github.com/kewlbear/Python-iOS.git",
         "state": {
           "branch": "kivy-ios",
-          "revision": "7b6186385dd3d869fef2929478fd09a4841292c2",
+          "revision": "f5333228b625560a90c17d9e2d3a9b2aac6967a9",
           "version": null
         }
       },
@@ -51,7 +51,7 @@
         "repositoryURL": "https://github.com/apple/swift-argument-parser",
         "state": {
           "branch": "main",
-          "revision": "b936799bcaa6c2e4fbb74507109f9b18d6650de3",
+          "revision": "d2930e8fcf9c33162b9fcc1d522bc975e2d4179b",
           "version": null
         }
       },
@@ -60,7 +60,7 @@
         "repositoryURL": "https://github.com/kewlbear/YoutubeDL-iOS.git",
         "state": {
           "branch": "main",
-          "revision": "632934f370e3dee5b9e8e58d1c824b647845a7c3",
+          "revision": "811ea597014bc483f44737a1d80c54d0896c36b0",
           "version": null
         }
       }

@@ -94,7 +94,7 @@ struct MainView: View {
                 }
             }
             
-            youtubeDL?.version.map { Text("youtube_dl version \($0)") }
+            youtubeDL?.version.map { Text("yt-dlp version \($0)") }
             
             Button("Paste URL") {
                 let pasteBoard = UIPasteboard.general
@@ -186,6 +186,7 @@ struct MainView: View {
                 }
             }
             catch {
+                print(#function, error)
                 DispatchQueue.main.async {
                     alert(message: error.localizedDescription)
                 }

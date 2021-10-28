@@ -1,6 +1,6 @@
 # YoutubeDL
 
-This iOS app uses youtube-dl python module to download videos from YouTube.
+This iOS app uses yt-dlp python module to download videos from YouTube.
 
 - Screen shots
 
@@ -19,7 +19,7 @@ This app is NOT AppStore-safe.  Historically AppStore has been removing apps dow
 
 ## Features
 
-- Automatically downloads youtube-dl python module from https://yt-dl..org
+- Automatically downloads yt-dlp python module from https://github.com/yt-dlp/yt-dlp/releases/latest
 - Download media using URLSession
 - Support background download
 - Support chunk based download
