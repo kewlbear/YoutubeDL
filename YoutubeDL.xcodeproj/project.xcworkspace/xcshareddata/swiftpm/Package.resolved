@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "FFmpeg-iOS",
+        "repositoryURL": "https://github.com/kewlbear/FFmpeg-iOS.git",
+        "state": {
+          "branch": "main",
+          "revision": "d69fb2d25e94b5fe27bc7db7493fd2c7778eaea0",
+          "version": null
+        }
+      },
+      {
         "package": "Python-iOS",
         "repositoryURL": "https://github.com/kewlbear/Python-iOS.git",
         "state": {
