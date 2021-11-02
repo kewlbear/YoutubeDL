@@ -32,31 +32,26 @@ let trace = "trace"
 @UIApplicationMain
 class AppDelegate: NSObject, UIApplicationDelegate {
     var window: UIWindow?
-    
-    var downloadViewController: DownloadViewController? {
-        let navigationController = window?.rootViewController as? UINavigationController
-        return navigationController?.topViewController as? DownloadViewController
-    }
+   
+    let model = AppModel()
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-
+        
         UNUserNotificationCenter.current().delegate = self
         
-        PythonSupport.initialize()
-        
-        _ = Downloader.shared // create URL session
-        
-        if #available(iOS 14, *) {
-            (window?.rootViewController as? UINavigationController)?.viewControllers = [UIHostingController(rootView: MainView())]
+        let view = NavigationView {
+            MainView()
         }
+            .environmentObject(model)
+        window?.rootViewController = UIHostingController(rootView: view)
         
         return true
     }
     
     func applicationDidEnterBackground(_ application: UIApplication) {
-        if Downloader.shared.transcoder != nil {
-            notify(body: NSLocalizedString("TranscodingStoppedMessage", comment: "Notification body"))
-        }
+//        if Downloader.shared.transcoder != nil {
+//            notify(body: NSLocalizedString("TranscodingStoppedMessage", comment: "Notification body"))
+//        }
     }
     
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
@@ -67,11 +62,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         guard let url = components.url else {
             return false
         }
-        if #available(iOS 14, *) {
-            (window?.rootViewController as? UINavigationController)?.viewControllers = [UIHostingController(rootView: MainView(url: url))]
-        } else {
-            downloadViewController?.url = url
-        }
+        
+        model.url = url
+        
         return true
     }
 }
@@ -85,7 +78,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         print(#function, response.actionIdentifier)
         if response.actionIdentifier == UNNotificationDefaultActionIdentifier && response.notification.request.identifier == NotificationRequestIdentifier.transcode.rawValue {
             DispatchQueue.global(qos: .userInitiated).async {
-                Downloader.shared.transcode()
+//                Downloader.shared.transcode()
             }
         }
         completionHandler()
