@@ -37,7 +37,7 @@ class AppModel: ObservableObject {
     
     @Published var url: URL?
     
-    @MainActor @Published var youtubeDL: YoutubeDL?
+    @Published var youtubeDL: YoutubeDL?
     
     @Published var enableChunkedDownload = true
     
@@ -52,26 +52,28 @@ class AppModel: ObservableObject {
     init() {
         $url.compactMap { $0 }
         .sink { url in
-            self.startDownload(url: url)
+            Task {
+                await self.startDownload(url: url)
+            }
         }.store(in: &subscriptions)
     }
     
-    func startDownload(url: URL) {
+    func startDownload(url: URL) async {
         guard Self.isPythonInitialized else { return }
         
-        Task {
-            do {
-                let youtubeDL = try await YoutubeDL(initializePython: false, downloadPythonModule: YoutubeDL.shouldDownloadPythonModule)
-                await MainActor.run {
-                    self.youtubeDL = youtubeDL
-                }
-                let fileURL = try await youtubeDL.download(url: url, formatSelector: formatSelector)
-                print(#function, fileURL)
-            } catch YoutubeDLError.canceled {
-                print(#function, "canceled")
-            } catch {
-                print(#function, error)
+        do {
+            guard let youtubeDL = youtubeDL else {
+                youtubeDL = try await YoutubeDL(initializePython: false, downloadPythonModule: YoutubeDL.shouldDownloadPythonModule)
+                await startDownload(url: url)
+                return
             }
+            
+            let fileURL = try await youtubeDL.download(url: url, formatSelector: formatSelector)
+            print(#function, fileURL)
+        } catch YoutubeDLError.canceled {
+            print(#function, "canceled")
+        } catch {
+            print(#function, error)
         }
     }
     
