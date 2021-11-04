@@ -61,37 +61,39 @@ struct MainView: View {
     
     var body: some View {
         List {
-            DisclosureGroup(isExpanded: $isExpanded) {
-                Button("Paste URL") {
-                    let pasteBoard = UIPasteboard.general
-                    //                guard pasteBoard.hasURLs || pasteBoard.hasStrings else {
-                    //                    alert(message: "Nothing to paste")
-                    //                    return
-                    //                }
-                    guard let url = pasteBoard.url ?? pasteBoard.string.flatMap({ URL(string: $0) }) else {
-                        alert(message: "Nothing to paste")
-                        return
-                    }
-                    urlString = url.absoluteString
-                    self.app.url = url
-                }
-                Button(#"Prepend "y" to URL in Safari"#) {
-                    // FIXME: open Safari
-                    open(url: URL(string: "https://youtube.com")!)
-                }
-                Button("Download shortcut") {
-                    // FIXME: open Shortcuts
-                    open(url: URL(string: "https://www.icloud.com/shortcuts/e226114f6e6c4440b9c466d1ebe8fbfc")!)
-                }
-            } label: {
-                TextField("URL", text: $urlString)
-                    .onSubmit {
-                        guard let url = URL(string: urlString) else {
-                            alert(message: "Invalid URL")
+            Section {
+                DisclosureGroup(isExpanded: $isExpanded) {
+                    Button("Paste URL") {
+                        let pasteBoard = UIPasteboard.general
+                        //                guard pasteBoard.hasURLs || pasteBoard.hasStrings else {
+                        //                    alert(message: "Nothing to paste")
+                        //                    return
+                        //                }
+                        guard let url = pasteBoard.url ?? pasteBoard.string.flatMap({ URL(string: $0) }) else {
+                            alert(message: "Nothing to paste")
                             return
                         }
-                        app.url = url
+                        urlString = url.absoluteString
+                        self.app.url = url
                     }
+                    Button(#"Prepend "y" to URL in Safari"#) {
+                        // FIXME: open Safari
+                        open(url: URL(string: "https://youtube.com")!)
+                    }
+                    Button("Download shortcut") {
+                        // FIXME: open Shortcuts
+                        open(url: URL(string: "https://www.icloud.com/shortcuts/e226114f6e6c4440b9c466d1ebe8fbfc")!)
+                    }
+                } label: {
+                    TextField("URL", text: $urlString)
+                        .onSubmit {
+                            guard let url = URL(string: urlString) else {
+                                alert(message: "Invalid URL")
+                                return
+                            }
+                            app.url = url
+                        }
+                }
             }
             
             if let key = indeterminateProgressKey {
@@ -100,12 +102,17 @@ struct MainView: View {
             }
             
             if info != nil {
-                Text(info?.title ?? "nil?")
+                Section {
+                    Text(info?.title ?? "nil?")
+                }
                 
-                DisclosureGroup("Options", isExpanded: $expandOptions) {
-                    Toggle("Fast Download", isOn: $app.enableChunkedDownload)
-                    Toggle("Enable Transcoding", isOn: $app.enableTranscoding)
-                    Toggle("Hide Unsupported Formats", isOn: $app.supportedFormatsOnly)
+                Section {
+                    DisclosureGroup("Options", isExpanded: $expandOptions) {
+                        Toggle("Fast Download", isOn: $app.enableChunkedDownload)
+                        Toggle("Enable Transcoding", isOn: $app.enableTranscoding)
+                        Toggle("Hide Unsupported Formats", isOn: $app.supportedFormatsOnly)
+                        Toggle("Copy to Photos", isOn: $app.exportToPhotos)
+                    }
                 }
             }
            
