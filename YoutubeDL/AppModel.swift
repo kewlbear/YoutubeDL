@@ -27,6 +27,7 @@ import Foundation
 import PythonSupport
 import YoutubeDL
 import Combine
+import UIKit
 
 class AppModel: ObservableObject {
     static private let isPythonInitialized: Bool = {
@@ -37,13 +38,15 @@ class AppModel: ObservableObject {
     
     @Published var url: URL?
     
-    @Published var youtubeDL: YoutubeDL?
+    @MainActor @Published var youtubeDL: YoutubeDL?
     
     @Published var enableChunkedDownload = true
     
     @Published var enableTranscoding = true
     
     @Published var supportedFormatsOnly = true
+    
+    @Published var exportToPhotos = true
     
     var formatSelector: ((Info?) async -> [Format])?
     
@@ -62,9 +65,12 @@ class AppModel: ObservableObject {
         guard Self.isPythonInitialized else { return }
         
         do {
-            guard let youtubeDL = youtubeDL else {
-                youtubeDL = try await YoutubeDL(initializePython: false, downloadPythonModule: YoutubeDL.shouldDownloadPythonModule)
-                await startDownload(url: url)
+            guard let youtubeDL = await youtubeDL else {
+                let youtubeDL = try await YoutubeDL(initializePython: false, downloadPythonModule: YoutubeDL.shouldDownloadPythonModule)
+                Task.detached { @MainActor in
+                    self.youtubeDL = youtubeDL
+                    await self.startDownload(url: url)
+                }
                 return
             }
             
