@@ -33,17 +33,8 @@
         "repositoryURL": "https://github.com/kewlbear/PythonKit.git",
         "state": {
           "branch": "master",
-          "revision": "6caffb495e6315a00413f52cb034575965d40989",
+          "revision": "86ce684b005aee7cea847568c6ab82079794f29b",
           "version": null
-        }
-      },
-      {
-        "package": "Rainbow",
-        "repositoryURL": "https://github.com/onevcat/Rainbow",
-        "state": {
-          "branch": null,
-          "revision": "626c3d4b6b55354b4af3aa309f998fae9b31a3d9",
-          "version": "3.2.0"
         }
       },
       {
