@@ -62,6 +62,10 @@ struct MainView: View {
     var body: some View {
         List {
             Section {
+                DownloadsView()
+            }
+            
+            Section {
                 DisclosureGroup(isExpanded: $isExpanded) {
                     Button("Paste URL") {
                         let pasteBoard = UIPasteboard.general
@@ -127,9 +131,16 @@ struct MainView: View {
                 indeterminateProgressKey = nil
                 self.info = info
                 
-                return await withCheckedContinuation { continuation in
+                let formats = await withCheckedContinuation { continuation in
                     check(info: info, continuation: continuation)
                 }
+                
+                var url: URL?
+                if !formats.isEmpty {
+                    url = save(info: info)
+                }
+                
+                return (formats, url)
             }
         })
         .onChange(of: app.url) { newValue in
@@ -144,6 +155,9 @@ struct MainView: View {
         }
         .actionSheet(isPresented: $showingFormats) { () -> ActionSheet in
             formatsSheet ?? ActionSheet(title: Text("nil?"))
+        }
+        .sheet(item: $app.fileURL) { url in
+//            TrimView(url: url)
         }
     }
     
@@ -212,12 +226,188 @@ struct MainView: View {
             showingFormats = true
         }
     }
-}
-
-@available(iOS 13.0.0, *)
-struct MainView_Previews: PreviewProvider {
-    static var previews: some View {
-        MainView()
-            .environmentObject(AppModel())
+    
+    func save(info: Info) -> URL? {
+        do {
+            return try app.save(info: info)
+        } catch {
+            print(#function, error)
+            self.error = error
+            return nil
+        }
     }
 }
+
+extension URL: Identifiable {
+    public var id: URL { self }
+}
+
+import MobileVLCKit
+
+struct TrimView: View {
+    class Model: NSObject, ObservableObject, VLCMediaPlayerDelegate {
+        let url: URL
+        
+        lazy var player: VLCMediaPlayer = {
+            let player = VLCMediaPlayer()
+            player.media = VLCMedia(url: url)
+            player.delegate = self
+            return player
+        }()
+        
+        init(url: URL) {
+            self.url = url
+        }
+    }
+    
+    @StateObject var model: Model
+    
+    @EnvironmentObject var app: AppModel
+    
+    var drag: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                let f = value.location.x / (model.player.drawable as! UIView).bounds.width
+                let t = f * CGFloat(model.player.media.length.intValue) / 1000
+                time = Date(timeIntervalSince1970: t)
+            }
+            .onEnded { value in
+                let f = value.location.x / (model.player.drawable as! UIView).bounds.width
+                let t = f * CGFloat(model.player.media.length.intValue)
+                model.player.time = VLCTime(int: Int32(t))
+            }
+    }
+    
+    @State var time = Date(timeIntervalSince1970: 0)
+        
+    let timeFormatter: Formatter = {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .medium
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        return formatter
+    }()
+    
+    var body: some View {
+        VStack {
+            Text(time, formatter: timeFormatter)
+            VLCView(player: model.player)
+            Button {
+//                if model.player.isPlaying {
+//                    model.player.pause()
+//                } else {
+//                    model.player.play()
+//                }
+                Task {
+                    await app.youtubeDL?.transcode(url: model.url)
+                }
+            } label: {
+                Text(model.player.isPlaying ? "Pause" : "Play")
+            }
+        }
+//        .gesture(drag)
+    }
+    
+    init(url: URL) {
+        _model = StateObject(wrappedValue: Model(url: url))
+    }
+}
+
+struct VLCView: UIViewRepresentable {
+    let player: VLCMediaPlayer
+    
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        player.drawable = view
+        return view
+    }
+    
+    func updateUIView(_ uiView: UIView, context: Context) {
+        //
+    }
+}
+
+import WebKit
+
+struct WebView: UIViewRepresentable {
+    func makeUIView(context: Context) -> WKWebView {
+        let webView = WKWebView()
+        webView.navigationDelegate = context.coordinator
+        return webView
+    }
+    
+    func updateUIView(_ webView: WKWebView, context: Context) {
+        //
+    }
+    
+    class Coordinator: NSObject, WKNavigationDelegate {
+        
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+}
+
+struct DownloadsView: View {
+    @EnvironmentObject var app: AppModel
+    
+    var body: some View {
+        ForEach(app.downloads) { download in
+            NavigationLink(download.lastPathComponent, destination: DetailsView(url: download))
+        }
+    }
+}
+
+struct DetailsView: View {
+    let url: URL
+    
+    @State var info: Info?
+    
+    @State var isExpanded = false
+    
+    @State var videoURL: URL?
+    
+    var body: some View {
+        List {
+            if let videoURL = videoURL {
+                Section {
+                    NavigationLink("Trim", destination: TrimView(url: videoURL))
+                }
+            }
+            
+            if let info = info {
+                DisclosureGroup("\(info.formats.count) Formats", isExpanded: $isExpanded) {
+                    ForEach(info.formats) { format in
+                        Text(format.format)
+                    }
+                }
+            }
+        }
+        .task {
+            do {
+                info = try JSONDecoder().decode(Info.self,
+                                                from: try Data(contentsOf: url.appendingPathComponent("Info.json")))
+                
+                videoURL = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: [.contentTypeKey], options: .skipsHiddenFiles).first { url in
+                    try! url.resourceValues(forKeys: [.contentTypeKey])
+                        .contentType?.conforms(to: .movie)
+                    ?? false
+                }
+            } catch {
+                print(error)
+            }
+        }
+    }
+}
+
+extension Format: Identifiable {
+    public var id: String { format_id }
+}
+
+//@available(iOS 13.0.0, *)
+//struct MainView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        MainView()
+//            .environmentObject(AppModel())
+//    }
+//}
