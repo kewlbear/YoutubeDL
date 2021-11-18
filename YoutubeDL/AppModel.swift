@@ -48,7 +48,11 @@ class AppModel: ObservableObject {
     
     @Published var exportToPhotos = true
     
-    var formatSelector: ((Info?) async -> [Format])?
+    @Published var fileURL: URL?
+    
+    @Published var downloads: [URL] = []
+    
+    var formatSelector: YoutubeDL.FormatSelector?
     
     lazy var subscriptions = Set<AnyCancellable>()
     
@@ -59,6 +63,13 @@ class AppModel: ObservableObject {
                 await self.startDownload(url: url)
             }
         }.store(in: &subscriptions)
+        
+        do {
+            downloads = try loadDownloads()
+        } catch {
+            // FIXME: ...
+            print(#function, error)
+        }
     }
     
     func startDownload(url: URL) async {
@@ -75,12 +86,46 @@ class AppModel: ObservableObject {
             }
             
             let fileURL = try await youtubeDL.download(url: url, formatSelector: formatSelector)
-            print(#function, fileURL)
+            print(#function, self.fileURL ?? "no url?")
+            Task.detached { @MainActor in
+                self.fileURL = fileURL
+            }
         } catch YoutubeDLError.canceled {
             print(#function, "canceled")
         } catch {
             print(#function, error)
         }
+    }
+    
+    func save(info: Info) throws -> URL {
+        let title = info.safeTitle
+        let fileManager = FileManager.default
+        let url = try documentsDirectory()
+            .appendingPathComponent(title)
+        try fileManager.createDirectory(at: url, withIntermediateDirectories: true)
+        
+        let data = try JSONEncoder().encode(info)
+        try data.write(to: url.appendingPathComponent("Info.json"))
+        
+        return url
+    }
+    
+    func loadDownloads() throws -> [URL] {
+        let keys: Set<URLResourceKey> = [.nameKey, .isDirectoryKey]
+        let documents = try documentsDirectory()
+        guard let enumerator = FileManager.default.enumerator(at: documents, includingPropertiesForKeys: Array(keys), options: .skipsHiddenFiles) else { fatalError() }
+        var urls = [URL]()
+        for case let url as URL in enumerator {
+            let values = try url.resourceValues(forKeys: keys)
+            guard enumerator.level == 2, url.lastPathComponent == "Info.json" else { continue }
+            print(enumerator.level, url.path.replacingOccurrences(of: documents.path, with: ""), values.isDirectory ?? false ? "dir" : "file")
+            urls.append(url.deletingLastPathComponent())
+        }
+        return urls
+    }
+    
+    func documentsDirectory() throws -> URL {
+        try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
     }
     
     func pauseDownload() {
