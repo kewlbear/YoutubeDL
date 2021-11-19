@@ -636,7 +636,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 6251F34808E9289F985B7AF5 /* Pods-YoutubeDL.debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = YoutubeDL/YoutubeDL.entitlements;
 				DEVELOPMENT_TEAM = 265782UUTC;
@@ -652,11 +651,10 @@
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 				);
 				INFOPLIST_FILE = "YoutubeDL/YoutubeDL-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
+				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path/Frameworks",
+					"$(SDKROOT)/usr/lib/swift",
 				);
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YD;
 				PRODUCT_NAME = Y;
 				SWIFT_INCLUDE_PATHS = "";
@@ -673,7 +671,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 1B3FFC641C531BBC2FECF0DD /* Pods-YoutubeDL.release.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = YoutubeDL/YoutubeDL.entitlements;
 				DEVELOPMENT_TEAM = 265782UUTC;
@@ -690,11 +687,10 @@
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 				);
 				INFOPLIST_FILE = "YoutubeDL/YoutubeDL-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
+				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path/Frameworks",
+					"$(SDKROOT)/usr/lib/swift",
 				);
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = kr.co.rhk.YD;
 				PRODUCT_NAME = Y;
 				SWIFT_INCLUDE_PATHS = "";

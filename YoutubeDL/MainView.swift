@@ -53,7 +53,7 @@ struct MainView: View {
     
     @State var urlString = ""
     
-    @State var isExpanded = true
+    @State var isExpanded = false
     
     @State var expandOptions = true
     
@@ -91,14 +91,18 @@ struct MainView: View {
                         open(url: URL(string: "https://www.icloud.com/shortcuts/e226114f6e6c4440b9c466d1ebe8fbfc")!)
                     }
                 } label: {
-                    TextField("URL", text: $urlString)
-                        .onSubmit {
-                            guard let url = URL(string: urlString) else {
-                                alert(message: "Invalid URL")
-                                return
+                    if #available(iOS 15.0, *) {
+                        TextField("Enter URL", text: $urlString)
+                            .onSubmit {
+                                guard let url = URL(string: urlString) else {
+                                    alert(message: "Invalid URL")
+                                    return
+                                }
+                                app.url = url
                             }
-                            app.url = url
-                        }
+                    } else {
+                        TextField("Enter URL", text: $urlString)
+                    }
                 }
             }
             
@@ -112,14 +116,14 @@ struct MainView: View {
                     Text(info?.title ?? "nil?")
                 }
                 
-                Section {
-                    DisclosureGroup("Options", isExpanded: $expandOptions) {
-                        Toggle("Fast Download", isOn: $app.enableChunkedDownload)
-                        Toggle("Enable Transcoding", isOn: $app.enableTranscoding)
-                        Toggle("Hide Unsupported Formats", isOn: $app.supportedFormatsOnly)
-                        Toggle("Copy to Photos", isOn: $app.exportToPhotos)
-                    }
-                }
+//                Section {
+//                    DisclosureGroup("Options", isExpanded: $expandOptions) {
+//                        Toggle("Fast Download", isOn: $app.enableChunkedDownload)
+//                        Toggle("Enable Transcoding", isOn: $app.enableTranscoding)
+//                        Toggle("Hide Unsupported Formats", isOn: $app.supportedFormatsOnly)
+//                        Toggle("Copy to Photos", isOn: $app.exportToPhotos)
+//                    }
+//                }
             }
            
             if let progress = app.youtubeDL?.downloader.progress {
