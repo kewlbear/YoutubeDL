@@ -317,12 +317,14 @@ struct TrimView: View {
     }
     
     func transcode() async {
+        let out = model.url.deletingPathExtension().appendingPathExtension("mp4")
+        try? FileManager.default.removeItem(at: out)
         let ret = ffmpeg(["FFmpeg-iOS",
                           "-ss", "00:01:23",
                           "-t", "00:00:21",
                           "-y",
                           "-i", model.url.path,
-                          model.url.deletingPathExtension().appendingPathExtension("mp4").path,
+                          out.path,
                          ])
         print(#function, ret)
     }
