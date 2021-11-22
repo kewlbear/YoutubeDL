@@ -25,6 +25,7 @@
 import SwiftUI
 import YoutubeDL
 import PythonKit
+import FFmpegSupport
 
 @available(iOS 13.0.0, *)
 struct MainView: View {
@@ -242,18 +243,20 @@ extension URL: Identifiable {
     public var id: URL { self }
 }
 
-import MobileVLCKit
+//import MobileVLCKit
 
 struct TrimView: View {
-    class Model: NSObject, ObservableObject, VLCMediaPlayerDelegate {
+    class Model: NSObject, ObservableObject
+//    , VLCMediaPlayerDelegate
+    {
         let url: URL
         
-        lazy var player: VLCMediaPlayer = {
-            let player = VLCMediaPlayer()
-            player.media = VLCMedia(url: url)
-            player.delegate = self
-            return player
-        }()
+//        lazy var player: VLCMediaPlayer = {
+//            let player = VLCMediaPlayer()
+//            player.media = VLCMedia(url: url)
+//            player.delegate = self
+//            return player
+//        }()
         
         init(url: URL) {
             self.url = url
@@ -264,19 +267,19 @@ struct TrimView: View {
     
     @EnvironmentObject var app: AppModel
     
-    var drag: some Gesture {
-        DragGesture()
-            .onChanged { value in
-                let f = value.location.x / (model.player.drawable as! UIView).bounds.width
-                let t = f * CGFloat(model.player.media.length.intValue) / 1000
-                time = Date(timeIntervalSince1970: t)
-            }
-            .onEnded { value in
-                let f = value.location.x / (model.player.drawable as! UIView).bounds.width
-                let t = f * CGFloat(model.player.media.length.intValue)
-                model.player.time = VLCTime(int: Int32(t))
-            }
-    }
+//    var drag: some Gesture {
+//        DragGesture()
+//            .onChanged { value in
+//                let f = value.location.x / (model.player.drawable as! UIView).bounds.width
+//                let t = f * CGFloat(model.player.media.length.intValue) / 1000
+//                time = Date(timeIntervalSince1970: t)
+//            }
+//            .onEnded { value in
+//                let f = value.location.x / (model.player.drawable as! UIView).bounds.width
+//                let t = f * CGFloat(model.player.media.length.intValue)
+//                model.player.time = VLCTime(int: Int32(t))
+//            }
+//    }
     
     @State var time = Date(timeIntervalSince1970: 0)
         
@@ -290,7 +293,7 @@ struct TrimView: View {
     var body: some View {
         VStack {
             Text(time, formatter: timeFormatter)
-            VLCView(player: model.player)
+//            VLCView(player: model.player)
             Button {
 //                if model.player.isPlaying {
 //                    model.player.pause()
@@ -298,10 +301,12 @@ struct TrimView: View {
 //                    model.player.play()
 //                }
                 Task {
-                    await app.youtubeDL?.transcode(url: model.url)
+                    await transcode()
                 }
             } label: {
-                Text(model.player.isPlaying ? "Pause" : "Play")
+                Text(
+//                    model.player.isPlaying ? "Pause" :
+                        "Transcode")
             }
         }
 //        .gesture(drag)
@@ -310,21 +315,32 @@ struct TrimView: View {
     init(url: URL) {
         _model = StateObject(wrappedValue: Model(url: url))
     }
+    
+    func transcode() async {
+        let ret = ffmpeg(["FFmpeg-iOS",
+                          "-ss", "00:01:23",
+                          "-t", "00:00:21",
+                          "-y",
+                          "-i", model.url.path,
+                          model.url.deletingPathExtension().appendingPathExtension("mp4").path,
+                         ])
+        print(#function, ret)
+    }
 }
 
-struct VLCView: UIViewRepresentable {
-    let player: VLCMediaPlayer
-    
-    func makeUIView(context: Context) -> UIView {
-        let view = UIView()
-        player.drawable = view
-        return view
-    }
-    
-    func updateUIView(_ uiView: UIView, context: Context) {
-        //
-    }
-}
+//struct VLCView: UIViewRepresentable {
+//    let player: VLCMediaPlayer
+//
+//    func makeUIView(context: Context) -> UIView {
+//        let view = UIView()
+//        player.drawable = view
+//        return view
+//    }
+//
+//    func updateUIView(_ uiView: UIView, context: Context) {
+//        //
+//    }
+//}
 
 import WebKit
 
