@@ -26,6 +26,7 @@ import SwiftUI
 import YoutubeDL
 import PythonKit
 import FFmpegSupport
+import AVFoundation
 
 @available(iOS 13.0.0, *)
 struct MainView: View {
@@ -290,10 +291,28 @@ struct TrimView: View {
         return formatter
     }()
     
+    @State var start = ""
+    
+    @State var length = ""
+    
+    @State var end = ""
+    
+    enum FocusedField: Hashable {
+        case start, length, end
+    }
+    
+    @FocusState var focus: FocusedField?
+    
     var body: some View {
         VStack {
-            Text(time, formatter: timeFormatter)
+//            Text(time, formatter: timeFormatter)
 //            VLCView(player: model.player)
+            TextField("Start", text: $start)
+                .focused($focus, equals: .start)
+            TextField("Length", text: $length)
+                .focused($focus, equals: .length)
+            TextField("End", text: $end)
+                .focused($focus, equals: .end)
             Button {
 //                if model.player.isPlaying {
 //                    model.player.pause()
@@ -310,6 +329,17 @@ struct TrimView: View {
             }
         }
 //        .gesture(drag)
+        .onChange(of: start) { newValue in
+            updateLength(start: newValue, end: end)
+        }
+        .onChange(of: end) { newValue in
+            guard focus == .end else { return }
+            updateLength(start: start, end: newValue)
+        }
+        .onChange(of: length) { newValue in
+            guard focus == .length else { return }
+            updateEnd(start: start, length: length)
+        }
     }
     
     init(url: URL) {
@@ -317,17 +347,131 @@ struct TrimView: View {
     }
     
     func transcode() async {
+        let s = seconds(start) ?? 0
+        let e = seconds(end) ?? 0
+        guard s < e else {
+            print(#function, "invalid interval:", start, "~", end)
+            return
+        }
         let out = model.url.deletingPathExtension().appendingPathExtension("mp4")
         try? FileManager.default.removeItem(at: out)
-        let ret = ffmpeg(["FFmpeg-iOS",
-                          "-ss", "00:01:23",
-                          "-t", "00:00:21",
-                          "-y",
-                          "-i", model.url.path,
-                          out.path,
-                         ])
-        print(#function, ret)
+        let t0 = Date()
+        let ret = ffmpeg("FFmpeg-iOS",
+                         "-ss", start,
+                         "-t", length,
+                         "-i", model.url.path,
+                         out.path)
+        print(#function, ret, "took", Date().timeIntervalSince(t0), "seconds")
+        
+        let audio = URL(fileURLWithPath: out.path.replacingOccurrences(of: "-otherVideo.mp4", with: "-audioOnly.m4a"))
+        let final = URL(fileURLWithPath: out.path.replacingOccurrences(of: "-otherVideo", with: ""))
+        let timeRange = CMTimeRange(start: CMTime(seconds: Double(s), preferredTimescale: 1),
+                                    end: CMTime(seconds: Double(e), preferredTimescale: 1))
+        mux(videoURL: out, audioURL: audio, outputURL: final, timeRange: timeRange)
     }
+    
+    func mux(videoURL: URL, audioURL: URL, outputURL: URL, timeRange: CMTimeRange) {
+        let t0 = ProcessInfo.processInfo.systemUptime
+       
+        let videoAsset = AVAsset(url: videoURL)
+        let audioAsset = AVAsset(url: audioURL)
+        
+        guard let videoAssetTrack = videoAsset.tracks(withMediaType: .video).first,
+              let audioAssetTrack = audioAsset.tracks(withMediaType: .audio).first else {
+            print(#function,
+                  videoAsset.tracks(withMediaType: .video),
+                  audioAsset.tracks(withMediaType: .audio))
+            return
+        }
+        
+        let composition = AVMutableComposition()
+        let videoCompositionTrack = composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid)
+        let audioCompositionTrack = composition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid)
+        
+        do {
+            try videoCompositionTrack?.insertTimeRange(CMTimeRange(start: .zero, duration: videoAssetTrack.timeRange.duration), of: videoAssetTrack, at: .zero)
+            try audioCompositionTrack?.insertTimeRange(timeRange, of: audioAssetTrack, at: .zero)
+            print(#function, videoAssetTrack.timeRange, audioAssetTrack.timeRange)
+        }
+        catch {
+            print(#function, error)
+            return
+        }
+        
+        guard let session = AVAssetExportSession(asset: composition, presetName: AVAssetExportPresetPassthrough) else {
+            print(#function, "unable to init export session")
+            return
+        }
+        
+        session.outputURL = outputURL
+        session.outputFileType = .mp4
+        print(#function, "merging...")
+        
+        session.exportAsynchronously {
+            print(#function, "finished merge", session.status.rawValue)
+            print(#function, "took", ProcessInfo.processInfo.systemUptime - t0, "seconds")
+            if session.status == .completed {
+                print(#function, "success")
+            } else {
+                print(#function, session.error ?? "no error?")
+            }
+        }
+    }
+
+    func updateLength(start: String, end: String) {
+        guard let s = seconds(start), let e = seconds(end) else {
+            return
+        }
+        let l = e - s
+        length = format(l) ?? length
+    }
+    
+    func updateEnd(start: String, length: String) {
+        guard let s = seconds(start), let l = seconds(length) else {
+            return
+        }
+        let e = s + l
+        end = format(e) ?? end
+    }
+}
+    
+func seconds(_ string: String) -> Int? {
+    let components = string.split(separator: ":")
+    guard components.count <= 3 else {
+        print(#function, "too many components:", string)
+        return nil
+    }
+    
+    var seconds = 0
+    for component in components {
+        guard let number = Int(component) else {
+            print(#function, "invalid number:", component)
+            return nil
+        }
+        seconds = 60 * seconds + number
+    }
+    return seconds
+}
+
+func format(_ seconds: Int) -> String? {
+    guard seconds >= 0 else {
+        print(#function, "invalid seconds:", seconds)
+        return nil
+    }
+    
+    let (minutes, sec) = seconds.quotientAndRemainder(dividingBy: 60)
+    var string = "\(sec)"
+    guard minutes > 0 else {
+        return string
+    }
+    
+    let (hours, min) = minutes.quotientAndRemainder(dividingBy: 60)
+    string = "\(min):" + (sec < 10 ? "0" : "") + string
+    guard hours > 0 else {
+        return string
+    }
+    
+    return "\(hours):" + (min < 10 ? "0" : "") + string
 }
 
 //struct VLCView: UIViewRepresentable {
