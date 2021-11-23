@@ -51,15 +51,15 @@ struct MainView: View {
     
     @State var isRemuxingEnabled = true
     
-    @State var showingFormats = false
-    
-    @State var formatsSheet: ActionSheet?
-
     @State var urlString = ""
     
     @State var isExpanded = true
     
     @State var expandOptions = true
+    
+    @State var formats: ([([Format], String)])?
+    
+    @State var formatsContinuation: FormatsContinuation?
     
     var body: some View {
         List {
@@ -133,7 +133,7 @@ struct MainView: View {
                 indeterminateProgressKey = nil
                 self.info = info
                 
-                let formats = await withCheckedContinuation { continuation in
+                let (formats, timeRange) = await withCheckedContinuation { continuation in
                     check(info: info, continuation: continuation)
                 }
                 
@@ -142,7 +142,7 @@ struct MainView: View {
                     url = save(info: info)
                 }
                 
-                return (formats, url)
+                return (formats, url, timeRange)
             }
         })
         .onChange(of: app.url) { newValue in
@@ -155,11 +155,13 @@ struct MainView: View {
         .alert(isPresented: $isShowingAlert) {
             Alert(title: Text(alertMessage ?? "no message?"))
         }
-        .actionSheet(isPresented: $showingFormats) { () -> ActionSheet in
-            formatsSheet ?? ActionSheet(title: Text("nil?"))
-        }
         .sheet(item: $app.fileURL) { url in
 //            TrimView(url: url)
+        }
+        .sheet(item: $formats) {
+            // FIXME: cancel download
+        } content: { formats in
+            DownloadOptionsView(formats: formats, duration: info!.duration, continuation: formatsContinuation!)
         }
     }
     
@@ -176,9 +178,9 @@ struct MainView: View {
         isShowingAlert = true
     }
     
-    func check(info: Info?, continuation: CheckedContinuation<[Format], Never>) {
+    func check(info: Info?, continuation: FormatsContinuation) {
         guard let formats = info?.formats else {
-            continuation.resume(returning: [])
+            continuation.resume(returning: ([], nil))
             return
         }
         
@@ -195,11 +197,11 @@ struct MainView: View {
             if let best = _best {
                 notify(body: String(format: NSLocalizedString("DownloadStartFormat", comment: "Notification body"),
                                     info?.title ?? NSLocalizedString("NoTitle?", comment: "Nil")))
-                continuation.resume(returning: [best])
+                continuation.resume(returning: ([best], nil))
             } else if let bestVideo = _bestVideo, let bestAudio = _bestAudio {
-                continuation.resume(returning: [bestVideo, bestAudio])
+                continuation.resume(returning: ([bestVideo, bestAudio], nil))
             } else {
-                continuation.resume(returning: [])
+                continuation.resume(returning: ([], nil))
                 DispatchQueue.main.async {
                     self.alert(message: NSLocalizedString("NoSuitableFormat", comment: "Alert message"))
                 }
@@ -207,26 +209,17 @@ struct MainView: View {
             return
         }
 
-        formatsSheet = ActionSheet(title: Text("ChooseFormat"), message: Text("SomeFormatsNeedTranscoding"), buttons: [
-            .default(Text(String(format: NSLocalizedString("BestFormat", comment: "Alert action"), bestHeight)),
-                     action: {
-                         continuation.resume(returning: [best])
-                     }),
-            .default(Text(String(format: NSLocalizedString("RemuxingFormat", comment: "Alert action"),
-                                 bestVideo.ext ?? NSLocalizedString("NoExt?", comment: "Nil"),
-                                 bestAudio.ext ?? NSLocalizedString("NoExt?", comment: "Nil"),
-                                 bestVideoHeight)),
-                     action: {
-                         continuation.resume(returning: [bestVideo, bestAudio])
-                     }),
-            .cancel() {
-                continuation.resume(returning: [])
-            }
-        ])
-
-        DispatchQueue.main.async {
-            showingFormats = true
-        }
+        formatsContinuation = continuation
+        self.formats = [
+            ([best],
+             String(format: NSLocalizedString("BestFormat", comment: "Alert action"),
+                    bestHeight)),
+            ([bestVideo, bestAudio],
+             String(format: NSLocalizedString("RemuxingFormat", comment: "Alert action"),
+                    bestVideo.ext,
+                    bestAudio.ext,
+                    bestVideoHeight)),
+        ]
     }
     
     func save(info: Info) -> URL? {
@@ -237,6 +230,113 @@ struct MainView: View {
             self.error = error
             return nil
         }
+    }
+}
+
+extension Array: Identifiable where Element == ([Format], String) {
+    public var id: [String] { map(\.0).flatMap { $0.map(\.format_id) } }
+}
+
+typealias TimeRange = Range<TimeInterval>
+
+typealias FormatsContinuation = CheckedContinuation<([Format], TimeRange?), Never>
+
+struct DownloadOptionsView: View {
+    let formats: [([Format], String)]
+    
+    let duration: Int
+    
+    let continuation: FormatsContinuation
+    
+    @AppStorage(wrappedValue: true, "cut") var cut: Bool
+    
+    @State var start = "0"
+    @State var end: String
+    @State var length: String
+    
+    enum Fields: Hashable {
+        case start, end, length
+    }
+    
+    @FocusState var focus: Fields?
+    
+    var body: some View {
+        Form {
+            ForEach(formats, id: \.1) { format in
+                Button {
+                    let s = seconds(start) ?? 0
+                    let e = seconds(end) ?? 0
+                    guard !cut || s < e else {
+                        print("invalid time range")
+                        return
+                    }
+                    let timeRange = cut ? TimeInterval(s)..<TimeInterval(e) : nil
+                    continuation.resume(returning: (format.0, timeRange))
+                } label: {
+                    Text(format.1)
+                }
+            }
+            
+            Section {
+                HStack {
+                    TextField("Start", text: $start)
+                        .multilineTextAlignment(.trailing)
+                        .focused($focus, equals: .start)
+                    Text("~")
+                    TextField("End", text: $end)
+                        .multilineTextAlignment(.leading)
+                        .focused($focus, equals: .end)
+                    TextField("Length", text: $length)
+                        .multilineTextAlignment(.trailing)
+                        .focused($focus, equals: .length)
+                }
+                .disabled(!cut)
+            } header: {
+                Toggle("자르기", isOn: $cut)
+            } footer: {
+                Text("짧게 자를수록 변환이 빨리 끝납니다.")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .onChange(of: start) { newValue in
+            updateLength(start: newValue, end: end)
+        }
+        .onChange(of: end) { newValue in
+            guard focus == .end else { return }
+            updateLength(start: start, end: newValue)
+        }
+        .onChange(of: length) { newValue in
+            guard focus == .length else { return }
+            updateEnd(start: start, length: length)
+        }
+    }
+    
+    init(formats: [([Format], String)], duration: Int, continuation: FormatsContinuation) {
+        self.formats = formats
+        self.duration = duration
+        
+        self.continuation = continuation
+        
+        let string = format(duration) ?? ""
+        _end = State(initialValue: string)
+        _length = State(initialValue: string)
+    }
+
+    func updateLength(start: String, end: String) {
+        guard let s = seconds(start), let e = seconds(end) else {
+            return
+        }
+        let l = e - s
+        length = format(l) ?? length
+    }
+    
+    func updateEnd(start: String, length: String) {
+        guard let s = seconds(start), let l = seconds(length) else {
+            return
+        }
+        let e = s + l
+        end = format(e) ?? end
     }
 }
 
@@ -355,8 +455,16 @@ struct TrimView: View {
         }
         let out = model.url.deletingPathExtension().appendingPathExtension("mp4")
         try? FileManager.default.removeItem(at: out)
+        let pipe = Pipe()
+        Task {
+            for try await line in pipe.fileHandleForReading.bytes.lines {
+                print(#function, line)
+            }
+        }
         let t0 = Date()
         let ret = ffmpeg("FFmpeg-iOS",
+                         "-progress", "pipe:\(pipe.fileHandleForWriting.fileDescriptor)",
+                         "-nostats",
                          "-ss", start,
                          "-t", length,
                          "-i", model.url.path,
