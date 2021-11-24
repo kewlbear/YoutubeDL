@@ -142,7 +142,7 @@ struct MainView: View {
                     url = save(info: info)
                 }
                 
-                return (formats, url, timeRange)
+                return (formats, url, timeRange, formats.first?.vbr)
             }
         })
         .onChange(of: app.url) { newValue in
@@ -155,9 +155,9 @@ struct MainView: View {
         .alert(isPresented: $isShowingAlert) {
             Alert(title: Text(alertMessage ?? "no message?"))
         }
-        .sheet(item: $app.fileURL) { url in
-//            TrimView(url: url)
-        }
+//        .sheet(item: $app.fileURL) { url in
+////            TrimView(url: url)
+//        }
         .sheet(item: $formats) {
             // FIXME: cancel download
         } content: { formats in
@@ -260,6 +260,8 @@ struct DownloadOptionsView: View {
     
     @FocusState var focus: Fields?
     
+    @Environment(\.dismiss) var dismiss
+    
     var body: some View {
         Form {
             ForEach(formats, id: \.1) { format in
@@ -272,6 +274,8 @@ struct DownloadOptionsView: View {
                     }
                     let timeRange = cut ? TimeInterval(s)..<TimeInterval(e) : nil
                     continuation.resume(returning: (format.0, timeRange))
+                    
+                    dismiss()
                 } label: {
                     Text(format.1)
                 }
@@ -559,27 +563,6 @@ func seconds(_ string: String) -> Int? {
         seconds = 60 * seconds + number
     }
     return seconds
-}
-
-func format(_ seconds: Int) -> String? {
-    guard seconds >= 0 else {
-        print(#function, "invalid seconds:", seconds)
-        return nil
-    }
-    
-    let (minutes, sec) = seconds.quotientAndRemainder(dividingBy: 60)
-    var string = "\(sec)"
-    guard minutes > 0 else {
-        return string
-    }
-    
-    let (hours, min) = minutes.quotientAndRemainder(dividingBy: 60)
-    string = "\(min):" + (sec < 10 ? "0" : "") + string
-    guard hours > 0 else {
-        return string
-    }
-    
-    return "\(hours):" + (min < 10 ? "0" : "") + string
 }
 
 //struct VLCView: UIViewRepresentable {
