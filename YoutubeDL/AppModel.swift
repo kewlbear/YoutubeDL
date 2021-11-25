@@ -100,9 +100,14 @@ class AppModel: ObservableObject {
     func save(info: Info) throws -> URL {
         let title = info.safeTitle
         let fileManager = FileManager.default
-        let url = try documentsDirectory()
+        var url = try documentsDirectory()
             .appendingPathComponent(title)
         try fileManager.createDirectory(at: url, withIntermediateDirectories: true)
+        
+        // exclude from iCloud backup
+        var values = URLResourceValues()
+        values.isExcludedFromBackup = true
+        try url.setResourceValues(values)
         
         let data = try JSONEncoder().encode(info)
         try data.write(to: url.appendingPathComponent("Info.json"))
