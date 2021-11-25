@@ -63,9 +63,9 @@ struct MainView: View {
     
     var body: some View {
         List {
-            Section {
-                DownloadsView()
-            }
+//            Section {
+//                DownloadsView()
+//            }
             
             Section {
                 DisclosureGroup(isExpanded: $isExpanded) {
@@ -126,11 +126,12 @@ struct MainView: View {
 //                }
             }
            
-            if let progress = app.youtubeDL?.downloader.progress {
+            if app.url != nil {
+                let progress = app.youtubeDL.downloader.progress
                 ProgressView(progress)
             }
             
-            app.youtubeDL?.version.map { Text("yt-dlp version \($0)") }
+            app.youtubeDL.version.map { Text("yt-dlp version \($0)") }
         }
         .onAppear(perform: {
             app.formatSelector = { info in

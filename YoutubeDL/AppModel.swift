@@ -30,15 +30,9 @@ import Combine
 import UIKit
 
 class AppModel: ObservableObject {
-    static private let isPythonInitialized: Bool = {
-        print("initialize Python")
-        PythonSupport.initialize()
-        return true
-    }()
-    
     @Published var url: URL?
     
-    @MainActor @Published var youtubeDL: YoutubeDL?
+    @Published var youtubeDL = YoutubeDL()
     
     @Published var enableChunkedDownload = true
     
@@ -73,18 +67,7 @@ class AppModel: ObservableObject {
     }
     
     func startDownload(url: URL) async {
-        guard Self.isPythonInitialized else { return }
-        
         do {
-            guard let youtubeDL = await youtubeDL else {
-                let youtubeDL = try await YoutubeDL(initializePython: false, downloadPythonModule: YoutubeDL.shouldDownloadPythonModule)
-                Task.detached { @MainActor in
-                    self.youtubeDL = youtubeDL
-                    await self.startDownload(url: url)
-                }
-                return
-            }
-            
             let fileURL = try await youtubeDL.download(url: url, formatSelector: formatSelector)
             print(#function, self.fileURL ?? "no url?")
             Task.detached { @MainActor in
@@ -100,9 +83,14 @@ class AppModel: ObservableObject {
     func save(info: Info) throws -> URL {
         let title = info.safeTitle
         let fileManager = FileManager.default
-        let url = try documentsDirectory()
+        var url = try documentsDirectory()
             .appendingPathComponent(title)
         try fileManager.createDirectory(at: url, withIntermediateDirectories: true)
+        
+        // exclude from iCloud backup
+        var values = URLResourceValues()
+        values.isExcludedFromBackup = true
+        try url.setResourceValues(values)
         
         let data = try JSONEncoder().encode(info)
         try data.write(to: url.appendingPathComponent("Info.json"))
