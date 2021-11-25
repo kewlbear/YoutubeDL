@@ -63,9 +63,9 @@ struct MainView: View {
     
     var body: some View {
         List {
-            Section {
-                DownloadsView()
-            }
+//            Section {
+//                DownloadsView()
+//            }
             
             Section {
                 DisclosureGroup(isExpanded: $isExpanded) {
