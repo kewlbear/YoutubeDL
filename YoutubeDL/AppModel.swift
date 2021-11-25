@@ -30,15 +30,9 @@ import Combine
 import UIKit
 
 class AppModel: ObservableObject {
-    static private let isPythonInitialized: Bool = {
-        print("initialize Python")
-        PythonSupport.initialize()
-        return true
-    }()
-    
     @Published var url: URL?
     
-    @MainActor @Published var youtubeDL: YoutubeDL?
+    @Published var youtubeDL = YoutubeDL()
     
     @Published var enableChunkedDownload = true
     
@@ -73,18 +67,7 @@ class AppModel: ObservableObject {
     }
     
     func startDownload(url: URL) async {
-        guard Self.isPythonInitialized else { return }
-        
         do {
-            guard let youtubeDL = await youtubeDL else {
-                let youtubeDL = try await YoutubeDL(initializePython: false, downloadPythonModule: YoutubeDL.shouldDownloadPythonModule)
-                Task.detached { @MainActor in
-                    self.youtubeDL = youtubeDL
-                    await self.startDownload(url: url)
-                }
-                return
-            }
-            
             let fileURL = try await youtubeDL.download(url: url, formatSelector: formatSelector)
             print(#function, self.fileURL ?? "no url?")
             Task.detached { @MainActor in
