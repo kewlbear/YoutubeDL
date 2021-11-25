@@ -63,9 +63,9 @@ struct MainView: View {
     
     var body: some View {
         List {
-            Section {
-                DownloadsView()
-            }
+//            Section {
+//                DownloadsView()
+//            }
             
             Section {
                 DisclosureGroup(isExpanded: $isExpanded) {
@@ -112,14 +112,14 @@ struct MainView: View {
                     Text(info?.title ?? "nil?")
                 }
                 
-                Section {
-                    DisclosureGroup("Options", isExpanded: $expandOptions) {
-                        Toggle("Fast Download", isOn: $app.enableChunkedDownload)
-                        Toggle("Enable Transcoding", isOn: $app.enableTranscoding)
-                        Toggle("Hide Unsupported Formats", isOn: $app.supportedFormatsOnly)
-                        Toggle("Copy to Photos", isOn: $app.exportToPhotos)
-                    }
-                }
+//                Section {
+//                    DisclosureGroup("Options", isExpanded: $expandOptions) {
+//                        Toggle("Fast Download", isOn: $app.enableChunkedDownload)
+//                        Toggle("Enable Transcoding", isOn: $app.enableTranscoding)
+//                        Toggle("Hide Unsupported Formats", isOn: $app.supportedFormatsOnly)
+//                        Toggle("Copy to Photos", isOn: $app.exportToPhotos)
+//                    }
+//                }
             }
            
             if let progress = app.youtubeDL?.downloader.progress {
