@@ -46,13 +46,18 @@ class AppModel: ObservableObject {
     
     @Published var downloads: [URL] = []
     
+    @Published var showProgress = false
+    
     var formatSelector: YoutubeDL.FormatSelector?
     
     lazy var subscriptions = Set<AnyCancellable>()
     
     init() {
+        youtubeDL.downloadsDirectory = try! documentsDirectory()
+        
         $url.compactMap { $0 }
         .sink { url in
+            self.showProgress = true
             Task {
                 await self.startDownload(url: url)
             }
@@ -83,8 +88,7 @@ class AppModel: ObservableObject {
     func save(info: Info) throws -> URL {
         let title = info.safeTitle
         let fileManager = FileManager.default
-        var url = try documentsDirectory()
-            .appendingPathComponent(title)
+        var url = URL(fileURLWithPath: title, relativeTo: try documentsDirectory())
         try fileManager.createDirectory(at: url, withIntermediateDirectories: true)
         
         // exclude from iCloud backup
