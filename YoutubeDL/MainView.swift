@@ -67,6 +67,17 @@ struct MainView: View {
 //                DownloadsView()
 //            }
             
+            if let pendingTranscode = app.youtubeDL.pendingTranscode {
+                Button {
+                    app.showProgress = true
+                    Task {
+                        await app.youtubeDL.transcode(directory: pendingTranscode)
+                    }
+                } label: {
+                    Text("Finish \(pendingTranscode.lastPathComponent)")
+                }
+            }
+            
             Section {
                 DisclosureGroup(isExpanded: $isExpanded) {
                     Button("Paste URL") {
@@ -126,7 +137,7 @@ struct MainView: View {
 //                }
             }
            
-            if app.url != nil {
+            if app.showProgress {
                 let progress = app.youtubeDL.downloader.progress
                 ProgressView(progress)
             }
@@ -189,6 +200,8 @@ struct MainView: View {
             return
         }
         
+        formatsContinuation = continuation
+        
         let _bestAudio = formats.filter { $0.isAudioOnly && $0.ext == "m4a" }.last
         let _bestVideo = formats.filter {
             $0.isVideoOnly && (isTranscodingEnabled || !$0.isTranscodingNeeded) }.last
@@ -200,11 +213,19 @@ struct MainView: View {
         else
         {
             if let best = _best {
-                notify(body: String(format: NSLocalizedString("DownloadStartFormat", comment: "Notification body"),
-                                    info?.title ?? NSLocalizedString("NoTitle?", comment: "Nil")))
-                continuation.resume(returning: ([best], nil))
+                self.formats = [
+                    ([best],
+                     String(format: NSLocalizedString("BestFormat", comment: "Alert action"),
+                            best.height!)),
+                ]
             } else if let bestVideo = _bestVideo, let bestAudio = _bestAudio {
-                continuation.resume(returning: ([bestVideo, bestAudio], nil))
+                self.formats = [
+                    ([bestVideo, bestAudio],
+                     String(format: NSLocalizedString("RemuxingFormat", comment: "Alert action"),
+                            bestVideo.ext,
+                            bestAudio.ext,
+                            bestVideo.height!)),
+                ]
             } else {
                 continuation.resume(returning: ([], nil))
                 DispatchQueue.main.async {
@@ -214,7 +235,6 @@ struct MainView: View {
             return
         }
 
-        formatsContinuation = continuation
         self.formats = [
             ([best],
              String(format: NSLocalizedString("BestFormat", comment: "Alert action"),
