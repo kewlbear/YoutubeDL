@@ -194,33 +194,6 @@ class DownloadViewController: UIViewController {
             }
         }
     }
-    
-    @IBAction func stopDownload(_ sender: UIBarButtonItem) {
-        sender.isEnabled = false
-        
-        Downloader.shared.session.getTasksWithCompletionHandler { (_, _, tasks) in
-            for task in tasks {
-                task.cancel()
-            }
-            
-            Downloader.shared.transcoder?.isCancelled = true
-            
-            DispatchQueue.main.async {
-                self.navigationItem.prompt = NSLocalizedString("Cancelled", comment: "Prompt") 
-                sender.isEnabled = true
-            }
-        }
-    }
-    
-    @IBAction func transcode(_ sender: UIBarButtonItem) {
-        if Downloader.shared.transcoder == nil {
-            DispatchQueue.global(qos: .userInitiated).async {
-                Downloader.shared.transcode()
-            }
-        } else {
-            Downloader.shared.transcoder?.isCancelled = true
-        }
-    }
 }
 
 extension DownloadViewController: MTKViewDelegate {
