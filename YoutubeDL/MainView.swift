@@ -22,6 +22,7 @@
 //  THE SOFTWARE.
 //
 
+import Foundation
 import SwiftUI
 import YoutubeDL
 import PythonKit
@@ -61,11 +62,13 @@ struct MainView: View {
     
     @State var formatsContinuation: FormatsContinuation?
     
+    @State var tasks: ID<[URLSessionDownloadTask]>?
+    
     var body: some View {
         List {
-//            Section {
-//                DownloadsView()
-//            }
+            Section {
+                DownloadsView()
+            }
             
             if let pendingTranscode = app.youtubeDL.pendingTranscode {
                 Button {
@@ -177,7 +180,21 @@ struct MainView: View {
         .sheet(item: $formats) {
             // FIXME: cancel download
         } content: { formats in
-            DownloadOptionsView(formats: formats, duration: info!.duration, continuation: formatsContinuation!)
+            DownloadOptionsView(formats: formats, duration: Int(ceil(info!.duration ?? 0)), continuation: formatsContinuation!)
+        }
+        .sheet(item: $tasks) { tasks in
+            TaskList(tasks: tasks.value)
+        }
+        .toolbar {
+            Button {
+                app.youtubeDL.downloader.session.getTasksWithCompletionHandler { _, _, tasks in
+                    DispatchQueue.main.async {
+                        self.tasks = ID(value: tasks)
+                    }
+                }
+            } label: {
+                Text("Tasks")
+            }
         }
     }
     
@@ -216,7 +233,7 @@ struct MainView: View {
                 self.formats = [
                     ([best],
                      String(format: NSLocalizedString("BestFormat", comment: "Alert action"),
-                            best.height!)),
+                            best.height ?? -1)),
                 ]
             } else if let bestVideo = _bestVideo, let bestAudio = _bestAudio {
                 self.formats = [
@@ -262,6 +279,12 @@ extension Array: Identifiable where Element == ([Format], String) {
     public var id: [String] { map(\.0).flatMap { $0.map(\.format_id) } }
 }
 
+// FIXME: rename?
+struct ID<Value>: Identifiable {
+    let value: Value
+    let id = UUID()
+}
+
 typealias TimeRange = Range<TimeInterval>
 
 typealias FormatsContinuation = CheckedContinuation<([Format], TimeRange?), Never>
@@ -293,11 +316,11 @@ struct DownloadOptionsView: View {
                 Button {
                     let s = seconds(start) ?? 0
                     let e = seconds(end) ?? 0
-                    guard !cut || s < e else {
+                    guard duration == 0 || !cut || s < e else {
                         print("invalid time range")
                         return
                     }
-                    let timeRange = cut ? TimeInterval(s)..<TimeInterval(e) : nil
+                    let timeRange = (duration > 0 && cut) ? TimeInterval(s)..<TimeInterval(e) : nil
                     continuation.resume(returning: (format.0, timeRange))
                     
                     dismiss()
@@ -327,6 +350,7 @@ struct DownloadOptionsView: View {
                     .font(.footnote)
                     .foregroundColor(.secondary)
             }
+            .disabled(duration <= 0)
         }
         .onChange(of: start) { newValue in
             updateLength(start: newValue, end: end)
@@ -689,3 +713,54 @@ extension Format: Identifiable {
 //            .environmentObject(AppModel())
 //    }
 //}
+
+struct TaskList: View {
+    let tasks: [URLSessionDownloadTask]
+    
+    struct TaskGroup: Identifiable {
+        let title: String?
+        
+        let task: URLSessionDownloadTask?
+        
+        let children: [TaskGroup]?
+        
+        var id: String? { task.map { "\($0.taskIdentifier)" } ?? title }
+        
+        var sortKey: Int { task?.taskIdentifier ?? -1 }
+    }
+    
+    @State var groups: [TaskGroup] = []
+    
+    var body: some View {
+        List(groups, children: \.children) { item in
+            if let task = item.task {
+                Text("#\(task.taskIdentifier) \(task.originalRequest?.value(forHTTPHeaderField: "Range") ?? "No range")")
+            } else {
+                Text(item.title ?? "nil")
+            }
+        }
+        .onAppear {
+            let groups = Dictionary(grouping: tasks) { task -> String? in
+                guard let d = task.taskDescription, let index = d.lastIndex(of: "-") else {
+                    return task.taskDescription
+                }
+                return String(d[..<index])
+            }.map { key, value -> TaskGroup in
+                print(key ?? "nil", value.map(\.taskIdentifier))
+                return TaskGroup(title: key, task: nil,
+                          children: Dictionary(grouping: value, by: \.kind).map { key, value -> TaskGroup in
+                    let children = value
+                        .map { TaskGroup(title: nil, task: $0, children: nil) }
+                        .sorted { $0.sortKey < $1.sortKey }
+                    print(key, children.map(\.task?.taskIdentifier))
+                    return TaskGroup(title: key.description, task: nil,
+                                     children: children)
+                })
+            }
+            
+            self.groups = groups
+        }
+    }
+}
+
+extension URLSessionDownloadTask: Identifiable {}

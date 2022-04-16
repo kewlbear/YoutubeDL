@@ -32,10 +32,10 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "YoutubeDLTests"
-               BuildableName = "YoutubeDLTests"
+               BlueprintIdentifier = "4C0A8EED24D7D0F40071AE7D"
+               BuildableName = "YoutubeDLTests.xctest"
                BlueprintName = "YoutubeDLTests"
-               ReferencedContainer = "container:../YoutubeDL-iOS">
+               ReferencedContainer = "container:YoutubeDL.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>

@@ -50,6 +50,11 @@ class YTests: XCTestCase {
         XCTAssertEqual(format(-1), nil)
     }
     
+    func testFilename() {
+        let path = #"[강제소환🏅#29] 1박2일 "선호"하는 사람들 다 모여라💓 김선호의 예능 뽀시래기적 모먼트 평생 못 잃어ㅣKBS 방송-otherVideo.webm"#
+        print(#function, path.lengthOfBytes(using: .utf8))
+    }
+    
     func testPerformanceExample() throws {
         // This is an example of a performance test case.
         measure {
