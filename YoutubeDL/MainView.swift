@@ -65,8 +65,14 @@ struct MainView: View {
     
     @State var tasks: ID<[URLSessionDownloadTask]>?
     
+    @AppStorage("isIdleTimerDisabled") var isIdleTimerDisabled = UIApplication.shared.isIdleTimerDisabled
+    
     var body: some View {
         List {
+            Section {
+                Toggle("Keep screen turned on", isOn: $isIdleTimerDisabled)
+            }
+            
             Section {
                 DownloadsView()
             }
@@ -164,6 +170,8 @@ struct MainView: View {
                 
                 return (formats, url, timeRange, formats.first?.vbr)
             }
+            
+            UIApplication.shared.isIdleTimerDisabled = isIdleTimerDisabled
         })
         .onChange(of: app.url) { newValue in
             guard let url = newValue else { return }
@@ -171,6 +179,9 @@ struct MainView: View {
             indeterminateProgressKey = "Extracting info"
             guard isExpanded else { return }
             isExpanded = false
+        }
+        .onChange(of: isIdleTimerDisabled) { newValue in
+            UIApplication.shared.isIdleTimerDisabled = newValue
         }
         .onReceive(app.$error) {
             error = $0
