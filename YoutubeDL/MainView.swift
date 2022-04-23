@@ -39,6 +39,7 @@ struct MainView: View {
     
     @State var error: Error? {
         didSet {
+            guard error != nil else { return }
             alertMessage = error?.localizedDescription
             isShowingAlert = true
         }
@@ -170,6 +171,13 @@ struct MainView: View {
             indeterminateProgressKey = "Extracting info"
             guard isExpanded else { return }
             isExpanded = false
+        }
+        .onReceive(app.$error) {
+            error = $0
+        }
+        .onReceive(app.$exception) {
+            alertMessage = $0?.description
+            isShowingAlert = alertMessage != nil
         }
         .alert(isPresented: $isShowingAlert) {
             Alert(title: Text(alertMessage ?? "no message?"))

@@ -28,7 +28,9 @@ import PythonSupport
 import YoutubeDL
 import Combine
 import UIKit
+import PythonKit
 
+@MainActor
 class AppModel: ObservableObject {
     @Published var url: URL?
     
@@ -47,6 +49,10 @@ class AppModel: ObservableObject {
     @Published var downloads: [URL] = []
     
     @Published var showProgress = false
+    
+    @Published var error: Error?
+    
+    @Published var exception: PythonObject?
     
     var formatSelector: YoutubeDL.FormatSelector?
     
@@ -80,8 +86,16 @@ class AppModel: ObservableObject {
             }
         } catch YoutubeDLError.canceled {
             print(#function, "canceled")
+        } catch PythonError.exception(let exception, traceback: _) {
+            print(#function, exception)
+            await MainActor.run {
+                self.exception = exception
+            }
         } catch {
             print(#function, error)
+            await MainActor.run {
+                self.error = error
+            }
         }
     }
     
