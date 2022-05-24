@@ -73,9 +73,9 @@ struct MainView: View {
                 Toggle("Keep screen turned on", isOn: $isIdleTimerDisabled)
             }
             
-            Section {
-                DownloadsView()
-            }
+//            Section {
+//                DownloadsView()
+//            }
             
             if let pendingTranscode = app.youtubeDL.pendingTranscode {
                 Button {
@@ -168,6 +168,8 @@ struct MainView: View {
                     url = save(info: info)
                 }
                 
+                app.showProgress = true
+                
                 return (formats, url, timeRange, formats.first?.vbr)
             }
             
@@ -175,6 +177,7 @@ struct MainView: View {
         })
         .onChange(of: app.url) { newValue in
             guard let url = newValue else { return }
+            app.showProgress = false
             urlString = url.absoluteString
             indeterminateProgressKey = "Extracting info"
             guard isExpanded else { return }

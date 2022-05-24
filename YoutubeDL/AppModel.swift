@@ -63,7 +63,6 @@ class AppModel: ObservableObject {
         
         $url.compactMap { $0 }
         .sink { url in
-            self.showProgress = true
             Task {
                 await self.startDownload(url: url)
             }
@@ -81,7 +80,7 @@ class AppModel: ObservableObject {
         do {
             let fileURL = try await youtubeDL.download(url: url, formatSelector: formatSelector)
             print(#function, self.fileURL ?? "no url?")
-            Task.detached { @MainActor in
+            Task { @MainActor in
                 self.fileURL = fileURL
             }
         } catch YoutubeDLError.canceled {
