@@ -2,20 +2,11 @@
   "object": {
     "pins": [
       {
-        "package": "FFmpeg-iOS",
-        "repositoryURL": "https://github.com/kewlbear/FFmpeg-iOS.git",
-        "state": {
-          "branch": "main",
-          "revision": "d69fb2d25e94b5fe27bc7db7493fd2c7778eaea0",
-          "version": null
-        }
-      },
-      {
         "package": "Python-iOS",
         "repositoryURL": "https://github.com/kewlbear/Python-iOS.git",
         "state": {
           "branch": "kivy-ios",
-          "revision": "f5333228b625560a90c17d9e2d3a9b2aac6967a9",
+          "revision": "1fa595f162b6df0dd729304ac284de8cc31b84f5",
           "version": null
         }
       },
@@ -24,7 +15,7 @@
         "repositoryURL": "https://github.com/pvieito/PythonKit.git",
         "state": {
           "branch": "master",
-          "revision": "86ce684b005aee7cea847568c6ab82079794f29b",
+          "revision": "f12defa918c90af4b7029aa4322d31f8660e0559",
           "version": null
         }
       },

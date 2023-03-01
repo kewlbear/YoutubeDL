@@ -37,6 +37,14 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         
+        let documentsDirectory: URL
+        if #available(iOS 16.0, *) {
+            documentsDirectory = URL.documentsDirectory
+        } else {
+            documentsDirectory = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+        }
+        FileManager.default.changeCurrentDirectoryPath(documentsDirectory.path)
+        
         UNUserNotificationCenter.current().delegate = self
         
         let view = NavigationView {

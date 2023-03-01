@@ -35,8 +35,6 @@ struct MainView: View {
     
     @State var isShowingAlert = false
     
-    @State var info: Info?
-    
     @State var error: Error? {
         didSet {
             guard error != nil else { return }
@@ -67,6 +65,8 @@ struct MainView: View {
     
     @AppStorage("isIdleTimerDisabled") var isIdleTimerDisabled = UIApplication.shared.isIdleTimerDisabled
     
+    @State private var showBrowser = false
+    
     var body: some View {
         List {
             Section {
@@ -76,17 +76,6 @@ struct MainView: View {
 //            Section {
 //                DownloadsView()
 //            }
-            
-            if let pendingTranscode = app.youtubeDL.pendingTranscode {
-                Button {
-                    app.showProgress = true
-                    Task {
-                        await app.youtubeDL.transcode(directory: pendingTranscode)
-                    }
-                } label: {
-                    Text("Finish \(pendingTranscode.lastPathComponent)")
-                }
-            }
             
             Section {
                 DisclosureGroup(isExpanded: $isExpanded) {
@@ -127,14 +116,14 @@ struct MainView: View {
                 }
             }
             
-            if let key = indeterminateProgressKey {
-                ProgressView(key)
-                    .frame(maxWidth: .infinity)
-            }
+//            if let key = indeterminateProgressKey {
+//                ProgressView(key)
+//                    .frame(maxWidth: .infinity)
+//            }
             
-            if info != nil {
+            if let info = app.info {
                 Section {
-                    Text(info?.title ?? "nil?")
+                    Text(info.title)
                 }
                 
 //                Section {
@@ -148,8 +137,7 @@ struct MainView: View {
             }
            
             if app.showProgress {
-                let progress = app.youtubeDL.downloader.progress
-                ProgressView(progress)
+                ProgressView(app.progress)
             }
             
             app.youtubeDL.version.map { Text("yt-dlp version \($0)") }
@@ -157,10 +145,11 @@ struct MainView: View {
         .onAppear(perform: {
             app.formatSelector = { info in
                 indeterminateProgressKey = nil
-                self.info = info
+                app.info = info
                 
-                let (formats, timeRange) = await withCheckedContinuation { continuation in
-                    check(info: info, continuation: continuation)
+                let (formats, timeRange): ([Format], TimeRange?) = await withCheckedContinuation { continuation in
+                    self.formatsContinuation = continuation
+                    self.formats = [([], "Transcode")]
                 }
                 
                 var url: URL?
@@ -170,14 +159,14 @@ struct MainView: View {
                 
                 app.showProgress = true
                 
-                return (formats, url, timeRange, formats.first?.vbr)
+                return (formats, url, timeRange, formats.first?.vbr, "")
             }
             
             UIApplication.shared.isIdleTimerDisabled = isIdleTimerDisabled
         })
         .onChange(of: app.url) { newValue in
             guard let url = newValue else { return }
-            app.showProgress = false
+//            app.showProgress = false
             urlString = url.absoluteString
             indeterminateProgressKey = "Extracting info"
             guard isExpanded else { return }
@@ -202,20 +191,28 @@ struct MainView: View {
         .sheet(item: $formats) {
             // FIXME: cancel download
         } content: { formats in
-            DownloadOptionsView(formats: formats, duration: Int(ceil(info!.duration ?? 0)), continuation: formatsContinuation!)
+            DownloadOptionsView(formats: formats, duration: Int(ceil(app.info!.duration ?? 0)), continuation: formatsContinuation!)
         }
         .sheet(item: $tasks) { tasks in
             TaskList(tasks: tasks.value)
         }
+        .sheet(item: $app.webViewURL) { url in
+            WebView(url: url) { url in
+                app.webViewURL = nil
+                
+                Task {
+                    await app.startDownload(url: url)
+                }
+            }
+        }
+        .sheet(isPresented: $showBrowser) {
+            Browser()
+        }
         .toolbar {
             Button {
-                app.youtubeDL.downloader.session.getTasksWithCompletionHandler { _, _, tasks in
-                    DispatchQueue.main.async {
-                        self.tasks = ID(value: tasks)
-                    }
-                }
+                showBrowser = true
             } label: {
-                Text("Tasks")
+                Image(systemName: "safari")
             }
         }
     }
@@ -652,23 +649,71 @@ func seconds(_ string: String) -> Int? {
 
 import WebKit
 
+let handlerName = "YoutubeDL"
+
 struct WebView: UIViewRepresentable {
+    let url: URL?
+    
+    let handler: ((URL) -> Void)?
+    
     func makeUIView(context: Context) -> WKWebView {
         let webView = WKWebView()
         webView.navigationDelegate = context.coordinator
+        webView.configuration.userContentController.add(context.coordinator, name: handlerName)
         return webView
     }
     
     func updateUIView(_ webView: WKWebView, context: Context) {
-        //
+        if let url, webView.url != url {
+            print(#function, url)
+            webView.load(URLRequest(url: url))
+        }
     }
     
-    class Coordinator: NSObject, WKNavigationDelegate {
+    class Coordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
+        let handler: ((URL) -> Void)?
+    
+        init(handler: ((URL) -> Void)?) {
+            self.handler = handler
+        }
         
+        func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
+            print(#function, navigationAction.request.url ?? "nil")
+            return .allow
+        }
+        
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            guard handler != nil else { return }
+            
+            Task { @MainActor in
+                let source = """
+                    var src = document.querySelector("video").src
+                    webkit.messageHandlers.\(handlerName).postMessage(src)
+                    1
+                    """
+                var done = false
+                while !done {
+                    do {
+                        _ = try await webView.evaluateJavaScript(source)
+                        done = true
+                    } catch {
+                        print(#function, error)
+                    }
+                    try await Task.sleep(nanoseconds: 100_000_000)
+                }
+            }
+        }
+        
+        func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+            print(#function, message.body)
+            guard let string = message.body as? String,
+                  let url = URL(string: string) else { return }
+            handler?(url)
+        }
     }
     
     func makeCoordinator() -> Coordinator {
-        Coordinator()
+        Coordinator(handler: handler)
     }
 }
 
@@ -786,3 +831,22 @@ struct TaskList: View {
 }
 
 extension URLSessionDownloadTask: Identifiable {}
+
+struct Browser: View {
+    @State private var address = ""
+    
+    @State private var url = URL(string: "https://instagram.com")
+    
+    var body: some View {
+        VStack {
+            TextField("Address", text: $address)
+                .onSubmit {
+                    guard let url = URL(string: (address.hasPrefix("https://") ? "" : "https://") + address) else { return }
+                    self.url = url
+                }
+                .textInputAutocapitalization(.never)
+                .padding()
+            WebView(url: url, handler: nil)
+        }
+    }
+}
