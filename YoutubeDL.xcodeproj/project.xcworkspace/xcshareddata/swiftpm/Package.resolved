@@ -2,24 +2,6 @@
   "object": {
     "pins": [
       {
-        "package": "FFmpeg-iOS",
-        "repositoryURL": "https://github.com/kewlbear/FFmpeg-iOS.git",
-        "state": {
-          "branch": "main",
-          "revision": "d69fb2d25e94b5fe27bc7db7493fd2c7778eaea0",
-          "version": null
-        }
-      },
-      {
-        "package": "LoggerKit",
-        "repositoryURL": "https://github.com/pvieito/LoggerKit.git",
-        "state": {
-          "branch": "master",
-          "revision": "02487bf1d5b0dcec1fd6ffed750386d617051020",
-          "version": null
-        }
-      },
-      {
         "package": "Python-iOS",
         "repositoryURL": "https://github.com/kewlbear/Python-iOS.git",
         "state": {
@@ -30,7 +12,7 @@
       },
       {
         "package": "PythonKit",
-        "repositoryURL": "https://github.com/kewlbear/PythonKit.git",
+        "repositoryURL": "https://github.com/pvieito/PythonKit.git",
         "state": {
           "branch": "master",
           "revision": "86ce684b005aee7cea847568c6ab82079794f29b",
@@ -41,18 +23,9 @@
         "package": "swift-argument-parser",
         "repositoryURL": "https://github.com/apple/swift-argument-parser",
         "state": {
-          "branch": "main",
-          "revision": "d2930e8fcf9c33162b9fcc1d522bc975e2d4179b",
-          "version": null
-        }
-      },
-      {
-        "package": "YoutubeDL-iOS",
-        "repositoryURL": "https://github.com/kewlbear/YoutubeDL-iOS.git",
-        "state": {
-          "branch": "main",
-          "revision": "811ea597014bc483f44737a1d80c54d0896c36b0",
-          "version": null
+          "branch": null,
+          "revision": "6b2aa2748a7881eebb9f84fb10c01293e15b52ca",
+          "version": "0.5.0"
         }
       }
     ]
