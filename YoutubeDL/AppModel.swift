@@ -244,7 +244,7 @@ class AppModel: ObservableObject {
                     // Fallback on earlier versions
                 }
                 self.progress.completedUnitCount = Int64(dict["downloaded_bytes"]!) ?? -1
-                self.progress.totalUnitCount = Int64(dict["total_bytes"]!) ?? -1
+                self.progress.totalUnitCount = Int64(dict["total_bytes"] ?? dict["total_bytes_estimate"] ?? "") ?? -1
                 self.progress.throughput = Int(dict["speed"]!)
                 self.progress.estimatedTimeRemaining = TimeInterval(dict["eta"]!)
             case "finished":

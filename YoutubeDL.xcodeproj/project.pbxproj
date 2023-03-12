@@ -60,8 +60,6 @@
 		4C185D4D256791C400106D39 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		4C185D4F256791D300106D39 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Localizable.strings; sourceTree = "<group>"; };
 		4C1F4CF8272A45760054479F /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
-		4C1F4CFB272A50AA0054479F /* YoutubeDL-iOS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "YoutubeDL-iOS"; path = "../YoutubeDL-iOS"; sourceTree = "<group>"; };
-		4C276FE9274B1A3B00D018AF /* FFmpeg-iOS */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "FFmpeg-iOS"; path = "../FFmpeg-iOS"; sourceTree = "<group>"; };
 		4C298A61274B641100C75C40 /* YoutubeDL-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "YoutubeDL-Bridging-Header.h"; sourceTree = "<group>"; };
 		4C298A64274B646F00C75C40 /* libffmpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libffmpeg.a; path = "../FFmpeg-iOS/build/xcf/iphoneos/libffmpeg.a"; sourceTree = "<group>"; };
 		4C298A66274B648900C75C40 /* ffmpeg.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = ffmpeg.xcframework; path = "../FFmpeg-iOS/Frameworks/ffmpeg.xcframework"; sourceTree = "<group>"; };
@@ -146,8 +144,6 @@
 		4C1F4CFA272A50AA0054479F /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				4C1F4CFB272A50AA0054479F /* YoutubeDL-iOS */,
-				4C276FE9274B1A3B00D018AF /* FFmpeg-iOS */,
 			);
 			name = Packages;
 			sourceTree = "<group>";
@@ -670,7 +666,7 @@
 			repositoryURL = "https://github.com/kewlbear/YoutubeDL-iOS.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.0.2;
+				minimumVersion = 0.0.3;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
