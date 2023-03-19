@@ -215,7 +215,11 @@ class AppModel: ObservableObject {
         let argv: [String] = (
             url.pathExtension == "mp4"
             ? ["-o", url.lastPathComponent,]
-            : ["-f", "bestvideo+bestaudio[ext=m4a]/best",]
+            : [
+                "-f", "bestvideo+bestaudio[ext=m4a]/best",
+                "--merge-output-format", "mp4",
+                "--postprocessor-args", "Merger+ffmpeg:-c:v h264",
+            ]
         )
         + [
             "--no-check-certificates",
