@@ -263,6 +263,25 @@ class AppModel: ObservableObject {
             if level == "error" {
                 error = message
             }
+        } makeTranscodeProgressBlock: {
+            self.progress.kind = nil
+            self.progress.localizedDescription = NSLocalizedString("Transcoding...", comment: "Progress description")
+            self.progress.completedUnitCount = 0
+            self.progress.totalUnitCount = 100
+            
+            let t0 = ProcessInfo.processInfo.systemUptime
+            
+            return { (progress: Double) in
+                print(#function, "transcode:", progress)
+                let elapsed = ProcessInfo.processInfo.systemUptime - t0
+                let speed = progress / elapsed
+                let ETA = (1 - progress) / speed
+                
+                guard ETA.isFinite else { return }
+                
+                self.progress.completedUnitCount = Int64(progress * 100)
+                self.progress.estimatedTimeRemaining = ETA
+            }
         }
         
         if let error {
