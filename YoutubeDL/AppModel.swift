@@ -91,43 +91,17 @@ class AppModel: ObservableObject {
         
         do {
             let (info, files, infos) = try await download(url: url)
-//            guard !infos.isEmpty else {
-//                print(#function, "no infos")
-//                return
-//            }
-            let format = try PythonDecoder().decode(Format.self, from: infos[0])
-           
+            
             let outputURL: URL
             
-            if format.isTranscodingNeeded {
-                showProgress = false
-                
-                let (_, _, timeRange, _, _) = await formatSelector!(try PythonDecoder().decode(Info.self, from: info!))
-                
-                let videoURL: URL
-                let audioURL: URL
-                if #available(iOS 16.0, *) {
-                    videoURL = URL(filePath: files[0])
-                    audioURL = URL(filePath: files[1])
-                } else {
-                    videoURL = URL(fileURLWithPath: files[0])
-                    audioURL = URL(fileURLWithPath: files[1])
-                }
-                
-                let bitRate = format.vbr
-                
-                let transcodedURL = videoURL.deletingPathExtension().appendingPathExtension("mp4")
-                
-                try await transcode(videoURL: videoURL, transcodedURL: transcodedURL, timeRange: timeRange, bitRate: bitRate)
-                
-                outputURL = videoURL.deletingPathExtension().deletingPathExtension().appendingPathExtension("mp4")
-                _ = try await mux(video: transcodedURL, audio: audioURL, out: outputURL, timeRange: timeRange)
+            guard let path = info.flatMap({ String($0["_filename"]) }) else {
+                print(#function, "no '_filename'?", info ?? "nil")
+                return
+            }
+            if #available(iOS 16.0, *) {
+                outputURL = URL(filePath: path)
             } else {
-                if #available(iOS 16.0, *) {
-                    outputURL = URL(filePath: files[0])
-                } else {
-                    outputURL = URL(fileURLWithPath: files[0])
-                }
+                outputURL = URL(fileURLWithPath: path)
             }
             
             export(url: outputURL)
@@ -260,7 +234,8 @@ class AppModel: ObservableObject {
             }
         } log: { level, message in
             print(#function, level, message)
-            if level == "error" {
+            
+            if level == "error" || message.hasSuffix("has already been downloaded") {
                 error = message
             }
         } makeTranscodeProgressBlock: {
