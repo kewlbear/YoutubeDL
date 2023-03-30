@@ -41,8 +41,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/kewlbear/YoutubeDL-iOS.git",
       "state" : {
-        "revision" : "6715162367fb8ac72ac2d6917c7e46d3865a4771",
-        "version" : "0.0.3"
+        "revision" : "c9f755e5a164f1c33b8b2573b789fdb070ec5b3d",
+        "version" : "0.0.4"
       }
     }
   ],
