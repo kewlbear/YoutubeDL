@@ -193,6 +193,7 @@ class AppModel: ObservableObject {
                 "-f", "bestvideo+bestaudio[ext=m4a]/best",
                 "--merge-output-format", "mp4",
                 "--postprocessor-args", "Merger+ffmpeg:-c:v h264",
+                "-o", "%(title).200B.%(ext)s", // https://github.com/yt-dlp/yt-dlp/issues/1136#issuecomment-932077195
             ]
         )
         + [
