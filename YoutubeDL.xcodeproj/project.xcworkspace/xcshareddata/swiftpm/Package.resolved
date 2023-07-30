@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/kewlbear/FFmpeg-iOS-Lame",
       "state" : {
-        "revision" : "c0b202a16a43933cb16bf9914c76e00f0d24d57e",
-        "version" : "0.0.6-b20230416-200000"
+        "revision" : "1808fa5a1263c5e216646cd8421fc7dcb70520cc",
+        "version" : "0.0.6-b20230730-000000"
       }
     },
     {
@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/kewlbear/FFmpeg-iOS-Support",
       "state" : {
-        "revision" : "60df9313af3a5869255b9654cd88eede4646295b",
-        "version" : "0.0.1"
+        "revision" : "be3bd9149ac53760e8725652eee99c405b2be47a",
+        "version" : "0.0.2"
       }
     },
     {
@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/kewlbear/Python-iOS.git",
       "state" : {
-        "revision" : "784b391aa25c765761998cacb2d1fd5c86014164",
-        "version" : "0.1.1-b20230312-012746"
+        "revision" : "4f3ca2bc0cff1ef2511555eb6114f9eb12e50412",
+        "version" : "0.1.1-b20230423-090254"
       }
     },
     {
@@ -41,8 +41,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/kewlbear/YoutubeDL-iOS.git",
       "state" : {
-        "revision" : "de56735bbcfef9dfb7011ddb7c1dd2fc5d525778",
-        "version" : "0.0.5"
+        "revision" : "fa41e79d0630b427c6ec698d57c1af20e2ef8ef8",
+        "version" : "0.0.7"
       }
     }
   ],
