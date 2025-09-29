@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -125,13 +125,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		44E298AEE89BAA9674A14AF8 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
 		4C0A8EEF24D7D0F40071AE7D /* YoutubeDLTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -158,7 +151,6 @@
 				4C0A8EEF24D7D0F40071AE7D /* YoutubeDLTests */,
 				60796EE419190F4100A9926B /* Frameworks */,
 				60796EE319190F4100A9926B /* Products */,
-				44E298AEE89BAA9674A14AF8 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -585,10 +577,14 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = kr.co.bosoft.YD;
 				PRODUCT_NAME = Y;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_INCLUDE_PATHS = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "YoutubeDL/YoutubeDL-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				USER_HEADER_SEARCH_PATHS = "";
 				VALID_ARCHS = "x86_64 arm64 arm64e";
 				WRAPPER_EXTENSION = app;
@@ -620,9 +616,13 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = kr.co.bosoft.YD;
 				PRODUCT_NAME = Y;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_INCLUDE_PATHS = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "YoutubeDL/YoutubeDL-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				VALID_ARCHS = "x86_64 arm64 arm64e";
 				WRAPPER_EXTENSION = app;
 			};

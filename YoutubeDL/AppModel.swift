@@ -2,399 +2,464 @@
 //  AppModel.swift
 //  YoutubeDL
 //
-//  Copyright (c) 2021 Changbeom Ahn
-//
-//  Permission is hereby granted, free of charge, to any person obtaining a copy
-//  of this software and associated documentation files (the "Software"), to deal
-//  in the Software without restriction, including without limitation the rights
-//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-//  copies of the Software, and to permit persons to whom the Software is
-//  furnished to do so, subject to the following conditions:
-//
-//  The above copyright notice and this permission notice shall be included in
-//  all copies or substantial portions of the Software.
-//
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-//  THE SOFTWARE.
+//  Full AppModel for YoutubeDL app
+//  - download options
+//  - yt-dlp invocation and progress handling
+//  - postprocessing (ffmpeg args via yt-dlp postprocessor)
 //
 
 import Foundation
-import PythonSupport
-import YoutubeDL
 import Combine
-import UIKit
+import SwiftUI
 import AVFoundation
 import Photos
+import YoutubeDL
 import PythonKit
 
+// --------------------------------------------------
+// MARK: - Options / Enums
+// --------------------------------------------------
+
+public enum DownloadKind: String, CaseIterable, Identifiable {
+    case video = "Video"
+    case audio = "Audio"
+    case best  = "Best"
+    public var id: String { rawValue }
+}
+
+public enum VideoQuality: String, CaseIterable, Identifiable {
+    case p2160 = "2160p (4K)"
+    case p1440 = "1440p"
+    case p1080 = "1080p"
+    case p720  = "720p"
+    case p480  = "480p"
+    case p360  = "360p"
+    case best  = "Best"
+    public var id: String { rawValue }
+}
+
+public enum ContainerFormat: String, CaseIterable, Identifiable {
+    case mp4 = "mp4"
+    case mkv = "mkv"
+    case webm = "webm"
+    public var id: String { rawValue }
+}
+
+public enum AudioFormat: String, CaseIterable, Identifiable {
+    case m4a = "m4a"
+    case mp3 = "mp3"
+    case opus = "opus"
+    case flac = "flac"
+    case wav = "wav"
+    case best = "best"
+    public var id: String { rawValue }
+}
+
+public enum TranscodePreset: String, CaseIterable, Identifiable {
+    case copy = "Copy (no re-encode)"
+    case h264_fast = "H.264 - Fast"
+    case h264_quality = "H.264 - Quality"
+    case hevc_fast = "HEVC - Fast"
+    case hevc_quality = "HEVC - Quality"
+    case vp9_fast = "VP9 - Fast"
+    case vp9_quality = "VP9 - Quality"
+
+    public var id: String { rawValue }
+}
+
+// --------------------------------------------------
+// MARK: - AppModel Class
+// --------------------------------------------------
+
 @MainActor
-class AppModel: ObservableObject {
-    @Published var url: URL?
-    
-    @Published var youtubeDL = YoutubeDL()
-    
-    @Published var enableChunkedDownload = true
-    
-    @Published var enableTranscoding = true
-    
-    @Published var supportedFormatsOnly = true
-    
-    @Published var exportToPhotos = true
-    
-    @Published var fileURL: URL?
-    
-    @Published var downloads: [URL] = []
-    
-    @Published var showProgress = false
-    
-    var progress = Progress()
-    
-    @Published var error: Error?
-    
-    @Published var exception: PythonObject?
-    
-    @Published var info: Info?
-    
-    @Published var webViewURL: URL?
-    
-    var formatSelector: YoutubeDL.FormatSelector?
-    
+public final class AppModel: ObservableObject {
+
+    // MARK: Published state used by UI
+
+    @Published public var url: URL? = nil
+    @Published public var youtubeDL: YoutubeDL = YoutubeDL()
+
+    @Published public var enableChunkedDownload: Bool = true
+    @Published public var enableTranscoding: Bool = true
+    @Published public var supportedFormatsOnly: Bool = true
+    @Published public var exportToPhotos: Bool = true
+
+    @Published public var fileURL: URL? = nil
+    @Published public var downloads: [URL] = []
+    @Published public var showProgress: Bool = false
+    @Published public var progress: Progress = Progress()
+    @Published public var error: Error? = nil
+    @Published public var exception: PythonObject? = nil
+    @Published public var info: Info? = nil
+    @Published public var webViewURL: URL? = nil
+    @Published public var outputFileURL: URL? = nil
+
+    // UI-configurable model fields (bound to MainView)
+    @Published public var kind: DownloadKind = .best
+    @Published public var videoQuality: VideoQuality = .best
+    @Published public var container: ContainerFormat = .mp4
+    @Published public var audioFormat: AudioFormat = .m4a
+    @Published public var transcode: TranscodePreset = .copy
+
+    @Published public var videoCRF: Int? = nil
+    @Published public var videoBitrateKbps: Int? = nil
+    @Published public var audioBitrateKbps: Int? = nil
+
+    // Save folders
+    @Published public var defaultSaveFolder: URL? = nil
+    @Published public var perDownloadFolder: URL? = nil
+
+    // Internals
     lazy var subscriptions = Set<AnyCancellable>()
-    
-    init() {
-        youtubeDL.downloadsDirectory = try! documentsDirectory()
-        
+
+    // MARK: - Init
+
+    public init() {
+        // default downloads directory to app documents
+        if let docs = try? documentsDirectory() {
+            youtubeDL.downloadsDirectory = docs
+        }
+
+        // react to url set by UI
         $url
             .compactMap { $0 }
-            .sink { url in
+            .sink { [weak self] url in
                 Task {
-                    await self.startDownload(url: url)
+                    await self?.startDownload(url: url)
                 }
             }
             .store(in: &subscriptions)
-        
+
+        // load existing downloads (if any)
         do {
             downloads = try loadDownloads()
         } catch {
-            // FIXME: ...
-            print(#function, error)
+            print("AppModel.init loadDownloads()", error)
         }
     }
-    
-    func startDownload(url: URL) async {
-        print(#function, url)
-        
+
+    // MARK: - Start download flow
+
+    public func startDownload(url: URL) async {
+        print("AppModel.startDownload:", url)
+
+        // reset transient state
+        await MainActor.run {
+            self.error = nil
+            self.exception = nil
+            self.outputFileURL = nil
+            self.showProgress = true
+            self.progress = Progress()
+            self.progress.localizedDescription = NSLocalizedString("Extracting info", comment: "progress description")
+        }
+
+        // configure downloads dir (per-download override or default)
+        if let per = perDownloadFolder ?? defaultSaveFolder {
+            youtubeDL.downloadsDirectory = per
+        } else if let docs = try? documentsDirectory() {
+            youtubeDL.downloadsDirectory = docs
+        }
+
         do {
-            let (info, files, infos) = try await download(url: url)
-            
-            let outputURL: URL
-            
-            guard let path = info.flatMap({ String($0["_filename"]) }) else {
-                print(#function, "no '_filename'?", info ?? "nil")
-                return
+            let (infoObj, files, infos) = try await download(url: url)
+
+            // decode Info if available (safe)
+            if let infoObj {
+                if let decoded = try? PythonDecoder().decode(Info.self, from: infoObj) {
+                    await MainActor.run { self.info = decoded }
+                } else {
+                    print("startDownload: failed to decode Info from infoObj")
+                }
             }
-            if #available(iOS 16.0, *) {
-                outputURL = URL(filePath: path)
-            } else {
-                outputURL = URL(fileURLWithPath: path)
-            }
-            
-            export(url: outputURL)
-            showProgress = false
-            notify(body: "Finished")
-        } catch YoutubeDLError.canceled {
-            print(#function, "canceled")
-        } catch PythonError.exception(let exception, traceback: _) {
-            print(#function, exception)
-            await MainActor.run {
-                self.exception = exception
-            }
-        } catch {
-            print(#function, error)
-            if (url.host ?? "").hasSuffix("instagram.com") {
+
+            guard let filename = infoObj.flatMap({ String($0["_filename"]) }) else {
+                print("startDownload: no filename in infoObj")
                 await MainActor.run {
-                    webViewURL = url
+                    self.showProgress = false
                 }
                 return
             }
-            
-            await MainActor.run {
-                self.error = error
+
+            // convert to URL
+            let outputURL: URL
+            if #available(iOS 16.0, *) {
+                outputURL = URL(filePath: filename)
+            } else {
+                outputURL = URL(fileURLWithPath: filename)
             }
+
+            await MainActor.run {
+                self.outputFileURL = outputURL
+                self.showProgress = false
+            }
+
+            if exportToPhotos && isVideoFile(outputURL) {
+                exportToPhotosLibrary(outputURL)
+            }
+
+            // clear per-download folder after a successful run
+            perDownloadFolder = nil
+
+            notify(body: "Finished")
+        } catch PythonError.exception(let ex, _) {
+            print("AppModel.startDownload python exception:", ex)
+            await MainActor.run { self.exception = ex; self.showProgress = false }
+        } catch {
+            print("AppModel.startDownload error:", error)
+            // fallback for instagram - let UI open a webview
+            if (url.host ?? "").hasSuffix("instagram.com") {
+                await MainActor.run { self.webViewURL = url }
+            } else {
+                await MainActor.run { self.error = error }
+            }
+            await MainActor.run { self.showProgress = false }
         }
     }
-    
+
+    // MARK: - Build yt-dlp args
+
+    // returns the argument list for yt_dlp
+    func buildArguments(for url: URL) -> [String] {
+        var argv: [String] = []
+
+        // Format selection
+        switch kind {
+        case .audio:
+            argv += ["-f", "bestaudio/best"]
+            argv += ["--extract-audio"]
+            if audioFormat != .best {
+                argv += ["--audio-format", audioFormat.rawValue.lowercased()]
+            }
+            if let a = audioBitrateKbps {
+                argv += ["--audio-quality", "\(a)k"]
+            }
+        case .video:
+            argv += ["-f", videoFormatSelectorString()]
+        case .best:
+            argv += ["-f", "bestvideo+bestaudio/best"]
+        }
+
+        // merge/output container
+        argv += ["--merge-output-format", container.rawValue.lowercased()]
+
+        // postprocessor args (ffmpeg)
+        if kind != .audio {
+            let ffmpegArgs = ffmpegPostprocessorArgs()
+            if !ffmpegArgs.isEmpty {
+                argv += ["--postprocessor-args", "Merger+ffmpeg:\(ffmpegArgs)"]
+            } else {
+                argv += ["--postprocessor-args", "Merger+ffmpeg:-movflags +faststart"]
+            }
+        }
+
+        // output template
+        argv += ["-o", "%(title).200B.%(ext)s"]
+
+        // other safe flags
+        argv += ["--no-check-certificates"]
+
+        // finally URL
+        argv += [url.absoluteString]
+
+        return argv
+    }
+
+    // helper to pick video format expression for yt-dlp
+    private func videoFormatSelectorString() -> String {
+        func heightLimit(_ h: Int?) -> String {
+            guard let h else { return "" }
+            return "[height<=\(h)]"
+        }
+
+        let h: Int?
+        switch videoQuality {
+        case .p2160: h = 2160
+        case .p1440: h = 1440
+        case .p1080: h = 1080
+        case .p720:  h = 720
+        case .p480:  h = 480
+        case .p360:  h = 360
+        case .best:  h = nil
+        }
+
+        let limit = heightLimit(h)
+
+        if supportedFormatsOnly {
+            return "bestvideo[vcodec~='(avc1|h264)']\(limit)+bestaudio[acodec~='(aac|mp4a)']/best\(limit)"
+        } else {
+            return "bestvideo\(limit)+bestaudio/best\(limit)"
+        }
+    }
+
+    // Build ffmpeg postprocessor args string
+    private func ffmpegPostprocessorArgs() -> String {
+        let mov = "-movflags +faststart"
+
+        switch transcode {
+        case .copy:
+            return "\(mov) -c:v copy -c:a copy"
+        case .h264_fast, .h264_quality:
+            var args = "\(mov) -c:v libx264 -preset " + (transcode == .h264_fast ? "veryfast" : "slow")
+            if let br = videoBitrateKbps {
+                args += " -b:v \(br)k"
+            } else if let crf = videoCRF {
+                args += " -crf \(crf)"
+            } else {
+                args += (transcode == .h264_fast ? " -crf 23" : " -crf 20")
+            }
+            args += " -c:a aac -b:a \((audioBitrateKbps ?? 192))k"
+            return args
+        case .hevc_fast, .hevc_quality:
+            var args = "\(mov) -c:v libx265 -preset " + (transcode == .hevc_fast ? "fast" : "slow")
+            if let br = videoBitrateKbps {
+                args += " -b:v \(br)k"
+            } else if let crf = videoCRF {
+                args += " -crf \(crf)"
+            } else {
+                args += (transcode == .hevc_fast ? " -crf 28" : " -crf 24")
+            }
+            args += " -tag:v hvc1 -c:a aac -b:a \((audioBitrateKbps ?? 192))k"
+            return args
+        case .vp9_fast, .vp9_quality:
+            var args = "\(mov) -c:v libvpx-vp9 -deadline " + (transcode == .vp9_fast ? "realtime" : "good")
+            if let br = videoBitrateKbps {
+                args += " -b:v \(br)k"
+            } else if let crf = videoCRF {
+                args += " -crf \(crf)"
+            } else {
+                args += (transcode == .vp9_fast ? " -crf 33" : " -crf 28")
+            }
+            args += " -c:a copy"
+            return args
+        }
+    }
+
+    // MARK: - Perform download with yt-dlp helper wrapper
+
+    func download(url: URL) async throws -> (PythonObject?, [String], [PythonObject]) {
+        var infoObj: PythonObject? = nil
+        var files: [String] = []
+        var infos: [PythonObject] = []
+        var errorMessage: String?
+
+        await MainActor.run {
+            self.showProgress = true
+            self.progress = Progress(totalUnitCount: 0)
+            self.progress.localizedDescription = NSLocalizedString("Extracting info", comment: "progress description")
+        }
+
+        let argv = buildArguments(for: url)
+        print("Running yt-dlp with argv:", argv)
+
+        try await yt_dlp(argv: argv) { dict in
+            infoObj = dict["info_dict"]
+            let status = String(dict["status"] ?? "unknown")
+
+            switch status {
+            case "downloading":
+                Task { @MainActor in
+                    self.progress.kind = .file
+                    self.progress.fileOperationKind = .downloading
+                    self.progress.completedUnitCount = Int64(dict["downloaded_bytes"]!) ?? -1
+                    self.progress.totalUnitCount = Int64(Double(dict["total_bytes"] ?? dict["total_bytes_estimate"] ?? Python.None) ?? -1)
+                    if let speed = Int(dict["speed"] ?? Python.None) { self.progress.throughput = speed }
+                    self.progress.estimatedTimeRemaining = TimeInterval(dict["eta"] ?? Python.None) ?? nil
+                }
+            case "finished":
+                if let fname = String(dict["filename"] ?? Python.None) {
+                    files.append(fname)
+                }
+                if let infoObj { infos.append(infoObj) }
+            default:
+                break
+            }
+        } log: { level, message in
+            print("[yt-dlp]", level, message)
+            if level == "error" {
+                errorMessage = message
+            }
+        } makeTranscodeProgressBlock: { [weak self] in
+            guard let self = self else { return { _ in } }
+            Task { @MainActor in
+                self.progress.kind = nil
+                self.progress.localizedDescription = NSLocalizedString("Transcoding...", comment: "")
+                self.progress.completedUnitCount = 0
+                self.progress.totalUnitCount = 100
+            }
+            let start = ProcessInfo.processInfo.systemUptime
+            return { (p: Double) in
+                Task { @MainActor in
+                    let elapsed = ProcessInfo.processInfo.systemUptime - start
+                    let speed = p / max(elapsed, 0.000001)
+                    let ETA = (1 - p) / max(speed, 0.000001)
+                    self.progress.completedUnitCount = Int64(p * 100)
+                    self.progress.estimatedTimeRemaining = ETA.isFinite ? ETA : nil
+                }
+            }
+        }
+
+        if let err = errorMessage {
+            throw NSError(domain: "AppModel", code: 1, userInfo: [NSLocalizedDescriptionKey: err])
+        }
+
+        return (infoObj, files, infos)
+    }
+
+    // MARK: - Helpers: export, IO, etc.
+
+    private func exportToPhotosLibrary(_ url: URL) {
+        PHPhotoLibrary.shared().performChanges({
+            _ = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
+        }) { success, err in
+            if let err { print("exportToPhotos error:", err) }
+        }
+    }
+
+    private func isVideoFile(_ url: URL) -> Bool {
+        let exts = ["mp4", "mov", "m4v", "mkv", "webm"]
+        return exts.contains(url.pathExtension.lowercased())
+    }
+
     func save(info: Info) throws -> URL {
         let title = info.safeTitle
-        let fileManager = FileManager.default
-        var url = URL(fileURLWithPath: title, relativeTo: try documentsDirectory())
-        try fileManager.createDirectory(at: url, withIntermediateDirectories: true)
-        
-        // exclude from iCloud backup
+        let fm = FileManager.default
+        let base = try documentsDirectory()
+        var dir = URL(fileURLWithPath: title, relativeTo: base) // ✅ must be var
+        try fm.createDirectory(at: dir, withIntermediateDirectories: true)
         var values = URLResourceValues()
         values.isExcludedFromBackup = true
-        try url.setResourceValues(values)
-        
+        try dir.setResourceValues(values)
         let data = try JSONEncoder().encode(info)
-        try data.write(to: url.appendingPathComponent("Info.json"))
-        
-        return url
+        try data.write(to: dir.appendingPathComponent("Info.json"))
+        return dir
     }
-    
+
     func loadDownloads() throws -> [URL] {
         let keys: Set<URLResourceKey> = [.nameKey, .isDirectoryKey]
         let documents = try documentsDirectory()
-        guard let enumerator = FileManager.default.enumerator(at: documents, includingPropertiesForKeys: Array(keys), options: .skipsHiddenFiles) else { fatalError() }
-        var urls = [URL]()
+        guard let enumerator = FileManager.default.enumerator(at: documents, includingPropertiesForKeys: Array(keys), options: .skipsHiddenFiles) else { return [] }
+        var urls: [URL] = []
         for case let url as URL in enumerator {
             let values = try url.resourceValues(forKeys: keys)
             guard enumerator.level == 2, url.lastPathComponent == "Info.json" else { continue }
-            print(enumerator.level, url.path.replacingOccurrences(of: documents.path, with: ""), values.isDirectory ?? false ? "dir" : "file")
             urls.append(url.deletingLastPathComponent())
         }
         return urls
     }
-    
+
     func documentsDirectory() throws -> URL {
         try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
     }
-    
-    func pauseDownload() {
-        
-    }
-    
-    func resumeDownload() {
-        
-    }
-    
-    func cancelDownload() {
-        
-    }
-    
-    func download(url: URL) async throws -> (PythonObject?, [String], [PythonObject]) {
-        progress.localizedDescription = NSLocalizedString("Extracting info", comment: "progress description")
 
-        showProgress = true
+    func setGlobalSaveFolder(url: URL?) {
+        defaultSaveFolder = url
+    }
 
-        var info: PythonObject?
-        var files = [String]()
-        var formats = [PythonObject]()
-        var error: String?
-        
-        let argv: [String] = (
-            url.pathExtension == "mp4"
-            ? ["-o", url.lastPathComponent,]
-            : [
-                "-f", "bestvideo+bestaudio[ext=m4a]/best",
-                "--merge-output-format", "mp4",
-                "--postprocessor-args", "Merger+ffmpeg:-c:v h264",
-                "-o", "%(title).200B.%(ext)s", // https://github.com/yt-dlp/yt-dlp/issues/1136#issuecomment-932077195
-            ]
-        )
-        + [
-            "--no-check-certificates",
-            url.absoluteString,
-        ]
-        print(#function, argv)
-        try await yt_dlp(argv: argv) { dict in
-            info = dict["info_dict"]
-//            if self.info == nil {
-//                DispatchQueue.main.async {
-//                    self.info = try? PythonDecoder().decode(Info.self, from: info!)
-//                }
-//            }
-            
-            let status = String(dict["status"]!)
-            
-            self.progress.localizedDescription = nil
-            
-            switch status {
-            case "downloading":
-                self.progress.kind = .file
-                self.progress.fileOperationKind = .downloading
-                if #available(iOS 16.0, *) {
-                    self.progress.fileURL = URL(filePath: String(dict["tmpfilename"]!)!)
-                } else {
-                    // Fallback on earlier versions
-                }
-                self.progress.completedUnitCount = Int64(dict["downloaded_bytes"]!) ?? -1
-                self.progress.totalUnitCount = Int64(Double(dict["total_bytes"] ?? dict["total_bytes_estimate"] ?? Python.None) ?? -1)
-                self.progress.throughput = Int(dict["speed"]!)
-                self.progress.estimatedTimeRemaining = TimeInterval(dict["eta"]!)
-            case "finished":
-                print(#function, dict["filename"] ?? "no filename")
-                files.append(String(dict["filename"]!)!)
-                formats.append(info!)
-            default:
-                print(#function, dict)
-            }
-        } log: { level, message in
-            print(#function, level, message)
-            
-            if level == "error" || message.hasSuffix("has already been downloaded") {
-                error = message
-            }
-        } makeTranscodeProgressBlock: {
-            self.progress.kind = nil
-            self.progress.localizedDescription = NSLocalizedString("Transcoding...", comment: "Progress description")
-            self.progress.completedUnitCount = 0
-            self.progress.totalUnitCount = 100
-            
-            let t0 = ProcessInfo.processInfo.systemUptime
-            
-            return { (progress: Double) in
-                print(#function, "transcode:", progress)
-                let elapsed = ProcessInfo.processInfo.systemUptime - t0
-                let speed = progress / elapsed
-                let ETA = (1 - progress) / speed
-                
-                guard ETA.isFinite else { return }
-                
-                self.progress.completedUnitCount = Int64(progress * 100)
-                self.progress.estimatedTimeRemaining = ETA
-            }
-        }
-        
-        if let error {
-            throw NSError(domain: "App", code: 1, userInfo: [NSLocalizedDescriptionKey: error])
-        }
-        
-        return (info, files, formats)
+    func setPerDownloadFolder(url: URL?) {
+        perDownloadFolder = url
     }
-    
-    func transcode(videoURL: URL, transcodedURL: URL, timeRange: TimeRange?, bitRate: Double?) async throws {
-        progress.kind = nil
-        progress.localizedDescription = NSLocalizedString("Transcoding...", comment: "Progress description")
-        progress.totalUnitCount = 100
-        
-        let t0 = ProcessInfo.processInfo.systemUptime
-        
-        let transcoder = Transcoder { progress in
-            print(#function, "transcode:", progress)
-            let elapsed = ProcessInfo.processInfo.systemUptime - t0
-            let speed = progress / elapsed
-            let ETA = (1 - progress) / speed
-            
-            guard ETA.isFinite else { return }
-            
-            self.progress.completedUnitCount = Int64(progress * 100)
-            self.progress.estimatedTimeRemaining = ETA
-        }
-       
-        let _: Int = try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global().async {
-                do {
-                    try transcoder.transcode(from: videoURL, to: transcodedURL, timeRange: timeRange, bitRate: bitRate)
-                    continuation.resume(returning: 0)
-                } catch {
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
-    }
-    
-    func mux(video videoURL: URL, audio audioURL: URL, out outputURL: URL, timeRange: TimeRange?) async throws -> Bool {
-        let t0 = ProcessInfo.processInfo.systemUptime
-       
-        let videoAsset = AVAsset(url: videoURL)
-        let audioAsset = AVAsset(url: audioURL)
-        
-        guard let videoAssetTrack = videoAsset.tracks(withMediaType: .video).first,
-              let audioAssetTrack = audioAsset.tracks(withMediaType: .audio).first else {
-            print(#function,
-                  videoAsset.tracks(withMediaType: .video),
-                  audioAsset.tracks(withMediaType: .audio))
-            return false
-        }
-        
-        let composition = AVMutableComposition()
-        let videoCompositionTrack = composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid)
-        let audioCompositionTrack = composition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid)
-        
-        do {
-            try videoCompositionTrack?.insertTimeRange(CMTimeRange(start: .zero, duration: videoAssetTrack.timeRange.duration), of: videoAssetTrack, at: .zero)
-            let range: CMTimeRange
-            if let timeRange = timeRange {
-                range = CMTimeRange(start: CMTime(seconds: timeRange.lowerBound, preferredTimescale: 1),
-                                    end: CMTime(seconds: timeRange.upperBound, preferredTimescale: 1))
-            } else {
-                range = CMTimeRange(start: .zero, duration: audioAssetTrack.timeRange.duration)
-            }
-            try audioCompositionTrack?.insertTimeRange(range, of: audioAssetTrack, at: .zero)
-            print(#function, videoAssetTrack.timeRange, range)
-        }
-        catch {
-            print(#function, error)
-            return false
-        }
-        
-        guard let session = AVAssetExportSession(asset: composition, presetName: AVAssetExportPresetPassthrough) else {
-            print(#function, "unable to init export session")
-            return false
-        }
-        
-        removeItem(at: outputURL)
-        
-        session.outputURL = outputURL
-        session.outputFileType = .mp4
-        print(#function, "merging...")
-        
-        DispatchQueue.main.async {
-            let progress = self.progress
-            progress.kind = nil
-            progress.localizedDescription = NSLocalizedString("Merging...", comment: "Progress description")
-            progress.localizedAdditionalDescription = nil
-            progress.totalUnitCount = 0
-            progress.completedUnitCount = 0
-            progress.estimatedTimeRemaining = nil
-        }
-        
-        Task {
-            while session.status != .completed {
-                print(#function, session.progress)
-                progress.localizedDescription = "\(Int(session.progress * 100))%"
-                try await Task.sleep(nanoseconds: 100_000_000)
-            }
-        }
-        
-        return try await withCheckedThrowingContinuation { continuation in
-            session.exportAsynchronously {
-                print(#function, "finished merge", session.status.rawValue)
-                print(#function, "took", self.youtubeDL.downloader.dateComponentsFormatter.string(from: ProcessInfo.processInfo.systemUptime - t0) ?? "?")
-                if session.status == .completed {
-                    if !self.youtubeDL.keepIntermediates {
-                        removeItem(at: videoURL)
-                        removeItem(at: audioURL)
-                    }
-                } else {
-                    print(#function, session.error ?? "no error?")
-                }
-                
-                continuation.resume(with: Result {
-                    if let error = session.error { throw error }
-                    return true
-                })
-            }
-        }
-    }
-  
-    func export(url: URL) {
-        PHPhotoLibrary.shared().performChanges({
-            _ = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
-        }) { success, error in
-            print(#function, success, error ?? "")
-            DispatchQueue.main.async {
-                self.error = error
-            }
-        }
-    }
-    
-    func share() {
-        
+
+    func notify(body: String) {
+        print("[AppModel.notify]", body)
     }
 }

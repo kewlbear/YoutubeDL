@@ -1,852 +1,667 @@
 //
 //  MainView.swift
+//  YoutubeDL
 //
-//  Copyright (c) 2020 Changbeom Ahn
-//
-//  Permission is hereby granted, free of charge, to any person obtaining a copy
-//  of this software and associated documentation files (the "Software"), to deal
-//  in the Software without restriction, including without limitation the rights
-//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-//  copies of the Software, and to permit persons to whom the Software is
-//  furnished to do so, subject to the following conditions:
-//
-//  The above copyright notice and this permission notice shall be included in
-//  all copies or substantial portions of the Software.
-//
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-//  THE SOFTWARE.
+//  Full SwiftUI MainView that binds to AppModel.swift
+//  Contains all UI pieces in one file (as requested):
+//  - URL input, paste, download
+//  - Kind, Quality, Container, AudioFormat, Transcode
+//  - Advanced fields (CRF, bitrates)
+//  - Save folder pickers (global & per-download)
+//  - Progress card, status, downloads history
+//  - WebView-based fallback sheet for sites like Instagram
 //
 
-import Foundation
 import SwiftUI
-import YoutubeDL
-import PythonKit
-import FFmpegSupport
+import UniformTypeIdentifiers
+import WebKit
 import AVFoundation
 
-@available(iOS 13.0.0, *)
-struct MainView: View {
-    @State var alertMessage: String?
-    
-    @State var isShowingAlert = false
-    
-    @State var error: Error? {
-        didSet {
-            guard error != nil else { return }
-            alertMessage = error?.localizedDescription
-            isShowingAlert = true
-        }
-    }
-    
-    @EnvironmentObject var app: AppModel
-    
-    @State var indeterminateProgressKey: String?
-    
-    @State var isTranscodingEnabled = true
-    
-    @State var isRemuxingEnabled = true
-    
-    @State var urlString = ""
-    
-    @State var isExpanded = false
-    
-    @State var expandOptions = true
-    
-    @State var formats: ([([Format], String)])?
-    
-    @State var formatsContinuation: FormatsContinuation?
-    
-    @State var tasks: ID<[URLSessionDownloadTask]>?
-    
-    @AppStorage("isIdleTimerDisabled") var isIdleTimerDisabled = UIApplication.shared.isIdleTimerDisabled
-    
-    @State private var showBrowser = false
-    
-    var body: some View {
-        List {
-            Section {
-                Toggle("Keep screen turned on", isOn: $isIdleTimerDisabled)
+@available(iOS 15.0, *)
+public struct MainView: View {
+    @EnvironmentObject public var app: AppModel
+
+    // URL input
+    @State private var urlString: String = ""
+    @State private var showAlert: Bool = false
+    @State private var alertMessage: String = ""
+
+    // Folder pickers
+    @State private var showGlobalFolderPicker: Bool = false
+    @State private var showPerDownloadFolderPicker: Bool = false
+
+    // Browser / webview
+    @State private var showBrowser: Bool = false
+
+    // Advanced toggles
+    @State private var showAdvancedVideo: Bool = false
+    @State private var showAdvancedAudio: Bool = false
+
+    // editable text fields for numeric entries
+    @State private var crfText: String = ""
+    @State private var vBitrateText: String = ""
+    @State private var aBitrateText: String = ""
+
+    public init() {}
+
+    public var body: some View {
+        NavigationView {
+            List {
+                urlInputSection
+                whatToDownloadSection
+
+                if app.kind != .audio {
+                    videoOptionsSection
+                    transcodePresetSection
+                } else {
+                    audioOptionsSection
+                }
+
+                saveLocationSection
+                behaviorSection
+
+                statusSection
+
+                downloadsHistorySection
+
+                aboutSection
             }
-            
-//            Section {
-//                DownloadsView()
-//            }
-            
-            Section {
-                DisclosureGroup(isExpanded: $isExpanded) {
-                    Button("Paste URL") {
-                        let pasteBoard = UIPasteboard.general
-                        //                guard pasteBoard.hasURLs || pasteBoard.hasStrings else {
-                        //                    alert(message: "Nothing to paste")
-                        //                    return
-                        //                }
-                        guard let url = pasteBoard.url ?? pasteBoard.string.flatMap({ URL(string: $0) }) else {
-                            alert(message: "Nothing to paste")
-                            return
-                        }
-                        urlString = url.absoluteString
-                        self.app.url = url
-                    }
-                    Button(#"Prepend "y" to URL in Safari"#) {
-                        // FIXME: open Safari
-                        open(url: URL(string: "https://youtube.com")!)
-                    }
-                    Button("Download shortcut") {
-                        // FIXME: open Shortcuts
-                        open(url: URL(string: "https://www.icloud.com/shortcuts/e226114f6e6c4440b9c466d1ebe8fbfc")!)
-                    }
-                } label: {
-                    if #available(iOS 15.0, *) {
-                        TextField("Enter URL", text: $urlString)
-                            .onSubmit {
-                                guard let url = URL(string: urlString) else {
-                                    alert(message: "Invalid URL")
-                                    return
-                                }
-                                app.url = url
-                            }
-                    } else {
-                        TextField("Enter URL", text: $urlString)
+            .listStyle(.insetGrouped)
+            .navigationTitle("YoutubeDL")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        showBrowser = true
+                    } label: {
+                        Image(systemName: "safari")
                     }
                 }
-            }
-            
-//            if let key = indeterminateProgressKey {
-//                ProgressView(key)
-//                    .frame(maxWidth: .infinity)
-//            }
-            
-            if let info = app.info {
-                Section {
-                    Text(info.title)
-                }
-                
-//                Section {
-//                    DisclosureGroup("Options", isExpanded: $expandOptions) {
-//                        Toggle("Fast Download", isOn: $app.enableChunkedDownload)
-//                        Toggle("Enable Transcoding", isOn: $app.enableTranscoding)
-//                        Toggle("Hide Unsupported Formats", isOn: $app.supportedFormatsOnly)
-//                        Toggle("Copy to Photos", isOn: $app.exportToPhotos)
-//                    }
-//                }
-            }
-           
-            if app.showProgress {
-                ProgressView(app.progress)
-            }
-            
-            app.youtubeDL.version.map { Text("yt-dlp version \($0)") }
-        }
-        .onAppear(perform: {
-            app.formatSelector = { info in
-                indeterminateProgressKey = nil
-                app.info = info
-                
-                let (formats, timeRange): ([Format], TimeRange?) = await withCheckedContinuation { continuation in
-                    self.formatsContinuation = continuation
-                    self.formats = [([], "Transcode")]
-                }
-                
-                var url: URL?
-                if !formats.isEmpty {
-                    url = save(info: info)
-                }
-                
-                app.showProgress = true
-                
-                return (formats, url, timeRange, formats.first?.vbr, "")
-            }
-            
-            UIApplication.shared.isIdleTimerDisabled = isIdleTimerDisabled
-        })
-        .onChange(of: app.url) { newValue in
-            guard let url = newValue else { return }
-//            app.showProgress = false
-            urlString = url.absoluteString
-            indeterminateProgressKey = "Extracting info"
-            guard isExpanded else { return }
-            isExpanded = false
-        }
-        .onChange(of: isIdleTimerDisabled) { newValue in
-            UIApplication.shared.isIdleTimerDisabled = newValue
-        }
-        .onReceive(app.$error) {
-            error = $0
-        }
-        .onReceive(app.$exception) {
-            alertMessage = $0?.description
-            isShowingAlert = alertMessage != nil
-        }
-        .alert(isPresented: $isShowingAlert) {
-            Alert(title: Text(alertMessage ?? "no message?"))
-        }
-//        .sheet(item: $app.fileURL) { url in
-////            TrimView(url: url)
-//        }
-        .sheet(item: $formats) {
-            // FIXME: cancel download
-        } content: { formats in
-            DownloadOptionsView(formats: formats, duration: Int(ceil(app.info!.duration ?? 0)), continuation: formatsContinuation!)
-        }
-        .sheet(item: $tasks) { tasks in
-            TaskList(tasks: tasks.value)
-        }
-        .sheet(item: $app.webViewURL) { url in
-            WebView(url: url) { url in
-                app.webViewURL = nil
-                
-                Task {
-                    await app.startDownload(url: url)
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Text(app.youtubeDL.version ?? "yt-dlp: ?")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                 }
             }
-        }
-        .sheet(isPresented: $showBrowser) {
-            Browser()
-        }
-        .toolbar {
-            Button {
-                showBrowser = true
-            } label: {
-                Image(systemName: "safari")
+            .sheet(isPresented: $showBrowser) { BrowserView() }
+            .sheet(isPresented: $showGlobalFolderPicker) {
+                FolderPicker(initialURL: app.defaultSaveFolder) { picked in
+                    app.setGlobalSaveFolder(url: picked)
+                }
+            }
+            .sheet(isPresented: $showPerDownloadFolderPicker) {
+                FolderPicker(initialURL: app.perDownloadFolder ?? app.defaultSaveFolder) { picked in
+                    app.setPerDownloadFolder(url: picked)
+                }
+            }
+            .sheet(item: Binding(
+                get: { app.webViewURL.map { WebSheet(url: $0) } },
+                set: { newVal in app.webViewURL = newVal?.url }
+            )) { sheet in
+                WebViewSheet(url: sheet.url) { discoveredURL in
+                    // close and kick off download with discovered src
+                    app.webViewURL = nil
+                    app.url = discoveredURL
+                }
+            }
+            .onAppear {
+                syncNumericFieldsFromModel()
+            }
+            .alert(isPresented: $showAlert) {
+                Alert(title: Text(alertMessage))
             }
         }
     }
-    
-    func open(url: URL) {
-        UIApplication.shared.open(url, options: [:]) {
-            if !$0 {
-                alert(message: "Failed to open \(url)")
-            }
-        }
-    }
-   
-    func alert(message: String) {
-        alertMessage = message
-        isShowingAlert = true
-    }
-    
-    func check(info: Info?, continuation: FormatsContinuation) {
-        guard let formats = info?.formats else {
-            continuation.resume(returning: ([], nil))
-            return
-        }
-        
-        formatsContinuation = continuation
-        
-        let _bestAudio = formats.filter { $0.isAudioOnly && $0.ext == "m4a" }.last
-        let _bestVideo = formats.filter {
-            $0.isVideoOnly && (isTranscodingEnabled || !$0.isTranscodingNeeded) }.last
-        let _best = formats.filter { !$0.isRemuxingNeeded && !$0.isTranscodingNeeded }.last
-        print(_best ?? "no best?", _bestVideo ?? "no bestvideo?", _bestAudio ?? "no bestaudio?")
-        guard let best = _best, let bestVideo = _bestVideo, let bestAudio = _bestAudio,
-              let bestHeight = best.height, let bestVideoHeight = bestVideo.height
-//              , bestVideoHeight > bestHeight
-        else
-        {
-            if let best = _best {
-                self.formats = [
-                    ([best],
-                     String(format: NSLocalizedString("BestFormat", comment: "Alert action"),
-                            best.height ?? -1)),
-                ]
-            } else if let bestVideo = _bestVideo, let bestAudio = _bestAudio {
-                self.formats = [
-                    ([bestVideo, bestAudio],
-                     String(format: NSLocalizedString("RemuxingFormat", comment: "Alert action"),
-                            bestVideo.ext,
-                            bestAudio.ext,
-                            bestVideo.height!)),
-                ]
-            } else {
-                continuation.resume(returning: ([], nil))
-                DispatchQueue.main.async {
-                    self.alert(message: NSLocalizedString("NoSuitableFormat", comment: "Alert message"))
-                }
-            }
-            return
-        }
 
-        self.formats = [
-            ([best],
-             String(format: NSLocalizedString("BestFormat", comment: "Alert action"),
-                    bestHeight)),
-            ([bestVideo, bestAudio],
-             String(format: NSLocalizedString("RemuxingFormat", comment: "Alert action"),
-                    bestVideo.ext,
-                    bestAudio.ext,
-                    bestVideoHeight)),
-        ]
-    }
-    
-    func save(info: Info) -> URL? {
-        do {
-            return try app.save(info: info)
-        } catch {
-            print(#function, error)
-            self.error = error
-            return nil
-        }
-    }
-}
+    // MARK: - Sections
 
-extension Array: Identifiable where Element == ([Format], String) {
-    public var id: [String] { map(\.0).flatMap { $0.map(\.format_id) } }
-}
-
-// FIXME: rename?
-struct ID<Value>: Identifiable {
-    let value: Value
-    let id = UUID()
-}
-
-typealias TimeRange = Range<TimeInterval>
-
-typealias FormatsContinuation = CheckedContinuation<([Format], TimeRange?), Never>
-
-struct DownloadOptionsView: View {
-    let formats: [([Format], String)]
-    
-    let duration: Int
-    
-    let continuation: FormatsContinuation
-    
-    @AppStorage(wrappedValue: true, "cut") var cut: Bool
-    
-    @State var start = "0"
-    @State var end: String
-    @State var length: String
-    
-    enum Fields: Hashable {
-        case start, end, length
-    }
-    
-    @FocusState var focus: Fields?
-    
-    @Environment(\.dismiss) var dismiss
-    
-    var body: some View {
-        Form {
-            ForEach(formats, id: \.1) { format in
-                Button {
-                    let s = seconds(start) ?? 0
-                    let e = seconds(end) ?? 0
-                    guard duration == 0 || !cut || s < e else {
-                        print("invalid time range")
-                        return
-                    }
-                    let timeRange = (duration > 0 && cut) ? TimeInterval(s)..<TimeInterval(e) : nil
-                    continuation.resume(returning: (format.0, timeRange))
-                    
-                    dismiss()
-                } label: {
-                    Text(format.1)
-                }
-            }
-            
-            Section {
+    private var urlInputSection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    TextField("Start", text: $start)
-                        .multilineTextAlignment(.trailing)
-                        .focused($focus, equals: .start)
-                    Text("~")
-                    TextField("End", text: $end)
-                        .multilineTextAlignment(.leading)
-                        .focused($focus, equals: .end)
-                    TextField("Length", text: $length)
-                        .multilineTextAlignment(.trailing)
-                        .focused($focus, equals: .length)
-                }
-                .disabled(!cut)
-            } header: {
-                Toggle("자르기", isOn: $cut)
-            } footer: {
-                Text("짧게 자를수록 변환이 빨리 끝납니다.")
-                    .font(.footnote)
-                    .foregroundColor(.secondary)
-            }
-            .disabled(duration <= 0)
-        }
-        .onChange(of: start) { newValue in
-            updateLength(start: newValue, end: end)
-        }
-        .onChange(of: end) { newValue in
-            guard focus == .end else { return }
-            updateLength(start: start, end: newValue)
-        }
-        .onChange(of: length) { newValue in
-            guard focus == .length else { return }
-            updateEnd(start: start, length: length)
-        }
-    }
-    
-    init(formats: [([Format], String)], duration: Int, continuation: FormatsContinuation) {
-        self.formats = formats
-        self.duration = duration
-        
-        self.continuation = continuation
-        
-        let string = format(duration) ?? ""
-        _end = State(initialValue: string)
-        _length = State(initialValue: string)
-    }
+                    TextField("Enter URL or paste", text: $urlString)
+                        .textInputAutocapitalization(.never)
+                        .disableAutocorrection(true)
+                        .keyboardType(.URL)
+                        .onSubmit { startDownloadTapped() }
 
-    func updateLength(start: String, end: String) {
-        guard let s = seconds(start), let e = seconds(end) else {
-            return
-        }
-        let l = e - s
-        length = format(l) ?? length
-    }
-    
-    func updateEnd(start: String, length: String) {
-        guard let s = seconds(start), let l = seconds(length) else {
-            return
-        }
-        let e = s + l
-        end = format(e) ?? end
-    }
-}
-
-extension URL: Identifiable {
-    public var id: URL { self }
-}
-
-//import MobileVLCKit
-
-struct TrimView: View {
-    class Model: NSObject, ObservableObject
-//    , VLCMediaPlayerDelegate
-    {
-        let url: URL
-        
-//        lazy var player: VLCMediaPlayer = {
-//            let player = VLCMediaPlayer()
-//            player.media = VLCMedia(url: url)
-//            player.delegate = self
-//            return player
-//        }()
-        
-        init(url: URL) {
-            self.url = url
-        }
-    }
-    
-    @StateObject var model: Model
-    
-    @EnvironmentObject var app: AppModel
-    
-//    var drag: some Gesture {
-//        DragGesture()
-//            .onChanged { value in
-//                let f = value.location.x / (model.player.drawable as! UIView).bounds.width
-//                let t = f * CGFloat(model.player.media.length.intValue) / 1000
-//                time = Date(timeIntervalSince1970: t)
-//            }
-//            .onEnded { value in
-//                let f = value.location.x / (model.player.drawable as! UIView).bounds.width
-//                let t = f * CGFloat(model.player.media.length.intValue)
-//                model.player.time = VLCTime(int: Int32(t))
-//            }
-//    }
-    
-    @State var time = Date(timeIntervalSince1970: 0)
-        
-    let timeFormatter: Formatter = {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .medium
-        formatter.timeZone = TimeZone(secondsFromGMT: 0)
-        return formatter
-    }()
-    
-    @State var start = ""
-    
-    @State var length = ""
-    
-    @State var end = ""
-    
-    enum FocusedField: Hashable {
-        case start, length, end
-    }
-    
-    @FocusState var focus: FocusedField?
-    
-    var body: some View {
-        VStack {
-//            Text(time, formatter: timeFormatter)
-//            VLCView(player: model.player)
-            TextField("Start", text: $start)
-                .focused($focus, equals: .start)
-            TextField("Length", text: $length)
-                .focused($focus, equals: .length)
-            TextField("End", text: $end)
-                .focused($focus, equals: .end)
-            Button {
-//                if model.player.isPlaying {
-//                    model.player.pause()
-//                } else {
-//                    model.player.play()
-//                }
-                Task {
-                    await transcode()
-                }
-            } label: {
-                Text(
-//                    model.player.isPlaying ? "Pause" :
-                        "Transcode")
-            }
-        }
-//        .gesture(drag)
-        .onChange(of: start) { newValue in
-            updateLength(start: newValue, end: end)
-        }
-        .onChange(of: end) { newValue in
-            guard focus == .end else { return }
-            updateLength(start: start, end: newValue)
-        }
-        .onChange(of: length) { newValue in
-            guard focus == .length else { return }
-            updateEnd(start: start, length: length)
-        }
-    }
-    
-    init(url: URL) {
-        _model = StateObject(wrappedValue: Model(url: url))
-    }
-    
-    func transcode() async {
-        let s = seconds(start) ?? 0
-        let e = seconds(end) ?? 0
-        guard s < e else {
-            print(#function, "invalid interval:", start, "~", end)
-            return
-        }
-        let out = model.url.deletingPathExtension().appendingPathExtension("mp4")
-        try? FileManager.default.removeItem(at: out)
-        let pipe = Pipe()
-        Task {
-            for try await line in pipe.fileHandleForReading.bytes.lines {
-                print(#function, line)
-            }
-        }
-        let t0 = Date()
-        let ret = ffmpeg("FFmpeg-iOS",
-                         "-progress", "pipe:\(pipe.fileHandleForWriting.fileDescriptor)",
-                         "-nostats",
-                         "-ss", start,
-                         "-t", length,
-                         "-i", model.url.path,
-                         out.path)
-        print(#function, ret, "took", Date().timeIntervalSince(t0), "seconds")
-        
-        let audio = URL(fileURLWithPath: out.path.replacingOccurrences(of: "-otherVideo.mp4", with: "-audioOnly.m4a"))
-        let final = URL(fileURLWithPath: out.path.replacingOccurrences(of: "-otherVideo", with: ""))
-        let timeRange = CMTimeRange(start: CMTime(seconds: Double(s), preferredTimescale: 1),
-                                    end: CMTime(seconds: Double(e), preferredTimescale: 1))
-        mux(videoURL: out, audioURL: audio, outputURL: final, timeRange: timeRange)
-    }
-    
-    func mux(videoURL: URL, audioURL: URL, outputURL: URL, timeRange: CMTimeRange) {
-        let t0 = ProcessInfo.processInfo.systemUptime
-       
-        let videoAsset = AVAsset(url: videoURL)
-        let audioAsset = AVAsset(url: audioURL)
-        
-        guard let videoAssetTrack = videoAsset.tracks(withMediaType: .video).first,
-              let audioAssetTrack = audioAsset.tracks(withMediaType: .audio).first else {
-            print(#function,
-                  videoAsset.tracks(withMediaType: .video),
-                  audioAsset.tracks(withMediaType: .audio))
-            return
-        }
-        
-        let composition = AVMutableComposition()
-        let videoCompositionTrack = composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid)
-        let audioCompositionTrack = composition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid)
-        
-        do {
-            try videoCompositionTrack?.insertTimeRange(CMTimeRange(start: .zero, duration: videoAssetTrack.timeRange.duration), of: videoAssetTrack, at: .zero)
-            try audioCompositionTrack?.insertTimeRange(timeRange, of: audioAssetTrack, at: .zero)
-            print(#function, videoAssetTrack.timeRange, audioAssetTrack.timeRange)
-        }
-        catch {
-            print(#function, error)
-            return
-        }
-        
-        guard let session = AVAssetExportSession(asset: composition, presetName: AVAssetExportPresetPassthrough) else {
-            print(#function, "unable to init export session")
-            return
-        }
-        
-        session.outputURL = outputURL
-        session.outputFileType = .mp4
-        print(#function, "merging...")
-        
-        session.exportAsynchronously {
-            print(#function, "finished merge", session.status.rawValue)
-            print(#function, "took", ProcessInfo.processInfo.systemUptime - t0, "seconds")
-            if session.status == .completed {
-                print(#function, "success")
-            } else {
-                print(#function, session.error ?? "no error?")
-            }
-        }
-    }
-
-    func updateLength(start: String, end: String) {
-        guard let s = seconds(start), let e = seconds(end) else {
-            return
-        }
-        let l = e - s
-        length = format(l) ?? length
-    }
-    
-    func updateEnd(start: String, length: String) {
-        guard let s = seconds(start), let l = seconds(length) else {
-            return
-        }
-        let e = s + l
-        end = format(e) ?? end
-    }
-}
-    
-func seconds(_ string: String) -> Int? {
-    let components = string.split(separator: ":")
-    guard components.count <= 3 else {
-        print(#function, "too many components:", string)
-        return nil
-    }
-    
-    var seconds = 0
-    for component in components {
-        guard let number = Int(component) else {
-            print(#function, "invalid number:", component)
-            return nil
-        }
-        seconds = 60 * seconds + number
-    }
-    return seconds
-}
-
-//struct VLCView: UIViewRepresentable {
-//    let player: VLCMediaPlayer
-//
-//    func makeUIView(context: Context) -> UIView {
-//        let view = UIView()
-//        player.drawable = view
-//        return view
-//    }
-//
-//    func updateUIView(_ uiView: UIView, context: Context) {
-//        //
-//    }
-//}
-
-import WebKit
-
-let handlerName = "YoutubeDL"
-
-struct WebView: UIViewRepresentable {
-    let url: URL?
-    
-    let handler: ((URL) -> Void)?
-    
-    func makeUIView(context: Context) -> WKWebView {
-        let webView = WKWebView()
-        webView.navigationDelegate = context.coordinator
-        webView.configuration.userContentController.add(context.coordinator, name: handlerName)
-        return webView
-    }
-    
-    func updateUIView(_ webView: WKWebView, context: Context) {
-        if let url, webView.url != url {
-            print(#function, url)
-            webView.load(URLRequest(url: url))
-        }
-    }
-    
-    class Coordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
-        let handler: ((URL) -> Void)?
-    
-        init(handler: ((URL) -> Void)?) {
-            self.handler = handler
-        }
-        
-        func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
-            print(#function, navigationAction.request.url ?? "nil")
-            return .allow
-        }
-        
-        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            guard handler != nil else { return }
-            
-            Task { @MainActor in
-                let source = """
-                    var src = document.querySelector("video").src
-                    webkit.messageHandlers.\(handlerName).postMessage(src)
-                    1
-                    """
-                var done = false
-                while !done {
-                    do {
-                        _ = try await webView.evaluateJavaScript(source)
-                        done = true
-                    } catch {
-                        print(#function, error)
+                    Button(action: pasteFromClipboard) {
+                        Image(systemName: "doc.on.clipboard")
                     }
-                    try await Task.sleep(nanoseconds: 100_000_000)
+                    .buttonStyle(.borderless)
+                }
+
+                HStack {
+                    Spacer()
+                    Button(action: startDownloadTapped) {
+                        Label("Download", systemImage: "arrow.down.circle.fill")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    Spacer()
                 }
             }
-        }
-        
-        func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-            print(#function, message.body)
-            guard let string = message.body as? String,
-                  let url = URL(string: string) else { return }
-            handler?(url)
+        } header: {
+            Label("Download URL", systemImage: "link")
         }
     }
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(handler: handler)
+
+    private var whatToDownloadSection: some View {
+        Section {
+            Picker("Kind", selection: $app.kind) {
+                ForEach(DownloadKind.allCases, id: \.self) { k in
+                    Text(k.rawValue).tag(k)
+                }
+            }
+            .pickerStyle(.segmented)
+        } header: {
+            Label("What to download", systemImage: "switch.2")
+        }
+    }
+
+    private var videoOptionsSection: some View {
+        Section {
+            HStack {
+                Label("Quality", systemImage: "sparkles")
+                Spacer()
+                Picker("Quality", selection: $app.videoQuality) {
+                    ForEach(VideoQuality.allCases, id: \.self) { q in
+                        Text(q.rawValue).tag(q)
+                    }
+                }
+                .pickerStyle(.menu)
+                .frame(maxWidth: 220)
+            }
+
+            HStack {
+                Label("Container", systemImage: "tray")
+                Spacer()
+                Picker("Container", selection: $app.container) {
+                    ForEach(ContainerFormat.allCases, id: \.self) { c in
+                        Text(c.rawValue.uppercased()).tag(c)
+                    }
+                }
+                .pickerStyle(.menu)
+                .frame(maxWidth: 220)
+            }
+
+            DisclosureGroup("Advanced Video Options", isExpanded: $showAdvancedVideo) {
+                VStack(spacing: 8) {
+                    HStack {
+                        Text("CRF")
+                        Spacer()
+                        TextField("auto", text: $crfText)
+                            .multilineTextAlignment(.trailing)
+                            .frame(maxWidth: 120)
+                            .keyboardType(.numberPad)
+                            .onChange(of: crfText) { _ in applyCRFText() }
+                    }
+                    HStack {
+                        Text("Video Bitrate (kbps)")
+                        Spacer()
+                        TextField("auto", text: $vBitrateText)
+                            .multilineTextAlignment(.trailing)
+                            .frame(maxWidth: 120)
+                            .keyboardType(.numberPad)
+                            .onChange(of: vBitrateText) { _ in applyVBitrateText() }
+                    }
+                    Text("Leave empty for auto. CRF prioritized when bitrate is not set.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.top, 6)
+            }
+        } header: {
+            Label("Video Options", systemImage: "film")
+        }
+    }
+
+    private var transcodePresetSection: some View {
+        Section {
+            HStack {
+                Label("Transcode Preset", systemImage: "cpu")
+                Spacer()
+                Picker("Preset", selection: $app.transcode) {
+                    ForEach(TranscodePreset.allCases, id: \.self) { p in
+                        Text(p.rawValue).tag(p)
+                    }
+                }
+                .pickerStyle(.menu)
+                .frame(maxWidth: 220)
+            }
+
+            Text(helpTextForPreset(app.transcode))
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        } header: {
+            Label("Transcoding", systemImage: "scissors")
+        }
+    }
+
+    private var audioOptionsSection: some View {
+        Section {
+            HStack {
+                Label("Audio Format", systemImage: "music.note")
+                Spacer()
+                Picker("Audio Format", selection: $app.audioFormat) {
+                    ForEach(AudioFormat.allCases, id: \.self) { f in
+                        Text(f.rawValue.uppercased()).tag(f)
+                    }
+                }
+                .pickerStyle(.menu)
+                .frame(maxWidth: 220)
+            }
+
+            DisclosureGroup("Advanced Audio Options", isExpanded: $showAdvancedAudio) {
+                VStack(spacing: 8) {
+                    HStack {
+                        Text("Audio Bitrate (kbps)")
+                        Spacer()
+                        TextField("auto", text: $aBitrateText)
+                            .multilineTextAlignment(.trailing)
+                            .frame(maxWidth: 120)
+                            .keyboardType(.numberPad)
+                            .onChange(of: aBitrateText) { _ in applyABitrateText() }
+                    }
+                    Text("Set if you want a target kbps for audio (mp3/aac).")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.top, 6)
+            }
+        } header: {
+            Label("Audio Options", systemImage: "headphones")
+        }
+    }
+
+    private var saveLocationSection: some View {
+        Section {
+            HStack {
+                Label("Default Save Folder", systemImage: "externaldrive")
+                Spacer()
+                Text(app.defaultSaveFolder?.lastPathComponent ?? "Documents")
+                    .foregroundStyle(.secondary)
+            }
+            .contentShape(Rectangle())
+            .onTapGesture { showGlobalFolderPicker = true }
+
+            HStack {
+                Label("Per-download Folder", systemImage: "folder.badge.plus")
+                Spacer()
+                Text(app.perDownloadFolder?.lastPathComponent ?? "—")
+                    .foregroundStyle(.secondary)
+            }
+            .contentShape(Rectangle())
+            .onTapGesture { showPerDownloadFolderPicker = true }
+        } header: {
+            Label("Save Location", systemImage: "folder")
+        }
+    }
+
+    private var behaviorSection: some View {
+        Section {
+            Toggle(isOn: $app.exportToPhotos) {
+                Label("Export to Photos (video)", systemImage: "photo.on.rectangle.angled")
+            }
+            Toggle(isOn: $app.supportedFormatsOnly) {
+                Label("Prefer iOS-friendly streams (H.264/AAC)", systemImage: "iphone")
+            }
+
+            Toggle(isOn: Binding(
+                get: { UIApplication.shared.isIdleTimerDisabled },
+                set: { UIApplication.shared.isIdleTimerDisabled = $0 }
+            )) {
+                Text("Keep screen on while downloading")
+            }
+        } header: {
+            Label("Behavior", systemImage: "gearshape")
+        }
+    }
+
+    private var statusSection: some View {
+        Section {
+            if app.showProgress {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Image(systemName: "arrow.down.circle")
+                        Text("Downloading…").fontWeight(.semibold)
+                        Spacer()
+                        if let eta = app.progress.estimatedTimeRemaining {
+                            Text("ETA \(Int(eta))s").font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                    if let title = app.info?.title {
+                        Text(title).font(.callout).foregroundStyle(.secondary).lineLimit(2)
+                    }
+                    ProgressView(app.progress)
+                }
+            }
+
+            if let out = app.outputFileURL {
+                VStack(alignment: .leading) {
+                    HStack {
+                        Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+                        Text("Finished").fontWeight(.semibold)
+                    }
+                    Text(out.lastPathComponent).font(.footnote).foregroundStyle(.secondary)
+                }
+            }
+
+            if let err = app.error {
+                VStack(alignment: .leading) {
+                    HStack {
+                        Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.red)
+                        Text("Error").fontWeight(.semibold)
+                    }
+                    Text(err.localizedDescription).font(.footnote).foregroundStyle(.secondary)
+                }
+            }
+
+            if let ex = app.exception {
+                VStack(alignment: .leading) {
+                    HStack {
+                        Image(systemName: "exclamationmark.octagon.fill").foregroundStyle(.orange)
+                        Text("Python Exception").fontWeight(.semibold)
+                    }
+                    Text(String(describing: ex)).font(.footnote).foregroundStyle(.secondary)
+                }
+            }
+        } header: {
+            Label("Status", systemImage: "info.circle")
+        }
+    }
+
+    private var downloadsHistorySection: some View {
+        Section {
+            if app.downloads.isEmpty {
+                Text("No downloads yet").foregroundStyle(.secondary)
+            } else {
+                ForEach(app.downloads, id: \.self) { dir in
+                    NavigationLink(destination: DetailsViewForDirectory(url: dir)) {
+                        Text(dir.lastPathComponent)
+                    }
+                }
+            }
+        } header: {
+            Label("Downloads", systemImage: "tray.and.arrow.down")
+        }
+    }
+
+    private var aboutSection: some View {
+        Section {
+            HStack {
+                Text("yt-dlp version")
+                Spacer()
+                Text(app.youtubeDL.version ?? "unknown").foregroundStyle(.secondary)
+            }
+            HStack {
+                Text("AppModel")
+                Spacer()
+                Text("v1").foregroundStyle(.secondary)
+            }
+        } header: {
+            Label("About", systemImage: "ellipsis.circle")
+        }
+    }
+
+    // MARK: - Actions & helpers
+
+    private func pasteFromClipboard() {
+        let pb = UIPasteboard.general
+        if let u = pb.url ?? pb.string.flatMap({ URL(string: $0) }) {
+            urlString = u.absoluteString
+        } else {
+            showUserAlert("Clipboard does not contain a URL")
+        }
+    }
+
+    private func startDownloadTapped() {
+        guard let u = URL(string: urlString.trimmingCharacters(in: .whitespacesAndNewlines)) else {
+            showUserAlert("Invalid URL")
+            return
+        }
+        // apply numeric fields to model
+        applyCRFText(); applyVBitrateText(); applyABitrateText()
+        app.url = u
+    }
+
+    private func showUserAlert(_ message: String) {
+        alertMessage = message
+        showAlert = true
+    }
+
+    private func syncNumericFieldsFromModel() {
+        crfText = app.videoCRF.map(String.init) ?? ""
+        vBitrateText = app.videoBitrateKbps.map(String.init) ?? ""
+        aBitrateText = app.audioBitrateKbps.map(String.init) ?? ""
+    }
+
+    private func applyCRFText() {
+        let t = crfText.trimmingCharacters(in: .whitespacesAndNewlines)
+        app.videoCRF = Int(t)
+        if app.videoCRF == nil && !t.isEmpty { crfText = "" }
+    }
+
+    private func applyVBitrateText() {
+        let t = vBitrateText.trimmingCharacters(in: .whitespacesAndNewlines)
+        app.videoBitrateKbps = Int(t)
+        if app.videoBitrateKbps == nil && !t.isEmpty { vBitrateText = "" }
+    }
+
+    private func applyABitrateText() {
+        let t = aBitrateText.trimmingCharacters(in: .whitespacesAndNewlines)
+        app.audioBitrateKbps = Int(t)
+        if app.audioBitrateKbps == nil && !t.isEmpty { aBitrateText = "" }
     }
 }
 
-struct DownloadsView: View {
-    @EnvironmentObject var app: AppModel
-    
-    var body: some View {
-        ForEach(app.downloads) { download in
-            NavigationLink(download.lastPathComponent, destination: DetailsView(url: download))
-        }
-    }
-}
+// --------------------------------------------------
+// MARK: - DetailsViewForDirectory (shows Info.json & first movie file)
+// --------------------------------------------------
 
-struct DetailsView: View {
+@available(iOS 15.0, *)
+struct DetailsViewForDirectory: View {
     let url: URL
-    
-    @State var info: Info?
-    
-    @State var isExpanded = false
-    
-    @State var videoURL: URL?
-    
+    @State private var info: Info? = nil
+    @State private var videoURL: URL? = nil
+    @State private var isExpanded = false
+
     var body: some View {
         List {
-            if let videoURL = videoURL {
-                Section {
-                    NavigationLink("Trim", destination: TrimView(url: videoURL))
+            if let info {
+                Section(header: Text("Metadata")) {
+                    Text(info.title).font(.headline)
+                    Text("Duration: \(Int(info.duration ?? 0))s").font(.subheadline).foregroundStyle(.secondary)
+                    DisclosureGroup("\(info.formats.count) formats", isExpanded: $isExpanded) {
+                        ForEach(info.formats, id: \.format_id) { f in
+                            Text(f.format)
+                        }
+                    }
                 }
             }
-            
-            if let info = info {
-                DisclosureGroup("\(info.formats.count) Formats", isExpanded: $isExpanded) {
-                    ForEach(info.formats) { format in
-                        Text(format.format)
-                    }
+
+            if let videoURL {
+                Section(header: Text("File")) {
+                    Text(videoURL.lastPathComponent)
                 }
             }
         }
         .task {
             do {
-                info = try JSONDecoder().decode(Info.self,
-                                                from: try Data(contentsOf: url.appendingPathComponent("Info.json")))
-                
-                videoURL = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: [.contentTypeKey], options: .skipsHiddenFiles).first { url in
-                    try! url.resourceValues(forKeys: [.contentTypeKey])
-                        .contentType?.conforms(to: .movie)
-                    ?? false
-                }
-            } catch {
-                print(error)
-            }
-        }
-    }
-}
+                let data = try Data(contentsOf: url.appendingPathComponent("Info.json"))
+                info = try JSONDecoder().decode(Info.self, from: data)
 
-extension Format: Identifiable {
-    public var id: String { format_id }
-}
-
-//@available(iOS 13.0.0, *)
-//struct MainView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        MainView()
-//            .environmentObject(AppModel())
-//    }
-//}
-
-struct TaskList: View {
-    let tasks: [URLSessionDownloadTask]
-    
-    struct TaskGroup: Identifiable {
-        let title: String?
-        
-        let task: URLSessionDownloadTask?
-        
-        let children: [TaskGroup]?
-        
-        var id: String? { task.map { "\($0.taskIdentifier)" } ?? title }
-        
-        var sortKey: Int { task?.taskIdentifier ?? -1 }
-    }
-    
-    @State var groups: [TaskGroup] = []
-    
-    var body: some View {
-        List(groups, children: \.children) { item in
-            if let task = item.task {
-                Text("#\(task.taskIdentifier) \(task.originalRequest?.value(forHTTPHeaderField: "Range") ?? "No range")")
-            } else {
-                Text(item.title ?? "nil")
-            }
-        }
-        .onAppear {
-            let groups = Dictionary(grouping: tasks) { task -> String? in
-                guard let d = task.taskDescription, let index = d.lastIndex(of: "-") else {
-                    return task.taskDescription
-                }
-                return String(d[..<index])
-            }.map { key, value -> TaskGroup in
-                print(key ?? "nil", value.map(\.taskIdentifier))
-                return TaskGroup(title: key, task: nil,
-                          children: Dictionary(grouping: value, by: \.kind).map { key, value -> TaskGroup in
-                    let children = value
-                        .map { TaskGroup(title: nil, task: $0, children: nil) }
-                        .sorted { $0.sortKey < $1.sortKey }
-                    print(key, children.map(\.task?.taskIdentifier))
-                    return TaskGroup(title: key.description, task: nil,
-                                     children: children)
+                let files = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: [.contentTypeKey], options: .skipsHiddenFiles)
+                videoURL = files.first(where: { u in
+                    (try? u.resourceValues(forKeys: [.contentTypeKey]).contentType?.conforms(to: .movie)) ?? false
                 })
+            } catch {
+                print("DetailsViewForDirectory error:", error)
             }
-            
-            self.groups = groups
         }
+        .navigationTitle(url.lastPathComponent)
     }
 }
 
-extension URLSessionDownloadTask: Identifiable {}
+// --------------------------------------------------
+// MARK: - Browser & WebViewSheet for sites needing JS grab
+// --------------------------------------------------
 
-struct Browser: View {
+@available(iOS 15.0, *)
+private struct BrowserView: View {
     @State private var address = ""
-    
     @State private var url = URL(string: "https://instagram.com")
-    
     var body: some View {
         VStack {
-            TextField("Address", text: $address)
-                .onSubmit {
-                    guard let url = URL(string: (address.hasPrefix("https://") ? "" : "https://") + address) else { return }
-                    self.url = url
+            HStack {
+                TextField("https://...", text: $address)
+                    .textInputAutocapitalization(.never)
+                    .textFieldStyle(.roundedBorder)
+                Button("Go") {
+                    guard let newURL = URL(string: address.hasPrefix("https://") ? address : "https://\(address)") else { return }
+                    url = newURL
                 }
-                .textInputAutocapitalization(.never)
-                .padding()
-            WebView(url: url, handler: nil)
+                .buttonStyle(.borderedProminent)
+            }
+            .padding()
+            WebViewRepresentable(url: url, handler: nil)
         }
     }
+}
+
+private struct WebSheet: Identifiable {
+    let url: URL
+    var id: URL { url }
+}
+
+@available(iOS 15.0, *)
+private struct WebViewSheet: View {
+    let url: URL
+    var onFoundURL: (URL) -> Void
+
+    var body: some View {
+        WebViewRepresentable(url: url) { found in
+            onFoundURL(found)
+        }
+    }
+}
+
+private let jsHandlerName = "yt_dl_handler"
+
+private struct WebViewRepresentable: UIViewRepresentable {
+    let url: URL?
+    let handler: ((URL) -> Void)?
+
+    func makeCoordinator() -> Coordinator { Coordinator(handler: handler) }
+
+    func makeUIView(context: Context) -> WKWebView {
+        let w = WKWebView()
+        w.navigationDelegate = context.coordinator
+        w.configuration.userContentController.add(context.coordinator, name: jsHandlerName)
+        return w
+    }
+
+    func updateUIView(_ uiView: WKWebView, context: Context) {
+        if let url, uiView.url != url {
+            uiView.load(URLRequest(url: url))
+        }
+    }
+
+    final class Coordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate {
+        let handler: ((URL) -> Void)?
+        init(handler: ((URL) -> Void)?) { self.handler = handler }
+        func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+            if let s = message.body as? String, let u = URL(string: s) {
+                handler?(u)
+            }
+        }
+
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            guard handler != nil else { return }
+            Task { @MainActor in
+                let js = """
+                (function() {
+                  var v = document.querySelector('video');
+                  if (!v) return null;
+                  return v.currentSrc || v.src || null;
+                })();
+                """
+                for _ in 0..<20 {
+                    if let res = try? await webView.evaluateJavaScript(js),
+                       let s = res as? String,
+                       let u = URL(string: s) {
+                        handler?(u)
+                        break
+                    }
+                    try? await Task.sleep(nanoseconds: 150_000_000)
+                }
+            }
+        }
+    }
+}
+
+// --------------------------------------------------
+// MARK: - FolderPicker (UIDocumentPicker wrapper)
+// --------------------------------------------------
+
+struct FolderPicker: UIViewControllerRepresentable {
+    let initialURL: URL?
+    let onPick: (URL?) -> Void
+
+    func makeCoordinator() -> Coordinator { Coordinator(onPick: onPick) }
+
+    func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
+        let pick = UIDocumentPickerViewController(forOpeningContentTypes: [UTType.folder], asCopy: false)
+        pick.delegate = context.coordinator
+        pick.directoryURL = initialURL
+        pick.allowsMultipleSelection = false
+        return pick
+    }
+
+    func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {}
+
+    final class Coordinator: NSObject, UIDocumentPickerDelegate {
+        let onPick: (URL?) -> Void
+        init(onPick: @escaping (URL?) -> Void) { self.onPick = onPick }
+        func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) { onPick(nil) }
+        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) { onPick(urls.first) }
+    }
+}
+
+// --------------------------------------------------
+// MARK: - Helpers
+// --------------------------------------------------
+
+private func helpTextForPreset(_ preset: TranscodePreset) -> String {
+    switch preset {
+    case .copy:
+        return "No re-encode — fastest, smallest CPU. If source is AV1/VP9 the file may not be Photos-compatible."
+    case .h264_fast:
+        return "H.264 encoding with fast preset — good balance between speed and compatibility."
+    case .h264_quality:
+        return "H.264 with quality preset — slower but higher visual quality."
+    case .hevc_fast:
+        return "HEVC (H.265) fast — smaller files but requires modern devices to playback natively."
+    case .hevc_quality:
+        return "HEVC quality — best efficiency, slower encoding."
+    case .vp9_fast:
+        return "VP9 (WebM) — web-optimized, may not be Photos-compatible."
+    case .vp9_quality:
+        return "VP9 high quality — large CPU cost, WEBM container."
+    }
+}
+
+private func secondsFromHMSString(_ string: String) -> Int? {
+    let parts = string.split(separator: ":").map(String.init)
+    guard parts.count <= 3, parts.allSatisfy({ Int($0) != nil }) else { return nil }
+    var total = 0
+    for part in parts { total = total * 60 + (Int(part) ?? 0) }
+    return total
+}
+
+private func formatSecondsToHMS(_ value: Int) -> String {
+    if value < 0 { return "0:00" }
+    let h = value / 3600
+    let m = (value % 3600) / 60
+    let s = value % 60
+    if h > 0 { return String(format: "%d:%02d:%02d", h, m, s) }
+    return String(format: "%d:%02d", m, s)
 }
