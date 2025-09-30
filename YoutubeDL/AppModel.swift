@@ -1,13 +1,3 @@
-//
-//  AppModel.swift
-//  YoutubeDL
-//
-//  Full AppModel for YoutubeDL app
-//  - download options
-//  - yt-dlp invocation and progress handling
-//  - postprocessing (ffmpeg args via yt-dlp postprocessor)
-//
-
 import Foundation
 import Combine
 import SwiftUI
@@ -16,66 +6,8 @@ import Photos
 import YoutubeDL
 import PythonKit
 
-// --------------------------------------------------
-// MARK: - Options / Enums
-// --------------------------------------------------
-
-public enum DownloadKind: String, CaseIterable, Identifiable {
-    case video = "Video"
-    case audio = "Audio"
-    case best  = "Best"
-    public var id: String { rawValue }
-}
-
-public enum VideoQuality: String, CaseIterable, Identifiable {
-    case p2160 = "2160p (4K)"
-    case p1440 = "1440p"
-    case p1080 = "1080p"
-    case p720  = "720p"
-    case p480  = "480p"
-    case p360  = "360p"
-    case best  = "Best"
-    public var id: String { rawValue }
-}
-
-public enum ContainerFormat: String, CaseIterable, Identifiable {
-    case mp4 = "mp4"
-    case mkv = "mkv"
-    case webm = "webm"
-    public var id: String { rawValue }
-}
-
-public enum AudioFormat: String, CaseIterable, Identifiable {
-    case m4a = "m4a"
-    case mp3 = "mp3"
-    case opus = "opus"
-    case flac = "flac"
-    case wav = "wav"
-    case best = "best"
-    public var id: String { rawValue }
-}
-
-public enum TranscodePreset: String, CaseIterable, Identifiable {
-    case copy = "Copy (no re-encode)"
-    case h264_fast = "H.264 - Fast"
-    case h264_quality = "H.264 - Quality"
-    case hevc_fast = "HEVC - Fast"
-    case hevc_quality = "HEVC - Quality"
-    case vp9_fast = "VP9 - Fast"
-    case vp9_quality = "VP9 - Quality"
-
-    public var id: String { rawValue }
-}
-
-// --------------------------------------------------
-// MARK: - AppModel Class
-// --------------------------------------------------
-
 @MainActor
 public final class AppModel: ObservableObject {
-
-    // MARK: Published state used by UI
-
     @Published public var url: URL? = nil
     @Published public var youtubeDL: YoutubeDL = YoutubeDL()
 
@@ -94,7 +26,6 @@ public final class AppModel: ObservableObject {
     @Published public var webViewURL: URL? = nil
     @Published public var outputFileURL: URL? = nil
 
-    // UI-configurable model fields (bound to MainView)
     @Published public var kind: DownloadKind = .best
     @Published public var videoQuality: VideoQuality = .best
     @Published public var container: ContainerFormat = .mp4
@@ -105,84 +36,118 @@ public final class AppModel: ObservableObject {
     @Published public var videoBitrateKbps: Int? = nil
     @Published public var audioBitrateKbps: Int? = nil
 
-    // Save folders
     @Published public var defaultSaveFolder: URL? = nil
     @Published public var perDownloadFolder: URL? = nil
 
-    // Internals
-    lazy var subscriptions = Set<AnyCancellable>()
+    private let service: YTDLPService
+    private let defaults: UserDefaults
+    private var subscriptions = Set<AnyCancellable>()
+    private var securityScopedAccess: [String: URL] = [:]
 
-    // MARK: - Init
+    private enum DefaultsKeys {
+        static let kind = "app.kind"
+        static let videoQuality = "app.videoQuality"
+        static let container = "app.container"
+        static let audioFormat = "app.audioFormat"
+        static let transcode = "app.transcode"
+        static let videoCRF = "app.videoCRF"
+        static let videoBitrate = "app.videoBitrate"
+        static let audioBitrate = "app.audioBitrate"
+        static let enableTranscoding = "app.enableTranscoding"
+        static let enableChunkedDownload = "app.enableChunkedDownload"
+        static let supportedFormats = "app.supportedFormats"
+        static let exportToPhotos = "app.exportToPhotos"
+        static let defaultFolder = "app.defaultFolder"
+        static let perDownloadFolder = "app.perDownloadFolder"
+    }
 
-    public init() {
-        // default downloads directory to app documents
+    public init(service: YTDLPService = .init(), defaults: UserDefaults = .standard) {
+        self.service = service
+        self.defaults = defaults
+
         if let docs = try? documentsDirectory() {
             youtubeDL.downloadsDirectory = docs
         }
 
-        // react to url set by UI
-        $url
-            .compactMap { $0 }
-            .removeDuplicates()
-            .sink { [weak self] url in
-                Task {
-                    await self?.startDownload(url: url)
-                }
-            }
-            .store(in: &subscriptions)
-
-        // load existing downloads (if any)
-        do {
-            downloads = try loadDownloads()
-        } catch {
-            print("AppModel.init loadDownloads()", error)
-        }
+        loadPreferences()
+        observeURLChanges()
+        observePreferenceChanges()
+        loadStoredDownloads()
     }
 
-    // MARK: - Start download flow
+    deinit {
+        releaseAllSecurityScopedResources()
+    }
+
+    // MARK: - Public API
 
     public func startDownload(url: URL) async {
-        print("AppModel.startDownload:", url)
+        resetTransientState()
 
-        // reset transient state
-        await MainActor.run {
-            self.error = nil
-            self.exception = nil
-            self.outputFileURL = nil
-            self.info = nil
-            self.showProgress = true
-            self.progress = Progress()
-            self.progress.localizedDescription = NSLocalizedString("Extracting info", comment: "progress description")
-        }
-
-        // configure downloads dir (per-download override or default)
         if let per = perDownloadFolder ?? defaultSaveFolder {
             youtubeDL.downloadsDirectory = per
         } else if let docs = try? documentsDirectory() {
             youtubeDL.downloadsDirectory = docs
         }
 
-        do {
-            let (infoObj, _, _) = try await download(url: url)
+        let configuration = YTDLPConfiguration(
+            kind: kind,
+            videoQuality: videoQuality,
+            container: container,
+            audioFormat: audioFormat,
+            transcode: transcode,
+            videoCRF: videoCRF,
+            videoBitrateKbps: videoBitrateKbps,
+            audioBitrateKbps: audioBitrateKbps,
+            enableTranscoding: enableTranscoding,
+            enableChunkedDownload: enableChunkedDownload,
+            supportedFormatsOnly: supportedFormatsOnly
+        )
 
-            // decode Info if available (safe)
-            if let infoObj {
-                if let decoded = try? PythonDecoder().decode(Info.self, from: infoObj) {
-                    await MainActor.run { self.info = decoded }
-                } else {
-                    print("startDownload: failed to decode Info from infoObj")
+        do {
+            let result = try await service.run(
+                url: url,
+                configuration: configuration,
+                progress: { [weak self] update in
+                    guard let self else { return }
+                    Task { @MainActor in
+                        self.apply(progressUpdate: update)
+                    }
+                },
+                logHandler: { level, message in
+                    print("[yt-dlp]", level, message)
+                },
+                makeTranscodeProgressBlock: { [weak self] in
+                    guard let self else { return nil }
+                    Task { @MainActor in
+                        self.progress.kind = nil
+                        self.progress.localizedDescription = NSLocalizedString("Transcoding...", comment: "")
+                        self.progress.completedUnitCount = 0
+                        self.progress.totalUnitCount = 100
+                    }
+                    let start = ProcessInfo.processInfo.systemUptime
+                    return { value in
+                        Task { @MainActor in
+                            let elapsed = ProcessInfo.processInfo.systemUptime - start
+                            let speed = value / max(elapsed, 0.000001)
+                            let eta = (1 - value) / max(speed, 0.000001)
+                            self.progress.completedUnitCount = Int64(value * 100)
+                            self.progress.estimatedTimeRemaining = eta.isFinite ? eta : nil
+                        }
+                    }
                 }
+            )
+
+            if let infoObject = result.infoObject,
+               let decoded = try? PythonDecoder().decode(Info.self, from: infoObject) {
+                info = decoded
             }
 
-            guard let filename = infoObj.flatMap({ String($0["_filename"]) }) else {
-                print("startDownload: no filename in infoObj")
-                await MainActor.run {
-                    self.showProgress = false
-                }
+            guard let filename = result.infoObject.flatMap({ String($0["_filename"]) }) else {
+                showProgress = false
                 return
             }
 
-            // convert to URL
             let outputURL: URL
             if #available(iOS 16.0, *) {
                 outputURL = URL(filePath: filename)
@@ -192,7 +157,7 @@ public final class AppModel: ObservableObject {
 
             var finalURL = outputURL
 
-            if let info = self.info {
+            if let info {
                 do {
                     let directory = try save(info: info, movingFileAt: outputURL)
                     finalURL = directory.appendingPathComponent(outputURL.lastPathComponent)
@@ -206,230 +171,270 @@ public final class AppModel: ObservableObject {
                 }
             }
 
-            await MainActor.run {
-                self.outputFileURL = finalURL
-                self.showProgress = false
-            }
+            outputFileURL = finalURL
+            showProgress = false
 
             if exportToPhotos && isVideoFile(finalURL) {
                 exportToPhotosLibrary(finalURL)
             }
 
-            // clear per-download folder after a successful run
-            perDownloadFolder = nil
-
+            setPerDownloadFolder(url: nil)
             notify(body: "Finished")
-        } catch PythonError.exception(let ex, _) {
-            print("AppModel.startDownload python exception:", ex)
-            await MainActor.run { self.exception = ex; self.showProgress = false }
+        } catch PythonError.exception(let exception, _) {
+            print("AppModel.startDownload python exception:", exception)
+            self.exception = exception
+            self.showProgress = false
         } catch {
             print("AppModel.startDownload error:", error)
-            // fallback for instagram - let UI open a webview
             if (url.host ?? "").hasSuffix("instagram.com") {
-                await MainActor.run { self.webViewURL = url }
+                webViewURL = url
             } else {
-                await MainActor.run { self.error = error }
+                self.error = error
             }
-            await MainActor.run { self.showProgress = false }
+            self.showProgress = false
         }
     }
 
-    // MARK: - Build yt-dlp args
-
-    // returns the argument list for yt_dlp
-    func buildArguments(for url: URL) -> [String] {
-        var argv: [String] = []
-
-        // Format selection
-        switch kind {
-        case .audio:
-            argv += ["-f", "bestaudio/best"]
-            argv += ["--extract-audio"]
-            if audioFormat != .best {
-                argv += ["--audio-format", audioFormat.rawValue.lowercased()]
-            }
-            if let a = audioBitrateKbps {
-                argv += ["--audio-quality", "\(a)k"]
-            }
-        case .video:
-            argv += ["-f", videoFormatSelectorString()]
-        case .best:
-            argv += ["-f", "bestvideo+bestaudio/best"]
-        }
-
-        // merge/output container
-        argv += ["--merge-output-format", container.rawValue.lowercased()]
-
-        // postprocessor args (ffmpeg)
-        if kind != .audio {
-            let ffmpegArgs = ffmpegPostprocessorArgs()
-            if !ffmpegArgs.isEmpty {
-                argv += ["--postprocessor-args", "Merger+ffmpeg:\(ffmpegArgs)"]
-            } else {
-                argv += ["--postprocessor-args", "Merger+ffmpeg:-movflags +faststart"]
-            }
-        }
-
-        // output template
-        argv += ["-o", "%(title).200B.%(ext)s"]
-
-        // other safe flags
-        argv += ["--no-check-certificates"]
-
-        // finally URL
-        argv += [url.absoluteString]
-
-        return argv
+    func setGlobalSaveFolder(url: URL?) {
+        defaultSaveFolder = url
+        storeBookmark(url: url, key: DefaultsKeys.defaultFolder)
     }
 
-    // helper to pick video format expression for yt-dlp
-    private func videoFormatSelectorString() -> String {
-        func heightLimit(_ h: Int?) -> String {
-            guard let h else { return "" }
-            return "[height<=\(h)]"
-        }
+    func setPerDownloadFolder(url: URL?) {
+        perDownloadFolder = url
+        storeBookmark(url: url, key: DefaultsKeys.perDownloadFolder)
+    }
 
-        let h: Int?
-        switch videoQuality {
-        case .p2160: h = 2160
-        case .p1440: h = 1440
-        case .p1080: h = 1080
-        case .p720:  h = 720
-        case .p480:  h = 480
-        case .p360:  h = 360
-        case .best:  h = nil
-        }
+    func notify(body: String) {
+        print("[AppModel.notify]", body)
+    }
 
-        let limit = heightLimit(h)
+    // MARK: - Private helpers
 
-        if supportedFormatsOnly {
-            return "bestvideo[vcodec~='(avc1|h264)']\(limit)+bestaudio[acodec~='(aac|mp4a)']/best\(limit)"
-        } else {
-            return "bestvideo\(limit)+bestaudio/best\(limit)"
+    private func loadStoredDownloads() {
+        do {
+            downloads = try loadDownloads()
+        } catch {
+            print("AppModel.init loadDownloads()", error)
         }
     }
 
-    // Build ffmpeg postprocessor args string
-    private func ffmpegPostprocessorArgs() -> String {
-        let mov = "-movflags +faststart"
+    private func resetTransientState() {
+        error = nil
+        exception = nil
+        outputFileURL = nil
+        info = nil
+        showProgress = true
+        progress = Progress()
+        progress.localizedDescription = NSLocalizedString("Extracting info", comment: "progress description")
+    }
 
-        switch transcode {
-        case .copy:
-            return "\(mov) -c:v copy -c:a copy"
-        case .h264_fast, .h264_quality:
-            var args = "\(mov) -c:v libx264 -preset " + (transcode == .h264_fast ? "veryfast" : "slow")
-            if let br = videoBitrateKbps {
-                args += " -b:v \(br)k"
-            } else if let crf = videoCRF {
-                args += " -crf \(crf)"
-            } else {
-                args += (transcode == .h264_fast ? " -crf 23" : " -crf 20")
-            }
-            args += " -c:a aac -b:a \((audioBitrateKbps ?? 192))k"
-            return args
-        case .hevc_fast, .hevc_quality:
-            var args = "\(mov) -c:v libx265 -preset " + (transcode == .hevc_fast ? "fast" : "slow")
-            if let br = videoBitrateKbps {
-                args += " -b:v \(br)k"
-            } else if let crf = videoCRF {
-                args += " -crf \(crf)"
-            } else {
-                args += (transcode == .hevc_fast ? " -crf 28" : " -crf 24")
-            }
-            args += " -tag:v hvc1 -c:a aac -b:a \((audioBitrateKbps ?? 192))k"
-            return args
-        case .vp9_fast, .vp9_quality:
-            var args = "\(mov) -c:v libvpx-vp9 -deadline " + (transcode == .vp9_fast ? "realtime" : "good")
-            if let br = videoBitrateKbps {
-                args += " -b:v \(br)k"
-            } else if let crf = videoCRF {
-                args += " -crf \(crf)"
-            } else {
-                args += (transcode == .vp9_fast ? " -crf 33" : " -crf 28")
-            }
-            args += " -c:a copy"
-            return args
+    private func apply(progressUpdate update: YTDLPService.ProgressUpdate) {
+        switch update.stage {
+        case .extracting:
+            showProgress = true
+            progress.kind = .file
+            progress.fileOperationKind = .downloading
+            progress.completedUnitCount = 0
+            progress.totalUnitCount = 0
+            progress.localizedDescription = NSLocalizedString("Extracting info", comment: "progress description")
+        case let .downloading(downloaded, total, speed, eta):
+            progress.kind = .file
+            progress.fileOperationKind = .downloading
+            progress.totalUnitCount = total ?? 0
+            progress.completedUnitCount = downloaded ?? 0
+            progress.localizedDescription = NSLocalizedString("Downloading", comment: "progress description")
+            progress.throughput = Double(speed ?? 0)
+            progress.estimatedTimeRemaining = eta
+        case let .transcoding(value):
+            progress.kind = nil
+            progress.localizedDescription = NSLocalizedString("Transcoding...", comment: "")
+            progress.completedUnitCount = Int64(value * 100)
+            progress.totalUnitCount = 100
         }
     }
 
-    // MARK: - Perform download with yt-dlp helper wrapper
-
-    func download(url: URL) async throws -> (PythonObject?, [String], [PythonObject]) {
-        var infoObj: PythonObject? = nil
-        var files: [String] = []
-        var infos: [PythonObject] = []
-        var errorMessage: String?
-
-        await MainActor.run {
-            self.showProgress = true
-            self.progress = Progress(totalUnitCount: 0)
-            self.progress.localizedDescription = NSLocalizedString("Extracting info", comment: "progress description")
-        }
-
-        let argv = buildArguments(for: url)
-        print("Running yt-dlp with argv:", argv)
-
-        try await yt_dlp(argv: argv) { dict in
-            infoObj = dict["info_dict"]
-            let status = String(dict["status"] ?? "unknown")
-
-            switch status {
-            case "downloading":
-                Task { @MainActor in
-                    self.progress.kind = .file
-                    self.progress.fileOperationKind = .downloading
-                    self.progress.completedUnitCount = Int64(dict["downloaded_bytes"]!) ?? -1
-                    self.progress.totalUnitCount = Int64(Double(dict["total_bytes"] ?? dict["total_bytes_estimate"] ?? Python.None) ?? -1)
-                    if let speed = Int(dict["speed"] ?? Python.None) { self.progress.throughput = speed }
-                    self.progress.estimatedTimeRemaining = TimeInterval(dict["eta"] ?? Python.None) ?? nil
-                }
-            case "finished":
-                if let fname = String(dict["filename"] ?? Python.None) {
-                    files.append(fname)
-                }
-                if let infoObj { infos.append(infoObj) }
-            default:
-                break
-            }
-        } log: { level, message in
-            print("[yt-dlp]", level, message)
-            if level == "error" {
-                errorMessage = message
-            }
-        } makeTranscodeProgressBlock: { [weak self] in
-            guard let self = self else { return { _ in } }
-            Task { @MainActor in
-                self.progress.kind = nil
-                self.progress.localizedDescription = NSLocalizedString("Transcoding...", comment: "")
-                self.progress.completedUnitCount = 0
-                self.progress.totalUnitCount = 100
-            }
-            let start = ProcessInfo.processInfo.systemUptime
-            return { (p: Double) in
-                Task { @MainActor in
-                    let elapsed = ProcessInfo.processInfo.systemUptime - start
-                    let speed = p / max(elapsed, 0.000001)
-                    let ETA = (1 - p) / max(speed, 0.000001)
-                    self.progress.completedUnitCount = Int64(p * 100)
-                    self.progress.estimatedTimeRemaining = ETA.isFinite ? ETA : nil
+    private func observeURLChanges() {
+        $url
+            .compactMap { $0 }
+            .removeDuplicates()
+            .sink { [weak self] url in
+                Task {
+                    await self?.startDownload(url: url)
                 }
             }
-        }
-
-        if let err = errorMessage {
-            throw NSError(domain: "AppModel", code: 1, userInfo: [NSLocalizedDescriptionKey: err])
-        }
-
-        return (infoObj, files, infos)
+            .store(in: &subscriptions)
     }
 
-    // MARK: - Helpers: export, IO, etc.
+    private func observePreferenceChanges() {
+        $kind
+            .dropFirst()
+            .sink { [weak self] in self?.defaults.set($0.rawValue, forKey: DefaultsKeys.kind) }
+            .store(in: &subscriptions)
+
+        $videoQuality
+            .dropFirst()
+            .sink { [weak self] in self?.defaults.set($0.rawValue, forKey: DefaultsKeys.videoQuality) }
+            .store(in: &subscriptions)
+
+        $container
+            .dropFirst()
+            .sink { [weak self] in self?.defaults.set($0.rawValue, forKey: DefaultsKeys.container) }
+            .store(in: &subscriptions)
+
+        $audioFormat
+            .dropFirst()
+            .sink { [weak self] in self?.defaults.set($0.rawValue, forKey: DefaultsKeys.audioFormat) }
+            .store(in: &subscriptions)
+
+        $transcode
+            .dropFirst()
+            .sink { [weak self] in self?.defaults.set($0.rawValue, forKey: DefaultsKeys.transcode) }
+            .store(in: &subscriptions)
+
+        $videoCRF
+            .dropFirst()
+            .sink { [weak self] in self?.defaults.set($0, forKey: DefaultsKeys.videoCRF) }
+            .store(in: &subscriptions)
+
+        $videoBitrateKbps
+            .dropFirst()
+            .sink { [weak self] in self?.defaults.set($0, forKey: DefaultsKeys.videoBitrate) }
+            .store(in: &subscriptions)
+
+        $audioBitrateKbps
+            .dropFirst()
+            .sink { [weak self] in self?.defaults.set($0, forKey: DefaultsKeys.audioBitrate) }
+            .store(in: &subscriptions)
+
+        $enableTranscoding
+            .dropFirst()
+            .sink { [weak self] in self?.defaults.set($0, forKey: DefaultsKeys.enableTranscoding) }
+            .store(in: &subscriptions)
+
+        $enableChunkedDownload
+            .dropFirst()
+            .sink { [weak self] in self?.defaults.set($0, forKey: DefaultsKeys.enableChunkedDownload) }
+            .store(in: &subscriptions)
+
+        $supportedFormatsOnly
+            .dropFirst()
+            .sink { [weak self] in self?.defaults.set($0, forKey: DefaultsKeys.supportedFormats) }
+            .store(in: &subscriptions)
+
+        $exportToPhotos
+            .dropFirst()
+            .sink { [weak self] in self?.defaults.set($0, forKey: DefaultsKeys.exportToPhotos) }
+            .store(in: &subscriptions)
+    }
+
+    private func loadPreferences() {
+        if let raw = defaults.string(forKey: DefaultsKeys.kind), let value = DownloadKind(rawValue: raw) {
+            kind = value
+        }
+
+        if let raw = defaults.string(forKey: DefaultsKeys.videoQuality), let value = VideoQuality(rawValue: raw) {
+            videoQuality = value
+        }
+
+        if let raw = defaults.string(forKey: DefaultsKeys.container), let value = ContainerFormat(rawValue: raw) {
+            container = value
+        }
+
+        if let raw = defaults.string(forKey: DefaultsKeys.audioFormat), let value = AudioFormat(rawValue: raw) {
+            audioFormat = value
+        }
+
+        if let raw = defaults.string(forKey: DefaultsKeys.transcode), let value = TranscodePreset(rawValue: raw) {
+            transcode = value
+        }
+
+        if defaults.object(forKey: DefaultsKeys.videoCRF) != nil {
+            videoCRF = defaults.integer(forKey: DefaultsKeys.videoCRF)
+        }
+
+        if defaults.object(forKey: DefaultsKeys.videoBitrate) != nil {
+            videoBitrateKbps = defaults.integer(forKey: DefaultsKeys.videoBitrate)
+        }
+
+        if defaults.object(forKey: DefaultsKeys.audioBitrate) != nil {
+            audioBitrateKbps = defaults.integer(forKey: DefaultsKeys.audioBitrate)
+        }
+
+        if defaults.object(forKey: DefaultsKeys.enableTranscoding) != nil {
+            enableTranscoding = defaults.bool(forKey: DefaultsKeys.enableTranscoding)
+        }
+
+        if defaults.object(forKey: DefaultsKeys.enableChunkedDownload) != nil {
+            enableChunkedDownload = defaults.bool(forKey: DefaultsKeys.enableChunkedDownload)
+        }
+
+        if defaults.object(forKey: DefaultsKeys.supportedFormats) != nil {
+            supportedFormatsOnly = defaults.bool(forKey: DefaultsKeys.supportedFormats)
+        }
+
+        if defaults.object(forKey: DefaultsKeys.exportToPhotos) != nil {
+            exportToPhotos = defaults.bool(forKey: DefaultsKeys.exportToPhotos)
+        }
+
+        defaultSaveFolder = resolveBookmark(forKey: DefaultsKeys.defaultFolder)
+        perDownloadFolder = resolveBookmark(forKey: DefaultsKeys.perDownloadFolder)
+    }
+
+    private func storeBookmark(url: URL?, key: String) {
+        releaseAccess(for: key)
+        guard let url else {
+            defaults.removeObject(forKey: key)
+            return
+        }
+
+        do {
+            let data = try url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
+            defaults.set(data, forKey: key)
+            if url.startAccessingSecurityScopedResource() {
+                securityScopedAccess[key] = url
+            }
+        } catch {
+            print("storeBookmark error", error)
+        }
+    }
+
+    private func resolveBookmark(forKey key: String) -> URL? {
+        guard let data = defaults.data(forKey: key) else { return nil }
+        do {
+            var stale = false
+            let url = try URL(resolvingBookmarkData: data, options: [.withSecurityScope], relativeTo: nil, bookmarkDataIsStale: &stale)
+            if stale {
+                storeBookmark(url: url, key: key)
+            } else if url.startAccessingSecurityScopedResource() {
+                securityScopedAccess[key] = url
+            }
+            return url
+        } catch {
+            print("resolveBookmark error", error)
+            defaults.removeObject(forKey: key)
+            return nil
+        }
+    }
+
+    private func releaseAccess(for key: String) {
+        if let url = securityScopedAccess.removeValue(forKey: key) {
+            url.stopAccessingSecurityScopedResource()
+        }
+    }
+
+    private func releaseAllSecurityScopedResources() {
+        for (_, url) in securityScopedAccess {
+            url.stopAccessingSecurityScopedResource()
+        }
+        securityScopedAccess.removeAll()
+    }
 
     private func exportToPhotosLibrary(_ url: URL) {
         PHPhotoLibrary.shared().performChanges({
             _ = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
-        }) { success, err in
-            if let err { print("exportToPhotos error:", err) }
+        }) { success, error in
+            if let error { print("exportToPhotos error:", error) }
         }
     }
 
@@ -500,17 +505,5 @@ public final class AppModel: ObservableObject {
 
     func documentsDirectory() throws -> URL {
         try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-    }
-
-    func setGlobalSaveFolder(url: URL?) {
-        defaultSaveFolder = url
-    }
-
-    func setPerDownloadFolder(url: URL?) {
-        perDownloadFolder = url
-    }
-
-    func notify(body: String) {
-        print("[AppModel.notify]", body)
     }
 }
