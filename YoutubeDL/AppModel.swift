@@ -123,6 +123,7 @@ public final class AppModel: ObservableObject {
         // react to url set by UI
         $url
             .compactMap { $0 }
+            .removeDuplicates()
             .sink { [weak self] url in
                 Task {
                     await self?.startDownload(url: url)
@@ -148,6 +149,7 @@ public final class AppModel: ObservableObject {
             self.error = nil
             self.exception = nil
             self.outputFileURL = nil
+            self.info = nil
             self.showProgress = true
             self.progress = Progress()
             self.progress.localizedDescription = NSLocalizedString("Extracting info", comment: "progress description")
@@ -161,7 +163,7 @@ public final class AppModel: ObservableObject {
         }
 
         do {
-            let (infoObj, files, infos) = try await download(url: url)
+            let (infoObj, _, _) = try await download(url: url)
 
             // decode Info if available (safe)
             if let infoObj {
@@ -188,13 +190,29 @@ public final class AppModel: ObservableObject {
                 outputURL = URL(fileURLWithPath: filename)
             }
 
+            var finalURL = outputURL
+
+            if let info = self.info {
+                do {
+                    let directory = try save(info: info, movingFileAt: outputURL)
+                    finalURL = directory.appendingPathComponent(outputURL.lastPathComponent)
+                    var stored = try loadDownloads()
+                    if !stored.contains(directory) {
+                        stored.insert(directory, at: 0)
+                    }
+                    downloads = stored
+                } catch {
+                    print("startDownload: failed to persist metadata", error)
+                }
+            }
+
             await MainActor.run {
-                self.outputFileURL = outputURL
+                self.outputFileURL = finalURL
                 self.showProgress = false
             }
 
-            if exportToPhotos && isVideoFile(outputURL) {
-                exportToPhotosLibrary(outputURL)
+            if exportToPhotos && isVideoFile(finalURL) {
+                exportToPhotosLibrary(finalURL)
             }
 
             // clear per-download folder after a successful run
@@ -420,31 +438,64 @@ public final class AppModel: ObservableObject {
         return exts.contains(url.pathExtension.lowercased())
     }
 
-    func save(info: Info) throws -> URL {
+    @discardableResult
+    func save(info: Info, movingFileAt sourceURL: URL) throws -> URL {
         let title = info.safeTitle
         let fm = FileManager.default
-        let base = try documentsDirectory()
-        var dir = URL(fileURLWithPath: title, relativeTo: base) // ✅ must be var
-        try fm.createDirectory(at: dir, withIntermediateDirectories: true)
+
+        let baseDirectory = sourceURL.deletingLastPathComponent()
+        var directory: URL
+        if baseDirectory.lastPathComponent == title {
+            directory = baseDirectory
+        } else {
+            directory = baseDirectory.appendingPathComponent(title, isDirectory: true)
+            var attempt = 2
+            while fm.fileExists(atPath: directory.path) {
+                directory = baseDirectory.appendingPathComponent("\(title) \(attempt)", isDirectory: true)
+                attempt += 1
+            }
+            try fm.createDirectory(at: directory, withIntermediateDirectories: true)
+        }
+
         var values = URLResourceValues()
         values.isExcludedFromBackup = true
-        try dir.setResourceValues(values)
+        do {
+            try directory.setResourceValues(values)
+        } catch {
+            print("save(info:movingFileAt:) setResourceValues", error)
+        }
+
         let data = try JSONEncoder().encode(info)
-        try data.write(to: dir.appendingPathComponent("Info.json"))
-        return dir
+        try data.write(to: directory.appendingPathComponent("Info.json"), options: .atomic)
+
+        let destination = directory.appendingPathComponent(sourceURL.lastPathComponent)
+        if destination != sourceURL {
+            if fm.fileExists(atPath: destination.path) {
+                try fm.removeItem(at: destination)
+            }
+            try fm.moveItem(at: sourceURL, to: destination)
+        }
+
+        return directory
     }
 
     func loadDownloads() throws -> [URL] {
-        let keys: Set<URLResourceKey> = [.nameKey, .isDirectoryKey]
+        let keys: Set<URLResourceKey> = [.nameKey, .isDirectoryKey, .contentModificationDateKey]
         let documents = try documentsDirectory()
         guard let enumerator = FileManager.default.enumerator(at: documents, includingPropertiesForKeys: Array(keys), options: .skipsHiddenFiles) else { return [] }
-        var urls: [URL] = []
+        var urls: [(url: URL, date: Date)] = []
         for case let url as URL in enumerator {
             let values = try url.resourceValues(forKeys: keys)
-            guard enumerator.level == 2, url.lastPathComponent == "Info.json" else { continue }
-            urls.append(url.deletingLastPathComponent())
+            guard enumerator.level == 2,
+                  values.isDirectory == false,
+                  url.lastPathComponent == "Info.json" else { continue }
+            let directory = url.deletingLastPathComponent()
+            let date = values.contentModificationDate ?? .distantPast
+            urls.append((directory, date))
         }
         return urls
+            .sorted { $0.date > $1.date }
+            .map { $0.url }
     }
 
     func documentsDirectory() throws -> URL {
