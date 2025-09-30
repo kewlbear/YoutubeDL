@@ -1,65 +1,58 @@
-//
-//  YoutubeDLTests.swift
-//  YoutubeDLTests
-//
-//  Created by 안창범 on 2020/08/03.
-//  Copyright © 2020 Jane Developer. All rights reserved.
-//
-
 import XCTest
 @testable import YoutubeDL
-@testable import Y
 
-class YTests: XCTestCase {
-
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+final class YoutubeDLTests: XCTestCase {
+    func testSecondsFromHMSString() {
+        XCTAssertEqual(secondsFromHMSString(""), nil)
+        XCTAssertEqual(secondsFromHMSString("1"), 1)
+        XCTAssertEqual(secondsFromHMSString("03"), 3)
+        XCTAssertEqual(secondsFromHMSString("3:21"), 201)
+        XCTAssertEqual(secondsFromHMSString("5:43:21"), (5 * 60 + 43) * 60 + 21)
+        XCTAssertNil(secondsFromHMSString("4:3:2:1"))
+        XCTAssertNil(secondsFromHMSString("abc"))
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    func testFormatSecondsToHMS() {
+        XCTAssertEqual(formatSecondsToHMS(0), "0:00")
+        XCTAssertEqual(formatSecondsToHMS(59), "0:59")
+        XCTAssertEqual(formatSecondsToHMS(61), "1:01")
+        XCTAssertEqual(formatSecondsToHMS(3601), "1:00:01")
+        XCTAssertEqual(formatSecondsToHMS(15_321), "4:15:21")
+        XCTAssertEqual(formatSecondsToHMS(-1), "0:00")
     }
 
-    func testSeconds() throws {
-        XCTAssertEqual(seconds(""), 0)
-        XCTAssertEqual(seconds("1"), 1)
-        XCTAssertEqual(seconds("03"), 3)
-        XCTAssertEqual(seconds("32"), 32)
-        XCTAssertEqual(seconds("321"), 321)
-        XCTAssertEqual(seconds("3:21"), 3 * 60 + 21)
-        XCTAssertEqual(seconds("3:2"), 3 * 60 + 2)
-        XCTAssertEqual(seconds(":"), 0)
-        XCTAssertEqual(seconds(":1"), 1)
-        XCTAssertEqual(seconds("43:21"), 43 * 60 + 21)
-        XCTAssertEqual(seconds("5:43:21"), (5 * 60 + 43) * 60 + 21)
-        XCTAssertEqual(seconds("5:4:3"), (5 * 60 + 4) * 60 + 3)
-        
-        XCTAssertEqual(seconds("a"), nil)
-        XCTAssertEqual(seconds("4:3:2:1"), nil)
-    }
+    func testYTDLPArgumentsRespectToggles() {
+        let sampleURL = URL(string: "https://example.com/video")!
+        let baseConfiguration = YTDLPConfiguration(
+            kind: .video,
+            videoQuality: .p1080,
+            container: .mp4,
+            audioFormat: .m4a,
+            transcode: .h264_fast,
+            videoCRF: nil,
+            videoBitrateKbps: nil,
+            audioBitrateKbps: nil,
+            enableTranscoding: true,
+            enableChunkedDownload: true,
+            supportedFormatsOnly: true
+        )
 
-    func testFormat() {
-        XCTAssertEqual(format(0), "0")
-        XCTAssertEqual(format(1), "1")
-        XCTAssertEqual(format(21), "21")
-        XCTAssertEqual(format(321), "5:21")
-        XCTAssertEqual(format(4321), "1:12:01")
-        XCTAssertEqual(format(54321), "15:05:21")
-        XCTAssertEqual(format(654321), "181:45:21")
-        
-        XCTAssertEqual(format(-1), nil)
-    }
-    
-    func testFilename() {
-        let path = #"[강제소환🏅#29] 1박2일 "선호"하는 사람들 다 모여라💓 김선호의 예능 뽀시래기적 모먼트 평생 못 잃어ㅣKBS 방송-otherVideo.webm"#
-        print(#function, path.lengthOfBytes(using: .utf8))
-    }
-    
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        measure {
-            // Put the code you want to measure the time of here.
+        let service = YTDLPService()
+        let enabledArgs = service.buildArguments(for: sampleURL, configuration: baseConfiguration)
+        XCTAssertTrue(enabledArgs.contains("--postprocessor-args"))
+        XCTAssertTrue(enabledArgs.contains("--concurrent-fragments"))
+        XCTAssertTrue(enabledArgs.contains("5"))
+
+        var disabled = baseConfiguration
+        disabled.enableTranscoding = false
+        disabled.enableChunkedDownload = false
+        let disabledArgs = service.buildArguments(for: sampleURL, configuration: disabled)
+        XCTAssertFalse(disabledArgs.contains("--postprocessor-args"))
+        XCTAssertTrue(disabledArgs.contains("--concurrent-fragments"))
+        if let fragmentsIndex = disabledArgs.firstIndex(of: "--concurrent-fragments") {
+            XCTAssertEqual(disabledArgs[disabledArgs.index(after: fragmentsIndex)], "1")
+        } else {
+            XCTFail("Missing fragment argument")
         }
     }
-
 }
