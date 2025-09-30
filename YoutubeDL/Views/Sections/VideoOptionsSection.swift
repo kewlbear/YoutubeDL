@@ -12,22 +12,42 @@ struct VideoOptionsSection: View {
 
     var body: some View {
         Section {
-            LabeledContent("Quality", value: quality.rawValue) {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Quality")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                    Text(quality.rawValue)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
                 Picker("Quality", selection: $quality) {
                     ForEach(VideoQuality.allCases) { option in
                         Text(option.rawValue).tag(option)
                     }
                 }
                 .pickerStyle(.menu)
+                .labelsHidden()
             }
 
-            LabeledContent("Container", value: container.rawValue.uppercased()) {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Container")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                    Text(container.rawValue.uppercased())
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
                 Picker("Container", selection: $container) {
                     ForEach(ContainerFormat.allCases) { option in
                         Text(option.rawValue.uppercased()).tag(option)
                     }
                 }
                 .pickerStyle(.menu)
+                .labelsHidden()
             }
 
             DisclosureGroup(isExpanded: $showAdvanced) {

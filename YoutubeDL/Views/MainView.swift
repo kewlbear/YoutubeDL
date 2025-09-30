@@ -131,10 +131,19 @@ public struct MainView: View {
 
     private var aboutSection: some View {
         Section {
-            LabeledContent("yt-dlp", value: app.youtubeDL.version ?? "unknown")
-            LabeledContent("App Model", value: "v2")
+            aboutRow(title: "yt-dlp", value: app.youtubeDL.version ?? "unknown")
+            aboutRow(title: "App Model", value: "v2")
         } header: {
             Label("About", systemImage: "ellipsis.circle")
+        }
+    }
+
+    private func aboutRow(title: String, value: String) -> some View {
+        HStack(spacing: 12) {
+            Text(title)
+            Spacer()
+            Text(value)
+                .foregroundStyle(.secondary)
         }
     }
 
