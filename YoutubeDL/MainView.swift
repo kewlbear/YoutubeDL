@@ -469,10 +469,23 @@ struct DetailsViewForDirectory: View {
             if let info {
                 Section(header: Text("Metadata")) {
                     Text(info.title).font(.headline)
-                    Text("Duration: \(Int(info.duration ?? 0))s").font(.subheadline).foregroundStyle(.secondary)
-                    DisclosureGroup("\(info.formats.count) formats", isExpanded: $isExpanded) {
-                        ForEach(info.formats, id: \.format_id) { f in
-                            Text(f.format)
+                    if let duration = info.formattedDuration {
+                        Text("Duration: \(duration)")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    if let uploader = info.uploader, !uploader.isEmpty {
+                        Text("Uploader: \(uploader)")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    if !info.formats.isEmpty {
+                        DisclosureGroup("\(info.formats.count) formats", isExpanded: $isExpanded) {
+                            ForEach(info.formats) { format in
+                                Text(format.summary)
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
                 }
