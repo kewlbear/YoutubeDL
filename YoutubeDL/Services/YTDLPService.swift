@@ -208,33 +208,4 @@ final class YTDLPService {
         guard let value, value != Python.None, let doubleValue = Double(value) else { return nil }
         return doubleValue
     }
-
-    private func yt_dlp(
-        argv: [String],
-        progress: @escaping (PythonObject) -> Void,
-        log: @escaping (String, String) -> Void,
-        makeTranscodeProgressBlock: @escaping () -> ((Double) -> Void)?
-    ) async throws {
-        _ = progress
-        _ = log
-        _ = makeTranscodeProgressBlock
-
-        guard Python.attemptImport("yt_dlp") != nil else {
-            throw NSError(
-                domain: "YTDLPService",
-                code: 2,
-                userInfo: [
-                    NSLocalizedDescriptionKey: "The embedded yt-dlp Python module could not be loaded."
-                ]
-            )
-        }
-
-        throw NSError(
-            domain: "YTDLPService",
-            code: 3,
-            userInfo: [
-                NSLocalizedDescriptionKey: "The yt-dlp execution bridge is unavailable in this build."
-            ]
-        )
-    }
 }
