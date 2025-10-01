@@ -9,18 +9,38 @@ struct SaveLocationSection: View {
     var body: some View {
         Section {
             Button(action: onSelectDefault) {
-                LabeledContent("Default Save Folder", value: defaultFolderName) {
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Default Save Folder")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                        Text(defaultFolderName)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
                     Image(systemName: "chevron.right")
                         .foregroundStyle(.tertiary)
                 }
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
 
             Button(action: onSelectPerDownload) {
-                LabeledContent("Per-download Folder", value: perDownloadFolderName) {
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Per-download Folder")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                        Text(perDownloadFolderName)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
                     Image(systemName: "chevron.right")
                         .foregroundStyle(.tertiary)
                 }
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
         } header: {

@@ -50,17 +50,25 @@ final class YTDLPService {
         let argv = buildArguments(for: url, configuration: configuration)
         try await yt_dlp(argv: argv) { dict in
             infoObj = dict["info_dict"]
-            let status = String(dict["status"] ?? "unknown")
+
+            let statusObject = dict["status"]
+            let status: String
+            if statusObject == Python.None {
+                status = "unknown"
+            } else {
+                status = String(statusObject) ?? "unknown"
+            }
 
             switch status {
             case "downloading":
                 let downloaded = Self.int64(from: dict["downloaded_bytes"])
-                let total = Self.int64(from: dict["total_bytes"] ?? dict["total_bytes_estimate"])
+                let total = Self.int64(from: dict["total_bytes"]) ?? Self.int64(from: dict["total_bytes_estimate"])
                 let speed = Self.int(from: dict["speed"])
                 let eta = Self.timeInterval(from: dict["eta"])
                 progress(.init(stage: .downloading(downloaded: downloaded, total: total, speed: speed, eta: eta), title: nil))
             case "finished":
-                if let fname = String(dict["filename"] ?? Python.None) {
+                let filenameObject = dict["filename"]
+                if filenameObject != Python.None, let fname = String(filenameObject) {
                     files.append(fname)
                 }
                 if let infoObj { infos.append(infoObj) }
@@ -207,5 +215,34 @@ final class YTDLPService {
     private static func timeInterval(from value: PythonObject?) -> TimeInterval? {
         guard let value, value != Python.None, let doubleValue = Double(value) else { return nil }
         return doubleValue
+    }
+
+    private func yt_dlp(
+        argv: [String],
+        progress: @escaping (PythonObject) -> Void,
+        log: @escaping (String, String) -> Void,
+        makeTranscodeProgressBlock: @escaping () -> ((Double) -> Void)?
+    ) async throws {
+        _ = progress
+        _ = log
+        _ = makeTranscodeProgressBlock
+
+        guard let _ = try? Python.attemptImport("yt_dlp") else {
+            throw NSError(
+                domain: "YTDLPService",
+                code: 2,
+                userInfo: [
+                    NSLocalizedDescriptionKey: "The embedded yt-dlp Python module could not be loaded."
+                ]
+            )
+        }
+
+        throw NSError(
+            domain: "YTDLPService",
+            code: 3,
+            userInfo: [
+                NSLocalizedDescriptionKey: "The yt-dlp execution bridge is unavailable in this build."
+            ]
+        )
     }
 }
