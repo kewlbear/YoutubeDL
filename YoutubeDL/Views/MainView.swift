@@ -3,7 +3,7 @@ import UIKit
 
 @available(iOS 15.0, *)
 public struct MainView: View {
-    @EnvironmentObject public var app: AppModel
+    @EnvironmentObject var app: AppModel
 
     @State private var urlString: String = ""
     @State private var showAlert = false
