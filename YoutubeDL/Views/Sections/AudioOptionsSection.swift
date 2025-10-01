@@ -9,13 +9,23 @@ struct AudioOptionsSection: View {
 
     var body: some View {
         Section {
-            LabeledContent("Format", value: format.rawValue.uppercased()) {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Format")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                    Text(format.rawValue.uppercased())
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
                 Picker("Audio Format", selection: $format) {
                     ForEach(AudioFormat.allCases) { option in
                         Text(option.rawValue.uppercased()).tag(option)
                     }
                 }
                 .pickerStyle(.menu)
+                .labelsHidden()
             }
 
             DisclosureGroup(isExpanded: $showAdvanced) {

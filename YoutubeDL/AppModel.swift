@@ -7,42 +7,41 @@ import YoutubeDL
 import PythonKit
 
 @MainActor
-public final class AppModel: ObservableObject {
-    @Published public var url: URL? = nil
-    @Published public var youtubeDL: YoutubeDL = YoutubeDL()
+final class AppModel: ObservableObject {
+    @Published var url: URL? = nil
+    @Published var youtubeDL: YoutubeDL = YoutubeDL()
 
-    @Published public var enableChunkedDownload: Bool = true
-    @Published public var enableTranscoding: Bool = true
-    @Published public var supportedFormatsOnly: Bool = true
-    @Published public var exportToPhotos: Bool = true
+    @Published var enableChunkedDownload: Bool = true
+    @Published var enableTranscoding: Bool = true
+    @Published var supportedFormatsOnly: Bool = true
+    @Published var exportToPhotos: Bool = true
 
-    @Published public var fileURL: URL? = nil
-    @Published public var downloads: [URL] = []
-    @Published public var showProgress: Bool = false
-    @Published public var progress: Progress = Progress()
-    @Published public var error: Error? = nil
-    @Published public var exception: PythonObject? = nil
-    @Published public var info: Info? = nil
-    @Published public var webViewURL: URL? = nil
-    @Published public var outputFileURL: URL? = nil
+    @Published var fileURL: URL? = nil
+    @Published var downloads: [URL] = []
+    @Published var showProgress: Bool = false
+    @Published var progress: Progress = Progress()
+    @Published var error: Error? = nil
+    @Published var exception: PythonObject? = nil
+    @Published var info: Info? = nil
+    @Published var webViewURL: URL? = nil
+    @Published var outputFileURL: URL? = nil
 
-    @Published public var kind: DownloadKind = .best
-    @Published public var videoQuality: VideoQuality = .best
-    @Published public var container: ContainerFormat = .mp4
-    @Published public var audioFormat: AudioFormat = .m4a
-    @Published public var transcode: TranscodePreset = .copy
+    @Published var kind: DownloadKind = .best
+    @Published var videoQuality: VideoQuality = .best
+    @Published var container: ContainerFormat = .mp4
+    @Published var audioFormat: AudioFormat = .m4a
+    @Published var transcode: TranscodePreset = .copy
 
-    @Published public var videoCRF: Int? = nil
-    @Published public var videoBitrateKbps: Int? = nil
-    @Published public var audioBitrateKbps: Int? = nil
+    @Published var videoCRF: Int? = nil
+    @Published var videoBitrateKbps: Int? = nil
+    @Published var audioBitrateKbps: Int? = nil
 
-    @Published public var defaultSaveFolder: URL? = nil
-    @Published public var perDownloadFolder: URL? = nil
+    @Published var defaultSaveFolder: URL? = nil
+    @Published var perDownloadFolder: URL? = nil
 
     private let service: YTDLPService
     private let defaults: UserDefaults
     private var subscriptions = Set<AnyCancellable>()
-    private var securityScopedAccess: [String: URL] = [:]
 
     private enum DefaultsKeys {
         static let kind = "app.kind"
@@ -61,7 +60,7 @@ public final class AppModel: ObservableObject {
         static let perDownloadFolder = "app.perDownloadFolder"
     }
 
-    public init(service: YTDLPService = .init(), defaults: UserDefaults = .standard) {
+    init(service: YTDLPService = .init(), defaults: UserDefaults = .standard) {
         self.service = service
         self.defaults = defaults
 
@@ -75,13 +74,9 @@ public final class AppModel: ObservableObject {
         loadStoredDownloads()
     }
 
-    deinit {
-        releaseAllSecurityScopedResources()
-    }
+    // MARK: - API
 
-    // MARK: - Public API
-
-    public func startDownload(url: URL) async {
+    func startDownload(url: URL) async {
         resetTransientState()
 
         if let per = perDownloadFolder ?? defaultSaveFolder {
@@ -244,7 +239,11 @@ public final class AppModel: ObservableObject {
             progress.totalUnitCount = total ?? 0
             progress.completedUnitCount = downloaded ?? 0
             progress.localizedDescription = NSLocalizedString("Downloading", comment: "progress description")
-            progress.throughput = Double(speed ?? 0)
+            if let speed {
+                progress.throughput = speed
+            } else {
+                progress.throughput = nil
+            }
             progress.estimatedTimeRemaining = eta
         case let .transcoding(value):
             progress.kind = nil
@@ -382,18 +381,14 @@ public final class AppModel: ObservableObject {
     }
 
     private func storeBookmark(url: URL?, key: String) {
-        releaseAccess(for: key)
         guard let url else {
             defaults.removeObject(forKey: key)
             return
         }
 
         do {
-            let data = try url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
+            let data = try url.bookmarkData(options: [], includingResourceValuesForKeys: nil, relativeTo: nil)
             defaults.set(data, forKey: key)
-            if url.startAccessingSecurityScopedResource() {
-                securityScopedAccess[key] = url
-            }
         } catch {
             print("storeBookmark error", error)
         }
@@ -403,11 +398,9 @@ public final class AppModel: ObservableObject {
         guard let data = defaults.data(forKey: key) else { return nil }
         do {
             var stale = false
-            let url = try URL(resolvingBookmarkData: data, options: [.withSecurityScope], relativeTo: nil, bookmarkDataIsStale: &stale)
+            let url = try URL(resolvingBookmarkData: data, options: [], relativeTo: nil, bookmarkDataIsStale: &stale)
             if stale {
                 storeBookmark(url: url, key: key)
-            } else if url.startAccessingSecurityScopedResource() {
-                securityScopedAccess[key] = url
             }
             return url
         } catch {
@@ -415,19 +408,6 @@ public final class AppModel: ObservableObject {
             defaults.removeObject(forKey: key)
             return nil
         }
-    }
-
-    private func releaseAccess(for key: String) {
-        if let url = securityScopedAccess.removeValue(forKey: key) {
-            url.stopAccessingSecurityScopedResource()
-        }
-    }
-
-    private func releaseAllSecurityScopedResources() {
-        for (_, url) in securityScopedAccess {
-            url.stopAccessingSecurityScopedResource()
-        }
-        securityScopedAccess.removeAll()
     }
 
     private func exportToPhotosLibrary(_ url: URL) {
