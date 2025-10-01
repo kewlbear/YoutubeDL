@@ -39,10 +39,7 @@ struct StatusSection: View {
 
             if let outputFileName {
                 VStack(alignment: .leading, spacing: 4) {
-                    Label("Finished", systemImage: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
+                    statusRow(title: "Finished", systemImage: "checkmark.circle.fill", accent: .green)
                     Text(outputFileName)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -52,10 +49,7 @@ struct StatusSection: View {
 
             if let errorMessage {
                 VStack(alignment: .leading, spacing: 4) {
-                    Label("Error", systemImage: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.red)
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
+                    statusRow(title: "Error", systemImage: "exclamationmark.triangle.fill", accent: .red)
                     Text(errorMessage)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -65,10 +59,7 @@ struct StatusSection: View {
 
             if let exceptionDescription {
                 VStack(alignment: .leading, spacing: 4) {
-                    Label("Python Exception", systemImage: "exclamationmark.octagon.fill")
-                        .foregroundStyle(.orange)
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
+                    statusRow(title: "Python Exception", systemImage: "exclamationmark.octagon.fill", accent: .orange)
                     Text(exceptionDescription)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -77,6 +68,19 @@ struct StatusSection: View {
             }
         } header: {
             Label("Status", systemImage: "info.circle")
+        }
+    }
+}
+
+private extension StatusSection {
+    func statusRow(title: String, systemImage: String, accent: Color) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: systemImage)
+                .foregroundStyle(accent)
+            Text(title)
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundStyle(accent)
         }
     }
 }
