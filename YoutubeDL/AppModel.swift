@@ -103,6 +103,7 @@ final class AppModel: ObservableObject {
             let result = try await service.run(
                 url: url,
                 configuration: configuration,
+                outputDirectory: youtubeDL.downloadsDirectory,
                 progress: { [weak self] update in
                     guard let self else { return }
                     Task { @MainActor in
@@ -111,25 +112,6 @@ final class AppModel: ObservableObject {
                 },
                 logHandler: { level, message in
                     print("[yt-dlp]", level, message)
-                },
-                makeTranscodeProgressBlock: { [weak self] in
-                    guard let self else { return nil }
-                    Task { @MainActor in
-                        self.progress.kind = nil
-                        self.progress.localizedDescription = NSLocalizedString("Transcoding...", comment: "")
-                        self.progress.completedUnitCount = 0
-                        self.progress.totalUnitCount = 100
-                    }
-                    let start = ProcessInfo.processInfo.systemUptime
-                    return { value in
-                        Task { @MainActor in
-                            let elapsed = ProcessInfo.processInfo.systemUptime - start
-                            let speed = value / max(elapsed, 0.000001)
-                            let eta = (1 - value) / max(speed, 0.000001)
-                            self.progress.completedUnitCount = Int64(value * 100)
-                            self.progress.estimatedTimeRemaining = eta.isFinite ? eta : nil
-                        }
-                    }
                 }
             )
 
@@ -248,8 +230,10 @@ final class AppModel: ObservableObject {
         case let .transcoding(value):
             progress.kind = nil
             progress.localizedDescription = NSLocalizedString("Transcoding...", comment: "")
-            progress.completedUnitCount = Int64(value * 100)
+            progress.completedUnitCount = Int64(max(0, min(1, value)) * 100)
             progress.totalUnitCount = 100
+            progress.estimatedTimeRemaining = nil
+            progress.throughput = nil
         }
     }
 
