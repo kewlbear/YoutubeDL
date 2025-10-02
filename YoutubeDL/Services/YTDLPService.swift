@@ -208,4 +208,189 @@ final class YTDLPService {
         guard let value, value != Python.None, let doubleValue = Double(value) else { return nil }
         return doubleValue
     }
+
+    private func yt_dlp(
+        argv: [String],
+        progress: @escaping (PythonObject) -> Void,
+        log: @escaping (String, String) -> Void,
+        makeTranscodeProgressBlock: @escaping () -> ((Double) -> Void)?
+    ) async throws {
+        try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.global(qos: .userInitiated).async {
+                do {
+                    let pyArgv = PythonObject(argv)
+
+                    let progressCallback = PythonObject { (dictionary: PythonObject) -> PythonObject in
+                        progress(dictionary)
+                        return Python.None
+                    }
+
+                    let logCallback = PythonObject { (level: PythonObject, message: PythonObject) -> PythonObject in
+                        let levelString = String(level) ?? "info"
+                        let messageString = String(message) ?? String(describing: message)
+                        log(levelString, messageString)
+                        return Python.None
+                    }
+
+                    let transcodeFactory = PythonObject { () -> PythonObject in
+                        guard let swiftCallback = makeTranscodeProgressBlock() else {
+                            return Python.None
+                        }
+
+                        let wrapped = PythonObject { (value: PythonObject) -> PythonObject in
+                            if let doubleValue = Double(value) {
+                                swiftCallback(doubleValue)
+                            } else if let stringValue = String(value) {
+                                let trimmed = stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                                if let parsed = Double(trimmed) {
+                                    swiftCallback(parsed)
+                                } else if trimmed.hasSuffix("%"),
+                                          let percent = Double(trimmed.dropLast()) {
+                                    swiftCallback(percent / 100.0)
+                                }
+                            }
+                            return Python.None
+                        }
+
+                        return wrapped
+                    }
+
+                    let result = Self.pythonRunner.run(pyArgv, progressCallback, logCallback, transcodeFactory)
+
+                    if let exitCode = Int(result), exitCode != 0 {
+                        let error = NSError(
+                            domain: "YTDLPService",
+                            code: exitCode,
+                            userInfo: [NSLocalizedDescriptionKey: "yt-dlp exited with code \(exitCode)"]
+                        )
+                        continuation.resume(throwing: error)
+                    } else {
+                        continuation.resume(returning: ())
+                    }
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+
+    private static let pythonRunner: PythonObject = {
+        let builtins = Python.import("builtins")
+        let types = Python.import("types")
+        let module = types.ModuleType("__ytdlp_service__")
+        let code = """
+import yt_dlp
+
+def _normalize_message(message):
+    if isinstance(message, bytes):
+        try:
+            return message.decode()
+        except Exception:
+            return repr(message)
+    return str(message)
+
+def run(argv, progress_cb, log_cb, transcode_factory):
+    class SwiftLogger(object):
+        def debug(self, msg):
+            log_cb("debug", _normalize_message(msg))
+
+        def info(self, msg):
+            log_cb("info", _normalize_message(msg))
+
+        def warning(self, msg):
+            log_cb("warning", _normalize_message(msg))
+
+        def error(self, msg):
+            log_cb("error", _normalize_message(msg))
+
+        def fatal(self, msg):
+            log_cb("fatal", _normalize_message(msg))
+
+    hooks = []
+    if progress_cb is not None:
+        def _progress_hook(data):
+            try:
+                progress_cb(data)
+            except Exception as exc:
+                log_cb("error", f"progress hook error: {exc}")
+
+        hooks.append(_progress_hook)
+
+    transcode_callback = None
+
+    def _postprocessor_hook(data):
+        nonlocal transcode_callback
+        status = data.get("status")
+        if status == "started":
+            try:
+                callback = transcode_factory()
+            except Exception as exc:
+                log_cb("error", f"transcode factory error: {exc}")
+                callback = None
+            transcode_callback = callback if callback is not None else None
+            if transcode_callback is not None:
+                try:
+                    transcode_callback(0.0)
+                except Exception:
+                    pass
+        elif status in ("processing", "downloading"):
+            if transcode_callback is not None:
+                fraction = None
+                processed = data.get("processed_bytes") or data.get("downloaded_bytes") or data.get("fragment_index")
+                total = data.get("total_bytes") or data.get("total_bytes_estimate") or data.get("fragment_count")
+                if processed is not None and total:
+                    try:
+                        fraction = float(processed) / float(total)
+                    except Exception:
+                        fraction = None
+                if fraction is None:
+                    percent = data.get("percent") or data.get("_percent_str") or data.get("progress")
+                    if percent is not None:
+                        if isinstance(percent, str):
+                            stripped = percent.strip()
+                            if stripped.endswith("%"):
+                                stripped = stripped[:-1]
+                            percent = stripped
+                        try:
+                            value = float(percent)
+                            fraction = value / 100.0 if value > 1.0 else value
+                        except Exception:
+                            fraction = None
+                if fraction is not None:
+                    try:
+                        transcode_callback(max(0.0, min(float(fraction), 1.0)))
+                    except Exception:
+                        pass
+        elif status in ("finished", "done"):
+            if transcode_callback is not None:
+                try:
+                    transcode_callback(1.0)
+                except Exception:
+                    pass
+                transcode_callback = None
+
+    parser, opts, args = yt_dlp.parse_options(list(argv))
+    if opts is None:
+        return 101
+
+    params = vars(opts)
+    params.setdefault("progress_hooks", [])
+    params["progress_hooks"].extend(hooks)
+    params.setdefault("postprocessor_hooks", []).append(_postprocessor_hook)
+    params["logger"] = SwiftLogger()
+
+    ydl = yt_dlp.YoutubeDL(params)
+    try:
+        result = ydl.download(list(args) if args is not None else [])
+    finally:
+        try:
+            ydl.close()
+        except Exception:
+            pass
+
+    return int(result)
+"""
+        builtins.exec(code, module.__dict__)
+        return module
+    }()
 }
