@@ -82,9 +82,10 @@ struct DownloadDetailsView: View {
             }
         }
         .navigationTitle(directoryURL.lastPathComponent)
-        .task(loadContent)
+        .task { await loadContent() }
     }
 
+    @MainActor
     private func loadContent() async {
         do {
             let data = try Data(contentsOf: directoryURL.appendingPathComponent("Info.json"))
