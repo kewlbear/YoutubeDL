@@ -48,7 +48,7 @@ struct DownloadDetailsView: View {
     var body: some View {
         List {
             if let info {
-                Section("Metadata") {
+                Section {
                     Text(info.title)
                         .font(.headline)
                     if let duration = info.duration.flatMap({ formatSecondsToHMS($0) }) {
@@ -70,14 +70,18 @@ struct DownloadDetailsView: View {
                             }
                         }
                     }
+                } header: {
+                    Text("Metadata")
                 }
             }
 
             if let videoURL {
-                Section("File") {
+                Section {
                     Text(videoURL.lastPathComponent)
                         .font(.body)
                         .foregroundStyle(.secondary)
+                } header: {
+                    Text("File")
                 }
             }
         }

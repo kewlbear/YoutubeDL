@@ -226,7 +226,7 @@ final class YTDLPService {
         log: @escaping (String, String) -> Void,
         makeTranscodeProgressBlock: @escaping () -> ((Double) -> Void)?
     ) async throws {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             DispatchQueue.global(qos: .userInitiated).async {
                 do {
                     let pyArgv = PythonObject(argv)
