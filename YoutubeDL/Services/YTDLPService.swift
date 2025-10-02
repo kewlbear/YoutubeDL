@@ -50,17 +50,18 @@ final class YTDLPService {
         let argv = buildArguments(for: url, configuration: configuration)
         try await yt_dlp(argv: argv) { dict in
             infoObj = dict["info_dict"]
-            let status = String(dict["status"] ?? "unknown")
+            let status = String(dict["status"]) ?? "unknown"
 
             switch status {
             case "downloading":
                 let downloaded = Self.int64(from: dict["downloaded_bytes"])
-                let total = Self.int64(from: dict["total_bytes"] ?? dict["total_bytes_estimate"])
+                let total = Self.int64(from: dict["total_bytes"]) ??
+                    Self.int64(from: dict["total_bytes_estimate"])
                 let speed = Self.int(from: dict["speed"])
                 let eta = Self.timeInterval(from: dict["eta"])
                 progress(.init(stage: .downloading(downloaded: downloaded, total: total, speed: speed, eta: eta), title: nil))
             case "finished":
-                if let fname = String(dict["filename"] ?? Python.None) {
+                if let fname = Self.string(from: dict["filename"]) {
                     files.append(fname)
                 }
                 if let infoObj { infos.append(infoObj) }
@@ -195,18 +196,28 @@ final class YTDLPService {
     }
 
     private static func int64(from value: PythonObject?) -> Int64? {
-        guard let value, value != Python.None, let intValue = Int(value) else { return nil }
+        guard let value = sanitized(value), let intValue = Int(value) else { return nil }
         return Int64(intValue)
     }
 
     private static func int(from value: PythonObject?) -> Int? {
-        guard let value, value != Python.None, let result = Int(value) else { return nil }
+        guard let value = sanitized(value), let result = Int(value) else { return nil }
         return result
     }
 
     private static func timeInterval(from value: PythonObject?) -> TimeInterval? {
-        guard let value, value != Python.None, let doubleValue = Double(value) else { return nil }
+        guard let value = sanitized(value), let doubleValue = Double(value) else { return nil }
         return doubleValue
+    }
+
+    private static func string(from value: PythonObject?) -> String? {
+        guard let value = sanitized(value) else { return nil }
+        return String(value)
+    }
+
+    private static func sanitized(_ value: PythonObject?) -> PythonObject? {
+        guard let value, value != Python.None else { return nil }
+        return value
     }
 
     private func yt_dlp(
@@ -220,24 +231,26 @@ final class YTDLPService {
                 do {
                     let pyArgv = PythonObject(argv)
 
-                    let progressCallback = PythonObject { (dictionary: PythonObject) -> PythonObject in
+                    let progressBlock: @convention(block) (PythonObject) -> PythonObject = { dictionary in
                         progress(dictionary)
                         return Python.None
                     }
+                    let progressCallback = PythonObject(progressBlock)
 
-                    let logCallback = PythonObject { (level: PythonObject, message: PythonObject) -> PythonObject in
+                    let logBlock: @convention(block) (PythonObject, PythonObject) -> PythonObject = { level, message in
                         let levelString = String(level) ?? "info"
                         let messageString = String(message) ?? String(describing: message)
                         log(levelString, messageString)
                         return Python.None
                     }
+                    let logCallback = PythonObject(logBlock)
 
-                    let transcodeFactory = PythonObject { () -> PythonObject in
+                    let transcodeFactoryBlock: @convention(block) () -> PythonObject = {
                         guard let swiftCallback = makeTranscodeProgressBlock() else {
                             return Python.None
                         }
 
-                        let wrapped = PythonObject { (value: PythonObject) -> PythonObject in
+                        let wrappedBlock: @convention(block) (PythonObject) -> PythonObject = { value in
                             if let doubleValue = Double(value) {
                                 swiftCallback(doubleValue)
                             } else if let stringValue = String(value) {
@@ -252,8 +265,9 @@ final class YTDLPService {
                             return Python.None
                         }
 
-                        return wrapped
+                        return PythonObject(wrappedBlock)
                     }
+                    let transcodeFactory = PythonObject(transcodeFactoryBlock)
 
                     let result = Self.pythonRunner.run(pyArgv, progressCallback, logCallback, transcodeFactory)
 
